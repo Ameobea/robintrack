@@ -1,4 +1,6 @@
 {
-    "git.ignoreLimitWarning": true,
-    "eslint.packageManager": "yarn"
+  "git.ignoreLimitWarning": true,
+  "eslint.packageManager": "yarn",
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true
 }

@@ -8,7 +8,9 @@ def pp_json(x: object) -> str:
     """ Pretty-prints the provided JSON-serializable object. """
     print(json.dumps(x, indent=2, sort_keys=True))
 
+
 THROTTLE_RGX = r'.*Expected available in (\d*\.?\d+) seconds.'
+
 
 def parse_throttle_res(msg: str) -> int:
     """ Given the response of a throttle message, returns the cooldown. """

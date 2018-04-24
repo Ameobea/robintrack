@@ -14,7 +14,8 @@ from common import parse_throttle_res, pp_json
 
 RABBITMQ_HOST = os.environ.get('RABBITMQ_HOST') or 'localhost'
 RABBITMQ_PORT = int(os.environ.get('RABBITMQ_PORT') or '5672')
-SCRAPER_REQUEST_COOLDOWN_SECONDS = float(os.environ.get('SCRAPER_REQUEST_COOLDOWN_SECONDS') or 1)
+SCRAPER_REQUEST_COOLDOWN_SECONDS = float(
+    os.environ.get('SCRAPER_REQUEST_COOLDOWN_SECONDS') or 1)
 
 
 rabbitmq_connection = pika.BlockingConnection(
@@ -43,19 +44,16 @@ res = trader.get_url("https://api.robinhood.com/instruments/")
 
 total_ids = 0
 quotes = []
+instrument_ids = []
 while True:
     fetched_instruments = res['results']
     tradable_instrument_ids = get_tradable_instrument_ids(fetched_instruments)
     total_ids += len(tradable_instrument_ids)
 
     for instrument_id, symbol in tradable_instrument_ids:
-        rabbitmq_channel.basic_publish(
-            exchange='',
-            routing_key='instrument_ids',
-            body=instrument_id
-        )
-
+        instrument_ids.append(instrument_id)
         quotes.append(symbol)
+
         if len(quotes) == 20:
             rabbitmq_channel.basic_publish(
                 exchange='',
@@ -63,11 +61,19 @@ while True:
                 body=','.join(quotes)
             )
 
+            rabbitmq_channel.basic_publish(
+                exchange='',
+                routing_key='instrument_ids',
+                body=','.join(instrument_ids)
+            )
+
             quotes = []
+            instrument_ids = []
 
     if res.get('detail'):
         cooldown_seconds = parse_throttle_res(res['detail'])
-        print('Instruments fetch request failed; waiting for {} second cooldown...'.format(cooldown_seconds))
+        print('Instruments fetch request failed; waiting for {} second cooldown...'.format(
+            cooldown_seconds))
         sleep(cooldown_seconds)
     elif res.get('next'):
         sleep(SCRAPER_REQUEST_COOLDOWN_SECONDS)
@@ -79,7 +85,8 @@ while True:
             body=','.join(quotes)
         )
 
-        print('Finished scraping; fetched a total of {} tradable instrument IDs.'.format(total_ids))
+        print('Finished scraping; fetched a total of {} tradable instrument IDs.'.format(
+            total_ids))
         break
 
 rabbitmq_connection.close()
