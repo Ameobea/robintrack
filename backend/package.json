@@ -1,0 +1,19 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "neutrino build",
+    "start": "neutrino start"
+  },
+  "devDependencies": {
+    "@neutrinojs/node": "^8.2.2",
+    "neutrino": "^8.2.2",
+    "neutrino-preset-typescript": "^2.0.0",
+    "typescript": "^2.8.3"
+  },
+  "dependencies": {
+    "ramda": "^0.25.0"
+  }
+}
