@@ -19,12 +19,17 @@ class StocksController < ApplicationController
     if entry
       render json: { bid: entry["bid_price"].to_f, ask: entry["ask_price"].to_f }
     else
-      render json: { error: "not_found" }
+      render json: { error: "not_found" }, status: :not_found
     end
   end
 
   def quotes
     symbols = params[:symbols].to_s.split(',')
+    if symbols.empty?
+      render json: { error: "no_symbols_supplied" }, status: :bad_request
+      return
+    end
+
     entries = get_quotes(symbols)
     render json: format_quotes(entries)
   end
@@ -35,7 +40,7 @@ class StocksController < ApplicationController
     if entry
       render json: format_popularity_history(entry["popularity_history"])
     else
-      render json: { error: "not_found" }
+      render json: { error: "not_found" }, status: :not_found
     end
   end
 
@@ -45,7 +50,7 @@ class StocksController < ApplicationController
     if entries.any?
       render json: format_quote_history(entries)
     else
-      render json: { error: "not_found" }
+      render json: { error: "not_found" }, status: :not_found
     end
   end
 
