@@ -16,25 +16,37 @@ class StocksController < ApplicationController
   def quote
     symbol = params[:id]
     entry = get_quote(symbol)
-    render json: { bid: entry["bid_price"].to_f, ask: entry["ask_price"].to_f }
+    if entry
+      render json: { bid: entry["bid_price"].to_f, ask: entry["ask_price"].to_f }
+    else
+      render json: { error: "not_found" }
+    end
   end
 
   def quotes
-    symbols = params[:symbols].split(',')
+    symbols = params[:symbols].to_s.split(',')
     entries = get_quotes(symbols)
     render json: format_quotes(entries)
   end
 
   def popularity_history
     symbol = params[:id]
-    entries = get_popularity_history(symbol)
-    render json: format_popularity_history(entries)
+    entry = get_popularity_history(symbol)
+    if entry
+      render json: format_popularity_history(entry["popularity_history"])
+    else
+      render json: { error: "not_found" }
+    end
   end
 
   def quote_history
     symbol = params[:id]
     entries = get_quote_history(symbol)
-    render json: format_quote_history(entries)
+    if entries.any?
+      render json: format_quote_history(entries)
+    else
+      render json: { error: "not_found" }
+    end
   end
 
   def limit_param
@@ -42,7 +54,7 @@ class StocksController < ApplicationController
   end
 
   def get_popularity_entries(sort_direction, limit)
-    MongoClient[:popularity].find.aggregate([
+    MongoClient[:popularity].aggregate([
       { "$sort" => { timestamp: -1 } },
       { "$group" => { _id: "$instrument_id", latest_popularity: { "$first" => "$popularity" } } },
       { "$lookup" => {
@@ -64,15 +76,15 @@ class StocksController < ApplicationController
 
   def get_quote(symbol)
     MongoClient[:quotes].find(
-      { "symbol": symbol },
-      :sort => { "updated_at": -1 },
-      :limit => 1
+      { symbol: symbol },
+      sort: { updated_at: -1 },
+      limit: 1,
     ).first
   end
 
   def get_quotes(symbols)
     MongoClient[:quotes].aggregate([
-      { "$match" => { "symbol" => { "$in" => symbols } } },
+      { "$match" => { symbol: { "$in" => symbols } } },
       { "$sort" => { timestamp: -1 } },
       { "$group" => {
         _id: "$symbol",
@@ -83,22 +95,22 @@ class StocksController < ApplicationController
   end
 
   def format_quotes(quotes)
-    quotes.reduce({}) {|acc, quote| acc.update(quote["_id"] => {
-      bid: quote["latest_bid"].to_f,
-      ask: quote["latest_ask"].to_f,
-    })}
+    quotes.each_with_object({}) do |quote, acc|
+      acc[quote["_id"]] = { bid: quote["latest_bid"].to_f, ask: quote["latest_ask"].to_f }
+    end
   end
 
   def get_popularity_history(symbol)
-    MongoClient[:popularity].aggregate([
+    MongoClient[:index].aggregate([
+      { "$match" => { symbol: symbol } },
       { "$lookup" => {
-        from: "index",
+        from: "popularity",
         localField: "instrument_id",
         foreignField: "instrument_id",
-        as: "indexes",
+        as: "popularity_history",
       } },
-      { "$match": { "indexes": { "$elemMatch": { "symbol": symbol } } } },
-    ])
+      { "$limit" => 1 },
+    ]).first
   end
 
   def format_popularity_history(entries)
@@ -108,12 +120,12 @@ class StocksController < ApplicationController
   end
 
   def get_quote_history(symbol)
-    MongoClient[:quotes].find({symbol: symbol}, :sort => { updated_at: -1 })
+    MongoClient[:quotes].find({symbol: symbol}, sort: { updated_at: -1 })
   end
 
   def format_quote_history(quotes)
     quotes.map do |quote|
-      { bid: quote["bid_price"], ask: quote["ask_price"] }
+      { bid: quote["bid_price"].to_f, ask: quote["ask_price"].to_f }
     end
   end
 end
