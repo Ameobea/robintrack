@@ -14,12 +14,18 @@ class StocksController < ApplicationController
   end
 
   def quote
+    symbol = params[:id]
+    render json: { page: "quote", symbol: symbol }
   end
 
   def popularity_history
+    symbol = params[:id]
+    render json: { page: "popularity_history", symbol: symbol }
   end
 
   def quote_history
+    symbol = params[:id]
+    render json: { page: "quote_history", symbol: symbol }
   end
 
   def limit_param
