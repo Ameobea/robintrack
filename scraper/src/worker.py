@@ -7,41 +7,36 @@ import os
 import re
 from time import sleep
 
+import click
 from Robinhood import Robinhood
 from Robinhood.exceptions import InvalidTickerSymbol
 import pika
-
-RABBITMQ_HOST = os.environ.get('RABBITMQ_HOST') or 'localhost'
-RABBITMQ_PORT = int(os.environ.get('RABBITMQ_PORT') or '5672')
-MODE = os.environ.get('MODE') or 'FETCH_POPULARITY'
-WORKER_REQUEST_COOLDOWN_SECONDS = float(
-    os.environ.get('WORKER_REQUEST_COOLDOWN_SECONDS') or 1)
+import pymongo
 
 from common import parse_throttle_res, pp_json
 from db import get_db
 
-rabbitmq_connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host=RABBITMQ_HOST, port=RABBITMQ_PORT))
-rabbitmq_channel = rabbitmq_connection.channel()
+INDEX_COL = get_db()['index']
 
-trader = Robinhood()
-db = get_db()
-collection = None
+TRADER = Robinhood()
 
 INSTRUMENT_ID_RGX = r'https://api.robinhood.com/instruments/(.+?)/'
 
+def parse_instrument_url(instrument_url: str) -> str:
+    return instrument_url.split('instruments/')[1][:-1]
 
-def store_popularities(popularity_map: dict):
+def store_popularities(popularity_map: dict, collection: pymongo.collection.Collection):
     """ Creates an entry in the database for the popularity. """
 
     timestamp = datetime.datetime.utcnow(),
     mapped_documents = map(lambda key: {'timestamp': timestamp,
-                                        'instrument_id': key, 'popularity': popularity_map[key]})
+                                        'instrument_id': key,
+                                        'popularity': popularity_map[key]},
+                           popularity_map.keys())
 
     collection.insert_many(mapped_documents)
 
-
-def store_quotes(quotes: dict):
+def store_quotes(quotes: list, collection: pymongo.collection.Collection):
     """ Creates entries in the database for the provided quotes. """
 
     def map_quote(quote: dict) -> dict:
@@ -57,50 +52,64 @@ def store_quotes(quotes: dict):
         }
 
     quotes = list(filter(lambda quote: quote != None, quotes))
+
+    for datum in quotes:
+        data = {
+            'has_traded': datum.get('has_traded'),
+            'updated_at': datum.get('updated_at'),
+            'trading_halted': datum.get('trading_halted'),
+        }
+        instrument_id = parse_instrument_url(datum['instrument'])
+        print(instrument_id, data)
+        INDEX_COL.update_one({'instrument_id': instrument_id}, {'$set': data})
+
     quotes = list(map(map_quote, quotes))
     collection.insert_many(quotes, ordered=False)
 
+def fetch_popularity(instrument_ids: str, collection: pymongo.collection.Collection,
+                     worker_request_cooldown_seconds=1.0):
+    url = 'https://api.robinhood.com/instruments/popularity/?ids={}'.format(instrument_ids)
 
-def fetch_popularity(instrument_ids: str):
-    url = 'https://api.robinhood.com/instruments/popularity/?ids={}'.format(
-        instrument_ids)
+    def reduce_popularity(acc: dict, datum: dict) -> dict:
+        instrument_id = parse_instrument_url(datum['instrument'])
 
-    res = trader.get_url(url)
+        return {
+            **acc,
+            instrument_id: datum['num_open_positions']
+        }
+
+    res = TRADER.get_url(url)
     try:
-        popularities = reduce(lambda acc, datum:
-                              {**acc,
-                               datum['instrument_id'].split('instruments/')[1]: datum['popularity']},
-                              res['results'],
-                              {})
-        store_popularity(instrument_id, open_positions)
-
-        sleep(WORKER_REQUEST_COOLDOWN_SECONDS)
+        popularities = reduce(reduce_popularity, res['results'], {})
+        store_popularities(popularities, collection)
+        sleep(worker_request_cooldown_seconds)
     except KeyError:  # Likely a ratelimit issue; cooldown.
-        if not res.get('detail'):
-            print(
-                'ERROR: Unexpected response received from popularity request: {}'.format(res))
+        if not res.get('results'):
+            print('ERROR: Unexpected response received from popularity request: {}'.format(res))
             sleep(120)
             return
 
+        print(res)
         cooldown_seconds = parse_throttle_res(res['detail'])
         print('Popularity fetch request failed; waiting for {} second cooldown...'.format(
             cooldown_seconds))
         sleep(cooldown_seconds)
 
-        fetch_popularity(instrument_id)
+        fetch_popularity(instrument_ids,
+                         collection,
+                         worker_request_cooldown_seconds=worker_request_cooldown_seconds)
 
-
-def fetch_quote(symbols: str):
+def fetch_quote(symbols: str, collection: pymongo.collection.Collection,
+                worker_request_cooldown_seconds=1.0):
     try:
-        res = trader.quote_data(symbols)
+        res = TRADER.quote_data(symbols)
         quotes = res['results']
-        store_quotes(quotes)
+        store_quotes(quotes, collection)
 
-        sleep(WORKER_REQUEST_COOLDOWN_SECONDS)
+        sleep(worker_request_cooldown_seconds)
     except KeyError:  # Likely a ratelimit issue; cooldown.
         if not res.get('detail'):
-            print(
-                'ERROR: Unexpected response received from popularity request: {}'.format(res))
+            print('ERROR: Unexpected response received from popularity request: {}'.format(res))
             sleep(120)
             return
 
@@ -109,24 +118,39 @@ def fetch_quote(symbols: str):
             cooldown_seconds))
         sleep(cooldown_seconds)
 
-        fetch_quote(symbols)
+        fetch_quote(symbols,
+                    collection,
+                    worker_request_cooldown_seconds=worker_request_cooldown_seconds)
     except InvalidTickerSymbol:
         print('Error while fetching symbols: {}'.format(symbols))
 
-
 WORK_CBS = {
-    'FETCH_POPULARITY': (fetch_popularity, "popularity", "instrument_ids"),
-    'FETCH_QUOTE': (fetch_quote, "quotes", "symbols"),
+    'popularity': (fetch_popularity, 'popularity', 'instrument_ids'),
+    'quote': (fetch_quote, 'quotes', 'symbols'),
 }
 
-(work_cb, collection_name, channel_name) = WORK_CBS[MODE]
-collection = db[collection_name]
-rabbitmq_channel.queue_declare(queue=channel_name)
+@click.command()
+@click.option('--mode', type=click.Choice(['quote', 'popularity']), default='popularity')
+@click.option('--rabbitmq_host', default='localhost')
+@click.option('--rabbitmq_port', type=click.INT, default=5672)
+@click.option('--worker_request_cooldown_seconds', type=click.FLOAT, default=1.0)
+def cli(mode: str, rabbitmq_host: str, rabbitmq_port: str, worker_request_cooldown_seconds: float):
+    rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_host,
+                                                                            port=rabbitmq_port))
+    rabbitmq_channel = rabbitmq_connection.channel()
 
+    (work_cb, collection_name, channel_name) = WORK_CBS[mode]
+    db = get_db()
+    collection = db[collection_name]
+    rabbitmq_channel.queue_declare(queue=channel_name)
 
-def handle_work(channel, method, properties, body):
-    work_cb(body.decode('utf-8'))
+    def handle_work(channel, method, properties, body):
+        work_cb(body.decode('utf-8'),
+                collection,
+                worker_request_cooldown_seconds=worker_request_cooldown_seconds,)
 
+    rabbitmq_channel.basic_consume(handle_work, queue=channel_name, no_ack=True)
+    rabbitmq_channel.start_consuming()
 
-rabbitmq_channel.basic_consume(handle_work, queue=channel_name, no_ack=True)
-rabbitmq_channel.start_consuming()
+if __name__ == '__main__':
+    cli() # pylint: disable=E1120
