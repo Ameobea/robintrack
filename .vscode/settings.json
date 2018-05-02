@@ -1,7 +1,0 @@
-{
-  "git.ignoreLimitWarning": true,
-  "eslint.packageManager": "yarn",
-  "editor.tabSize": 2,
-  "editor.formatOnSave": false,
-  "python.pythonPath": "/opt/anaconda/envs/tf/bin/python"
-}
