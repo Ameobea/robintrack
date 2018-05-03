@@ -1,13 +1,13 @@
 """ Utilities for interacting with MongoDB """
 
-import os
+from os import environ
 
 from pymongo import MongoClient
 
-MONGO_USER = os.environ.get('MONGO_USER') or ''
-MONGO_PASSWORD = os.environ.get('MONGO_PASSWORD') or ''
-MONGO_HOST = os.environ.get('MONGO_HOST') or 'localhost'
-MONGO_PORT = int(os.environ.get('MONGO_PORT')) if os.environ.get('MONGO_PORT') else 27017
+MONGO_USER = environ.get('MONGO_USER') or ''
+MONGO_PASSWORD = environ.get('MONGO_PASSWORD') or ''
+MONGO_HOST = environ.get('MONGO_HOST') or 'localhost'
+MONGO_PORT = int(environ['MONGO_PORT']) if environ.get('MONGO_PORT') else 27017
 
 mongo_url = "mongodb://{}{}{}{}{}:{}/".format(
     MONGO_USER,

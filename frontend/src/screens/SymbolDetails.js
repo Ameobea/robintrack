@@ -21,20 +21,8 @@ import {
 
 const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => ({
   title: { text: `Popularity History for ${symbol}` },
-  xAxis: [
-    {
-      type: 'time',
-      splitNumber: 10,
-    },
-  ],
-  yAxis: [
-    {
-      type: 'value',
-    },
-    {
-      type: 'value',
-    },
-  ],
+  xAxis: [{ type: 'time', splitNumber: 10 }],
+  yAxis: [{ type: 'value' }, { type: 'value' }],
   series: [
     {
       type: 'line',

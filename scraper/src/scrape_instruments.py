@@ -1,18 +1,17 @@
 """ Entrypoint for the Robinhood scraper.  Pulls data from the top instruments and pushes the
 IDs of tradable instruments into a RabbitMQ queue. """
 
-import json
-import os
 from time import sleep
 from typing import List
 
 import click
-from Robinhood import endpoints, Robinhood
+from Robinhood import Robinhood
 import pika
 import pymongo
 
-from common import parse_throttle_res, pp_json
+from common import parse_throttle_res
 from db import get_db
+
 
 def get_tradable_instrument_ids(instruments: dict) -> List[str]:
     """ Returns the instrument IDs and symbols of all tradable instruments in the provided list
@@ -26,6 +25,7 @@ def get_tradable_instrument_ids(instruments: dict) -> List[str]:
         lambda instrument: (instrument['id'], instrument['symbol']),
         tradable_instruments
     ))
+
 
 @click.command()
 @click.option('--rabbitmq_host', type=click.STRING, default='localhost')
@@ -50,12 +50,14 @@ def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds
     instrument_ids = []
     while True:
         fetched_instruments = res['results']
-        tradable_instrument_ids = get_tradable_instrument_ids(fetched_instruments)
+        tradable_instrument_ids = get_tradable_instrument_ids(
+            fetched_instruments)
         total_ids += len(tradable_instrument_ids)
 
         for instrument_id, symbol in tradable_instrument_ids:
             try:
-                index_col.insert_one({'instrument_id': instrument_id, 'symbol': symbol})
+                index_col.insert_one(
+                    {'instrument_id': instrument_id, 'symbol': symbol})
             except pymongo.errors.DuplicateKeyError:
                 pass
 
@@ -99,5 +101,6 @@ def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds
 
     rabbitmq_connection.close()
 
+
 if __name__ == '__main__':
-    cli() # pylint: disable=E1120
+    cli()  # pylint: disable=E1120
