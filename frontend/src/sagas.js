@@ -4,8 +4,8 @@ import * as apiActions from 'src/actions/api';
 import * as Api from 'src/api';
 
 function* fetchQuote({ symbol }) {
-  const quote = yield call(Api.fetchQuote);
-  yield put({ type: apiActions.QUOTE_FETCHED, quote });
+  const quote = yield call(Api.fetchQuote, symbol);
+  yield put({ type: apiActions.QUOTE_FETCHED, symbol, quote });
 }
 
 function* fetchTopSymbols() {
@@ -21,6 +21,24 @@ function* fetchBottomSymbols() {
   });
 }
 
+function* fetchPopularityHistory({ symbol }) {
+  const popHistory = yield call(Api.fetchPopularityHistory, symbol);
+  yield put({
+    type: apiActions.POPULARITY_HISTORY_FETCHED,
+    symbol,
+    payload: popHistory,
+  });
+}
+
+function* fetchQuoteHistory({ symbol }) {
+  const quoteHistory = yield call(Api.fetchQuoteHistory, symbol);
+  yield put({
+    type: apiActions.QUOTE_HISTORY_FETCHED,
+    symbol,
+    payload: quoteHistory,
+  });
+}
+
 function* rootSaga() {
   yield takeEvery(apiActions.FETCH_QUOTE_REQUESTED, fetchQuote);
   yield takeEvery(apiActions.FETCH_TOP_SYMBOLS_REQUESTED, fetchTopSymbols);
@@ -28,6 +46,11 @@ function* rootSaga() {
     apiActions.FETCH_BOTTOM_SYMBOLS_REQUESTED,
     fetchBottomSymbols
   );
+  yield takeEvery(
+    apiActions.FETCH_POPULARITY_HISTORY_REQUESTED,
+    fetchPopularityHistory
+  );
+  yield takeEvery(apiActions.FETCH_QUOTE_HISTORY_REQUESTED, fetchQuoteHistory);
 }
 
 export default rootSaga;

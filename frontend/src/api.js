@@ -2,23 +2,17 @@
  * Defines an interface to the backend.
  */
 
-export const fetchQuote = symbol => {
-  Promise.resolve({
-    instrument_id: '890a6135-d05b-4ec1-97fc-39378ad391dd',
-    symbol: 'ABCD',
-    bid: 1.02,
-    ask: 1.03,
-  });
-};
+export const fetchQuote = symbol =>
+  fetch(`/stocks/${symbol}/quote`).then(res => res.json());
 
 export const fetchTopSymbols = () =>
-  Promise.resolve([
-    { symbol: 'AAPL', popularity: 12312 },
-    { symbol: 'GOOG', popularity: 11111 },
-  ]);
+  fetch('/stocks/most_popular').then(res => res.json());
 
 export const fetchBottomSymbols = () =>
-  Promise.resolve([
-    { symbol: 'AAPL', popularity: 12312 },
-    { symbol: 'GOOG', popularity: 11111 },
-  ]);
+  fetch('/stocks/least_popular').then(res => res.json());
+
+export const fetchPopularityHistory = symbol =>
+  fetch(`/stocks/${symbol}/popularity_history`).then(res => res.json());
+
+export const fetchQuoteHistory = symbol =>
+  fetch(`/stocks/${symbol}/quote_history`).then(res => res.json());

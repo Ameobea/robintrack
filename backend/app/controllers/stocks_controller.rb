@@ -130,7 +130,11 @@ class StocksController < ApplicationController
 
   def format_quote_history(quotes)
     quotes.map do |quote|
-      { bid: quote["bid_price"].to_f, ask: quote["ask_price"].to_f }
+      {
+        bid: quote["bid_price"].to_f,
+        ask: quote["ask_price"].to_f,
+        timestamp: quote["updated_at"],
+      }
     end
   end
 end

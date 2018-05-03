@@ -4,8 +4,9 @@ import { routerMiddleware, routerReducer } from 'react-router-redux';
 import createSagaMiddleware from 'redux-saga';
 
 import rootSaga from 'src/sagas';
+import apiReducer from 'src/reducers/api';
 
-const reducers = {};
+const reducers = { api: apiReducer };
 
 export const history = createHistory();
 
