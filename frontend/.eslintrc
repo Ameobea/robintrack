@@ -1,6 +1,6 @@
 {
   "rules": {
-    "indent": [2, { "SwitchCase": 1 }],
+    "indent": [2, 2, { "SwitchCase": 1 }],
     "quotes": [2, "single"],
     "react/display-name": 0,
     "react/forbid-component-props": 0,

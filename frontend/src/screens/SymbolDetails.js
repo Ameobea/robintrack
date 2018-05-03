@@ -9,41 +9,13 @@ import {
 } from 'recompose';
 import * as R from 'ramda';
 
-import ReactEchartsCore from 'echarts-for-react/lib/core';
-import echarts from 'echarts/lib/echarts';
-import 'echarts/lib/chart/line';
-
 import {
   requestPopularityHistory,
   requestQuoteHistory,
   requestQuote,
 } from 'src/actions/api';
 
-const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => ({
-  title: { text: `Popularity History for ${symbol}` },
-  xAxis: [{ type: 'time', splitNumber: 10 }],
-  yAxis: [{ type: 'value' }, { type: 'value' }],
-  series: [
-    {
-      type: 'line',
-      name: 'quote',
-      data: quoteHistory.map(({ timestamp, bid, ask }) => [
-        new Date(timestamp),
-        (bid + ask) / 2,
-      ]),
-      yAxisIndex: 0,
-    },
-    {
-      type: 'line',
-      name: 'popularity',
-      data: popularityHistory.map(({ timestamp, popularity }) => [
-        new Date(timestamp),
-        popularity,
-      ]),
-      yAxisIndex: 1,
-    },
-  ],
-});
+import PopularityChart from 'src/components/PopularityChart';
 
 const SymbolDetails = ({
   match: {
@@ -58,12 +30,10 @@ const SymbolDetails = ({
 }) => (
   <div>
     <h1>{`${symbol}: ${bid} : ${ask}`}</h1>
-    <ReactEchartsCore
-      option={getChartOptions({ symbol, quoteHistory, popularityHistory })}
-      echarts={echarts}
-      notMerge={true}
-      lazyUpdate={true}
-      opts={{}}
+    <PopularityChart
+      symbol={symbol}
+      quoteHistory={quoteHistory}
+      popularityHistory={popularityHistory}
     />
   </div>
 );

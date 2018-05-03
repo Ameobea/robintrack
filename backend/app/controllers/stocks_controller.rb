@@ -125,7 +125,7 @@ class StocksController < ApplicationController
   end
 
   def get_quote_history(symbol)
-    MongoClient[:quotes].find({symbol: symbol}, sort: { updated_at: -1 })
+    MongoClient[:quotes].find({symbol: symbol}, sort: { updated_at: 1 })
   end
 
   def format_quote_history(quotes)
