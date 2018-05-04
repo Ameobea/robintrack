@@ -8,7 +8,6 @@ gem 'dotenv-rails', groups: [:development, :test]
 gem 'rails', '~> 5.2.0'
 gem 'puma', '~> 3.11'
 gem 'jbuilder', '~> 2.5'
-gem 'sqlite3'
 
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.1.0', require: false
@@ -23,12 +22,8 @@ group :development do
   gem 'pry-rails'
 end
 
-group :test do
-  # Adds support for Capybara system testing and selenium driver
-  gem 'capybara', '>= 2.15', '< 4.0'
-  gem 'selenium-webdriver'
-  # Easy installation and use of chromedriver to run system tests with Chrome
-  gem 'chromedriver-helper'
+group :development, :test do
+  gem 'rspec-rails', '~> 3.7'
 end
 
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
