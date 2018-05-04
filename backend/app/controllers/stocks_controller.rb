@@ -1,17 +1,6 @@
 class StocksController < ApplicationController
   DEFAULT_LIMIT = 50
 
-  class NotFound < StandardError; end
-  class BadRequest < StandardError; end
-
-  rescue_from NotFound do
-    render json: { error: "not_found" }, status: :not_found
-  end
-
-  rescue_from BadRequest do |message|
-    render json: { error: message }, status: :bad_request
-  end
-
   def most_popular
     entries = Popularity.most_popular(limit_param)
     render json: format_popularity_entries(entries)

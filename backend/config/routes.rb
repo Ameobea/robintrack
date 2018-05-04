@@ -10,4 +10,8 @@ Rails.application.routes.draw do
       get :quote_history
     end
   end
+
+  get :largest_popularity_changes, to: "popularities#largest_popularity_changes", defaults: { format: :json }
+  get :largest_popularity_decreases, to: "popularities#largest_popularity_decreases", defaults: { format: :json }
+  get :largest_popularity_increases, to: "popularities#largest_popularity_increases", defaults: { format: :json }
 end
