@@ -22,7 +22,7 @@ class Popularity
         as: "indexes",
       } },
       { "$addFields" => { symbol: { "$arrayElemAt" => ["$indexes.symbol", 0] } } },
-      { "$sort" => { latest_popularity: sort_direction, symbol: sort_direction } },
+      { "$sort" => { latest_popularity: sort_direction, symbol: SORT_ASCENDING } },
       { "$skip" => start_index },
       { "$limit" => limit },
     ])
@@ -38,8 +38,8 @@ class Popularity
         foreignField: "instrument_id",
         as: "indexes",
       } },
-      { "$sort" => { latest_popularity: SORT_DESCENDING } },
       { "$addFields" => { symbol: { "$arrayElemAt" => ["$indexes.symbol", 0] } } },
+      { "$sort" => { latest_popularity: SORT_DESCENDING, symbol: SORT_ASCENDING } },
       { "$group" => { _id: 1, symbol: { "$push" => "$symbol" } } },
       { "$unwind" => { path: "$symbol", includeArrayIndex: "ranking" } },
       { "$match" => { symbol: symbol } },
