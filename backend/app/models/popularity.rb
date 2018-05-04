@@ -39,31 +39,46 @@ class Popularity
     entry && entry["popularity_history"]
   end
 
-  def self.largest_popularity_changes(hours_ago, limit)
-    popularity_difference_lookup(hours_ago, SORT_DESCENDING, limit, true)
+  def self.largest_popularity_changes(options)
+    options = options.merge(sort_direction: SORT_DESCENDING, take_absoute_value: true)
+    popularity_difference_lookup(options)
   end
 
-  def self.largest_popularity_decreases(hours_ago, limit)
-    popularity_difference_lookup(hours_ago, SORT_ASCENDING, limit)
+  def self.largest_popularity_decreases(options)
+    popularity_difference_lookup(options.merge(sort_direction: SORT_ASCENDING))
   end
 
-  def self.largest_popularity_increases(hours_ago, limit)
-    popularity_difference_lookup(hours_ago, SORT_DESCENDING, limit)
+  def self.largest_popularity_increases(options)
+    popularity_difference_lookup(options.merge(sort_direction: SORT_DESCENDING))
   end
 
-  def self.popularity_difference_lookup(hours_ago, sort_direction, limit, take_absoute_value = nil)
+  def self.popularity_difference_lookup(options)
+    hours_ago          = options[:hours_ago]
+    sort_direction     = options[:sort_direction]
+    limit              = options[:limit]
+    take_absoute_value = options[:take_absoute_value]
+    percentage         = options[:percentage]
+    min_popularity     = options[:min_popularity]
+
+    if percentage
+      difference_query = { "$multiply" => [100, { "$divide" => [{ "$subtract" => ["$end_popularity", "$start_popularity"] }, "$start_popularity"] }] }
+    else
+      difference_query = { "$subtract" => ["$end_popularity", "$start_popularity"] }
+    end
+
     if take_absoute_value
       sorter = { "$sort" => { abs_popularity_difference: sort_direction } }
     else
       sorter = { "$sort" => { popularity_difference: sort_direction } }
     end
+
     MongoClient[:popularity].aggregate([
       { "$match" => { timestamp: { "$gte" => hours_ago.hour.ago.utc } } },
       { "$sort" => { timestamp: -1 } },
       { "$group" => {
         _id: "$instrument_id",
-        latest_popularity: { "$first" => "$popularity" },
-        old_popularity: { "$last" => "$popularity" },
+        end_popularity: { "$first" => "$popularity" },
+        start_popularity: { "$last" => "$popularity" },
       } },
       { "$lookup" => {
         from: "index",
@@ -71,7 +86,8 @@ class Popularity
         foreignField: "instrument_id",
         as: "indexes",
       } },
-      { "$addFields" => { popularity_difference: { "$subtract" => ["$latest_popularity", "$old_popularity"] } } },
+      { "$addFields" => { popularity_difference: difference_query } },
+      min_popularity && { "$match" => { start_popularity: { "$gte" => min_popularity } } },
       take_absoute_value && { "$addFields" => { abs_popularity_difference: { "$abs" => "$popularity_difference" } } },
       sorter,
       { "$limit" => limit },
