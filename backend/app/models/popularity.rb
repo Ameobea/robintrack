@@ -80,6 +80,7 @@ class Popularity
         end_popularity: { "$first" => "$popularity" },
         start_popularity: { "$last" => "$popularity" },
       } },
+      min_popularity && { "$match" => { start_popularity: { "$gte" => min_popularity } } },
       { "$lookup" => {
         from: "index",
         localField: "_id",
@@ -87,7 +88,6 @@ class Popularity
         as: "indexes",
       } },
       { "$addFields" => { popularity_difference: difference_query } },
-      min_popularity && { "$match" => { start_popularity: { "$gte" => min_popularity } } },
       take_absoute_value && { "$addFields" => { abs_popularity_difference: { "$abs" => "$popularity_difference" } } },
       sorter,
       { "$limit" => limit },
