@@ -66,7 +66,7 @@ const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => {
     axisLabel: {
       showMinLabel: false,
       showMaxLabel: false,
-      color: '#2c343c',
+      color: 'white',
     },
     splitNumber: 10,
   };
@@ -91,7 +91,6 @@ const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => {
         axisLabel: {
           ...yAxisDefaults.axisLabel,
           formatter: value => `$${value.toFixed(2)}`,
-          color: 'white',
         },
         splitLine: { show: true },
       },

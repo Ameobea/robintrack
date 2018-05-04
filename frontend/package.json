@@ -6,6 +6,8 @@
     "echarts": "^4.1.0",
     "echarts-for-react": "^2.0.8",
     "history": "^4.7.2",
+    "numeral": "^2.0.6",
+    "prop-types": "^15.6.1",
     "ramda": "^0.25.0",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
