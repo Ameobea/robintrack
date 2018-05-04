@@ -1,2 +1,0 @@
-class Stock < ApplicationRecord
-end
