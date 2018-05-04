@@ -59,7 +59,7 @@ class PopularitiesController < ApplicationController
         start_popularity: entry["start_popularity"],
         end_popularity: entry["end_popularity"],
         popularity_difference: entry["popularity_difference"],
-        symbol: entry["indexes"].first["symbol"],
+        symbol: entry["symbol"],
       }
     end
   end

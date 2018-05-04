@@ -2,15 +2,15 @@ class Popularity
   SORT_ASCENDING = 1
   SORT_DESCENDING = -1
 
-  def self.most_popular(limit)
-    sort_by_popularity(SORT_DESCENDING, limit)
+  def self.most_popular(limit, start_index)
+    sort_by_popularity(SORT_DESCENDING, limit, start_index)
   end
 
-  def self.least_popular(limit)
-    sort_by_popularity(SORT_ASCENDING, limit)
+  def self.least_popular(limit, start_index)
+    sort_by_popularity(SORT_ASCENDING, limit, start_index)
   end
 
-  def self.sort_by_popularity(sort_direction, limit)
+  def self.sort_by_popularity(sort_direction, limit, start_index)
     MongoClient[:popularity].aggregate([
       { "$sort" => { timestamp: -1 } },
       { "$group" => { _id: "$instrument_id", latest_popularity: { "$first" => "$popularity" } } },
@@ -20,9 +20,35 @@ class Popularity
         foreignField: "instrument_id",
         as: "indexes",
       } },
+      { "$unwind" => { path: "$indexes", includeArrayIndex: "index_index" } },
+      { "$match" => { index_index: 0 } },
+      { "$addFields" => { symbol: "$indexes.symbol" } },
       { "$sort" => { latest_popularity: sort_direction } },
+      { "$skip" => start_index },
       { "$limit" => limit },
     ])
+  end
+
+  def self.get_ranking(symbol)
+    MongoClient[:popularity].aggregate([
+      { "$sort" => { timestamp: -1 } },
+      { "$group" => { _id: "$instrument_id", latest_popularity: { "$first" => "$popularity" } } },
+      { "$lookup" => {
+        from: "index",
+        localField: "_id",
+        foreignField: "instrument_id",
+        as: "indexes",
+      } },
+      { "$sort" => { latest_popularity: SORT_DESCENDING } },
+      { "$unwind" => { path: "$indexes", includeArrayIndex: "index_index" } },
+      { "$match" => { index_index: 0 } },
+      { "$addFields" => { symbol: "$indexes.symbol" } },
+      { "$group" => { _id: 1, symbol: { "$push" => "$symbol" } } },
+      { "$unwind" => { path: "$symbol", includeArrayIndex: "ranking" } },
+      { "$match" => { symbol: symbol } },
+      { "$addFields" => { ranking: { "$add" => ["$ranking", 1] } } },
+      { "$limit" => 1 },
+    ]).first
   end
 
   def self.get_history_for_symbol(symbol)
@@ -87,6 +113,9 @@ class Popularity
         foreignField: "instrument_id",
         as: "indexes",
       } },
+      { "$unwind" => { path: "$indexes", includeArrayIndex: "index_index" } },
+      { "$match" => { index_index: 0 } },
+      { "$addFields" => { symbol: "$indexes.symbol" } },
       { "$addFields" => { popularity_difference: difference_query } },
       take_absoute_value && { "$addFields" => { abs_popularity_difference: { "$abs" => "$popularity_difference" } } },
       sorter,

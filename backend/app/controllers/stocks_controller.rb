@@ -2,12 +2,12 @@ class StocksController < ApplicationController
   DEFAULT_LIMIT = 50
 
   def most_popular
-    entries = Popularity.most_popular(limit_param)
+    entries = Popularity.most_popular(limit_param, start_index_param)
     render json: format_popularity_entries(entries)
   end
 
   def least_popular
-    entries = Popularity.least_popular(limit_param)
+    entries = Popularity.least_popular(limit_param, start_index_param)
     render json: format_popularity_entries(entries)
   end
 
@@ -33,6 +33,13 @@ class StocksController < ApplicationController
     render json: format_popularity_history(entries)
   end
 
+  def popularity_ranking
+    entry = Popularity.get_ranking(params[:id])
+    raise NotFound unless entry
+
+    render json: { symbol: entry["symbol"], ranking: entry["ranking"] }
+  end
+
   def quote_history
     entries = Quote.search_by_symbol(params[:id])
     raise NotFound if entries.none?
@@ -42,13 +49,21 @@ class StocksController < ApplicationController
 
   private
 
+  def start_index_param
+    start_index = params[:start_index].to_i
+    if start_index < 0
+      raise BadRequest, "please provide a positive integer for start_index"
+    end
+    start_index
+  end
+
   def limit_param
     params.fetch(:limit, DEFAULT_LIMIT).to_i
   end
 
   def format_popularity_entries(entries)
     entries.map do |entry|
-      { popularity: entry["latest_popularity"], symbol: entry["indexes"].first["symbol"] }
+      { popularity: entry["latest_popularity"], symbol: entry["symbol"] }
     end
   end
 
