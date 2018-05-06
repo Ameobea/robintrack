@@ -29,7 +29,7 @@ def parse_instrument_url(instrument_url: str) -> str:
 def store_popularities(popularity_map: dict, collection: pymongo.collection.Collection):
     """ Creates an entry in the database for the popularity. """
 
-    timestamp = datetime.datetime.utcnow(),
+    timestamp = datetime.datetime.utcnow()
     pprint(popularity_map)
     mapped_documents = map(lambda key: {'timestamp': timestamp,
                                         'instrument_id': key,
@@ -62,8 +62,11 @@ def store_quotes(quotes: list, collection: pymongo.collection.Collection):
     pprint(list(map(format_quote, quotes)))
 
     # Update the index collection with up-to-date tradability info
+    timestamp = datetime.datetime.utcnow(),
+
     def update_index_symbol(datum: dict) -> pymongo.operations.UpdateOne:
         data = {
+            'timestamp': timestamp,
             'has_traded': datum.get('has_traded'),
             'updated_at': datum.get('updated_at'),
             'trading_halted': datum.get('trading_halted'),

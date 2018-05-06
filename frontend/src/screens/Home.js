@@ -1,11 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+import { backgroundColor } from 'src/style';
+
 const Home = () => (
-  <div>
-    <h1>Home Page</h1>
-    <Link to="/leaderboard">Leaderboard</Link>
-    <Link to="/symbol/SPY">SPY</Link>
+  <div style={{ backgroundColor }}>
+    <center>
+      <h1>RH-Track</h1>
+    </center>
+    <div>
+      <Link to="/leaderboard">Leaderboard</Link>
+    </div>
+    <div>
+      <Link to="/symbol/SPY">SPY</Link>
+    </div>
   </div>
 );
 

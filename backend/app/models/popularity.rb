@@ -12,6 +12,7 @@ class Popularity
 
   def self.sort_by_popularity(sort_direction, limit, start_index)
     MongoClient[:popularity].aggregate([
+      { "$match" => { timestamp: { "$gte": 24.hour.ago.utc } } },
       { "$sort" => { timestamp: -1 } },
       { "$group" => { _id: "$instrument_id", latest_popularity: { "$first" => "$popularity" } } },
       { "$lookup" => {
@@ -21,7 +22,7 @@ class Popularity
         as: "indexes",
       } },
       { "$addFields" => { symbol: { "$arrayElemAt" => ["$indexes.symbol", 0] } } },
-      { "$sort" => { latest_popularity: sort_direction } },
+      { "$sort" => { latest_popularity: sort_direction, symbol: sort_direction } },
       { "$skip" => start_index },
       { "$limit" => limit },
     ])

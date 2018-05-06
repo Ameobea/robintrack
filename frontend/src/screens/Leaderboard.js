@@ -5,9 +5,11 @@ import { compose, lifecycle } from 'recompose';
 import numeral from 'numeral';
 
 import { requestBottomSymbols, requestTopSymbols } from 'src/actions/api';
+import { fontColor, backgroundColor } from 'src/style';
+import Loading from 'src/components/Loading';
 
 const textStyle = {
-  fontSize: 28,
+  fontSize: 24,
 };
 
 const SymbolTableRow = ({ style = {}, children }) => (
@@ -25,6 +27,7 @@ const SymbolTable = ({ label, data, style }) => (
         display: 'flex',
         flexDirection: 'column',
         alignSelf: 'center',
+        color: fontColor,
       }}
     >
       <h2 style={{ textAlign: 'center', fontSize: 34, fontWeight: 'bold' }}>
@@ -55,7 +58,7 @@ const SymbolTable = ({ label, data, style }) => (
 
 const Leaderboard = ({ bottomSymbols, topSymbols }) => {
   if (!bottomSymbols || !topSymbols) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   const symbolTableStyle = {
@@ -66,7 +69,13 @@ const Leaderboard = ({ bottomSymbols, topSymbols }) => {
 
   return (
     <div
-      style={{ display: 'flex', flex: 1, flexWrap: 'wrap', paddingBottom: 50 }}
+      style={{
+        display: 'flex',
+        flex: 1,
+        flexWrap: 'wrap',
+        paddingBottom: 50,
+        backgroundColor,
+      }}
     >
       <SymbolTable
         label="Most Popular Assets"
@@ -91,8 +100,13 @@ export default compose(
   connect(mapStateToProps, { requestBottomSymbols, requestTopSymbols }),
   lifecycle({
     componentWillMount() {
-      this.props.requestBottomSymbols();
-      this.props.requestTopSymbols();
+      if (!this.props.bottomSymbols) {
+        this.props.requestBottomSymbols();
+      }
+
+      if (!this.props.topSymbols) {
+        this.props.requestTopSymbols();
+      }
     },
   })
 )(Leaderboard);

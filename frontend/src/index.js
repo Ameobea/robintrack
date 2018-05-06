@@ -8,6 +8,8 @@ import { history, store } from 'src/reducers';
 import Home from 'src/screens/Home';
 import Leaderboard from 'src/screens/Leaderboard';
 import SymbolDetails from 'src/screens/SymbolDetails';
+import Header from 'src/components/Header';
+import { backgroundColor } from 'src/style';
 
 const ConnectedSwitch = connect(({ router: { location } }) => ({
   location,
@@ -16,11 +18,14 @@ const ConnectedSwitch = connect(({ router: { location } }) => ({
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-      <ConnectedSwitch>
-        <Route exact path="/" component={Home} />
-        <Route path="/leaderboard" component={Leaderboard} />
-        <Route path="/symbol/:symbol" component={SymbolDetails} />
-      </ConnectedSwitch>
+      <div style={{ height: '100vh', backgroundColor }}>
+        <Header />
+        <ConnectedSwitch>
+          <Route exact path="/" component={Home} />
+          <Route path="/leaderboard" component={Leaderboard} />
+          <Route path="/symbol/:symbol" component={SymbolDetails} />
+        </ConnectedSwitch>
+      </div>
     </ConnectedRouter>
   </Provider>,
   document.getElementById('root')

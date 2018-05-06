@@ -106,7 +106,10 @@ const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => {
       {
         ...seriesDefaults,
         name: 'Price',
-        data: quoteSeries,
+        data: quoteSeries.map(([timestamp, quote]) => [
+          timestamp,
+          parseFloat(quote.toFixed(3)),
+        ]),
         yAxisIndex: 0,
         xAxisIndex: 0,
         lineStyle: { color: '#f39' },

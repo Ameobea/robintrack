@@ -16,6 +16,7 @@ import {
 } from 'src/actions/api';
 
 import PopularityChart from 'src/components/PopularityChart';
+import Loading from 'src/components/Loading';
 
 const SymbolDetails = ({
   match: {
@@ -28,7 +29,15 @@ const SymbolDetails = ({
   quoteHistory,
   requestQuote,
 }) => (
-  <div>
+  <div
+    style={{
+      display: 'flex',
+      flex: 1,
+      flexDirection: 'column',
+      backgroundColor: '#16161d',
+      color: '#e3e3e3',
+    }}
+  >
     <h1>{`${symbol}: ${bid} : ${ask}`}</h1>
     <PopularityChart
       symbol={symbol}
@@ -76,7 +85,7 @@ export default compose(
   })),
   branch(
     R.prop('loading'),
-    renderComponent(() => <div>Loading...</div>),
+    renderComponent(Loading),
     renderComponent(SymbolDetails)
   )
 )();
