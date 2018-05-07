@@ -9,6 +9,7 @@ import click
 import pika
 import pymongo
 from pymongo.errors import BulkWriteError
+import requests
 
 from Robinhood import Robinhood
 from Robinhood.exceptions import InvalidTickerSymbol
@@ -100,8 +101,8 @@ def fetch_popularity(instrument_ids: str, collection: pymongo.collection.Collect
             instrument_id: datum['num_open_positions']
         }
 
-    res = TRADER.get_url(url)
     try:
+        res = TRADER.get_url(url)
         popularities = reduce(reduce_popularity, res['results'], {})
         store_popularities(popularities, collection)
         sleep(worker_request_cooldown_seconds)
@@ -118,6 +119,14 @@ def fetch_popularity(instrument_ids: str, collection: pymongo.collection.Collect
             cooldown_seconds))
         sleep(cooldown_seconds)
 
+        fetch_popularity(instrument_ids,
+                         collection,
+                         sleep,
+                         worker_request_cooldown_seconds=worker_request_cooldown_seconds)
+    except requests.exceptions.ReadTimeout:
+        print(
+            'Read timeout while fetching popularity... Sleeping 30 seconds and re-trying.')
+        sleep(30)
         fetch_popularity(instrument_ids,
                          collection,
                          sleep,
@@ -150,6 +159,14 @@ def fetch_quote(symbols: str, collection: pymongo.collection.Collection, sleep,
                     worker_request_cooldown_seconds=worker_request_cooldown_seconds)
     except InvalidTickerSymbol:
         print('Error while fetching symbols: {}'.format(symbols))
+    except requests.exceptions.ReadTimeout:
+        print(
+            'Read timeout while fetching quotes... Sleeping 30 seconds and re-trying.')
+        sleep(30)
+        fetch_quote(symbols,
+                    collection,
+                    sleep,
+                    worker_request_cooldown_seconds=worker_request_cooldown_seconds)
 
 
 WORK_CBS = {

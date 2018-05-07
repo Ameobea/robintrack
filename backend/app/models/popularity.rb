@@ -30,7 +30,7 @@ class Popularity
 
   def self.get_ranking(symbol)
     MongoClient[:popularity].aggregate([
-      { "$match" => { timestamp: { "$gte": 24.hour.ago.utc } } },
+      { "$match" => { timestamp: { "$gte": 2.hour.ago.utc } } },
       { "$sort" => { timestamp: -1 } },
       { "$group" => { _id: "$instrument_id", latest_popularity: { "$first" => "$popularity" } } },
       { "$lookup" => {
