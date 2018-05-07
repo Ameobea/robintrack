@@ -9,14 +9,14 @@ import re
 import click
 import pika
 import pymongo
-from pymongo.errors import DuplicateKeyError
+from pymongo.errors import BulkWriteError
 
 from Robinhood import Robinhood
 from Robinhood.exceptions import InvalidTickerSymbol
 
 from common import parse_throttle_res
 from db import get_db
-from .utils import pluck, DESIRED_QUOTE_KEYS
+from utils import pluck, DESIRED_QUOTE_KEYS
 
 INDEX_COL = get_db()['index']
 
@@ -85,8 +85,11 @@ def store_quotes(quotes: list, collection: pymongo.collection.Collection):
     quotes = list(map(map_quote, quotes))
     try:
         collection.insert_many(quotes, ordered=False)
-    except DuplicateKeyError:
-        pass
+    except BulkWriteError as bwe:
+        for err in bwe.details['writeErrors']:
+            if 'duplicate key' not in err['errmsg']:
+                print('ERROR: Unhandled exception occured during batch write:')
+                pprint(err)
 
 
 def fetch_popularity(instrument_ids: str, collection: pymongo.collection.Collection, sleep,
