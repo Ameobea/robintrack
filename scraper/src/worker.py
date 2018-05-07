@@ -7,13 +7,16 @@ from pprint import pprint
 import re
 
 import click
-from Robinhood import Robinhood
-from Robinhood.exceptions import InvalidTickerSymbol
 import pika
 import pymongo
+from pymongo.errors import DuplicateKeyError
+
+from Robinhood import Robinhood
+from Robinhood.exceptions import InvalidTickerSymbol
 
 from common import parse_throttle_res
 from db import get_db
+from .utils import pluck, DESIRED_QUOTE_KEYS
 
 INDEX_COL = get_db()['index']
 
@@ -51,7 +54,7 @@ def store_quotes(quotes: list, collection: pymongo.collection.Collection):
 
         return {
             'instrument_id': match[1],
-            **quote
+            **pluck(DESIRED_QUOTE_KEYS, quote)
         }
 
     quotes = list(filter(lambda quote: quote != None, quotes))
@@ -80,7 +83,10 @@ def store_quotes(quotes: list, collection: pymongo.collection.Collection):
     INDEX_COL.bulk_write(ops, ordered=False)
 
     quotes = list(map(map_quote, quotes))
-    collection.insert_many(quotes, ordered=False)
+    try:
+        collection.insert_many(quotes, ordered=False)
+    except DuplicateKeyError:
+        pass
 
 
 def fetch_popularity(instrument_ids: str, collection: pymongo.collection.Collection, sleep,

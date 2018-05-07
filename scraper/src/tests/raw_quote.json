@@ -1,0 +1,19 @@
+{
+  "instrument_id": "f7a777df-9b1f-47f6-a82f-fe2645f663c2",
+  "ask_price": "35.9000",
+  "ask_size": 100,
+  "bid_price": "18.9000",
+  "bid_size": 100,
+  "last_trade_price": "27.0000",
+  "last_extended_hours_trade_price": null,
+  "previous_close": "26.6000",
+  "adjusted_previous_close": "26.6000",
+  "previous_close_date": "2018-04-30",
+  "symbol": "FCBP",
+  "trading_halted": false,
+  "has_traded": true,
+  "last_trade_price_source": "nls",
+  "updated_at": "2018-05-01T20:00:00Z",
+  "instrument":
+    "https://api.robinhood.com/instruments/f7a777df-9b1f-47f6-a82f-fe2645f663c2/"
+}

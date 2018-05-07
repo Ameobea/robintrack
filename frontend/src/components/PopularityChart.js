@@ -11,6 +11,8 @@ import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/legend';
 import * as R from 'ramda';
 
+import { emphasis, emphasis2 } from 'src/style';
+
 const analyzeTimeSeries = series => {
   const values = series.map(arr => arr[1]);
   const first = series[0] || [new Date('3000-04-20'), 0];
@@ -112,8 +114,8 @@ const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => {
         ]),
         yAxisIndex: 0,
         xAxisIndex: 0,
-        lineStyle: { color: '#f39' },
-        itemStyle: { color: '#f39', borderColor: '#fff' },
+        lineStyle: { color: emphasis },
+        itemStyle: { color: emphasis, borderColor: '#fff' },
       },
       {
         ...seriesDefaults,
@@ -121,8 +123,8 @@ const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => {
         data: popularitySeries,
         yAxisIndex: 1,
         xAxisIndex: 1,
-        lineStyle: { color: '#00d68e' },
-        itemStyle: { color: '#00d68e', borderColor: '#fff' },
+        lineStyle: { color: emphasis2 },
+        itemStyle: { color: emphasis2, borderColor: '#fff' },
       },
     ],
   };
