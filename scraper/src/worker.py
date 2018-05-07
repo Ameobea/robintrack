@@ -4,7 +4,6 @@ quotes, popularity, or stores the ID in a database. """
 import datetime
 from functools import reduce
 from pprint import pprint
-import re
 
 import click
 import pika
