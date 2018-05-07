@@ -20,3 +20,10 @@ UPDATED_AT_TIME_FORMAT_STRING = '%Y-%m-%dT%H:%M:%SZ'
 
 def parse_updated_at(updated_at: str) -> datetime:
     return datetime.strptime(updated_at, UPDATED_AT_TIME_FORMAT_STRING)
+
+
+INSTRUMENT_ID_RGX = r'https://api.robinhood.com/instruments/(.+?)/'
+
+
+def parse_instrument_url(instrument_url: str) -> str:
+    return instrument_url.split('instruments/')[1][:-1]

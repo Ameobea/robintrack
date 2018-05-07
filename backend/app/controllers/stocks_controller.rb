@@ -75,7 +75,7 @@ class StocksController < ApplicationController
 
   def format_popularity_history(entries)
     entries.map do |entry|
-      { popularity: entry["popularity"], timestamp: entry["timestamp"].first }
+      { popularity: entry["popularity"], timestamp: entry["timestamp"] }
     end
   end
 

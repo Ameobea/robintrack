@@ -16,17 +16,11 @@ from Robinhood.exceptions import InvalidTickerSymbol
 
 from common import parse_throttle_res
 from db import get_db
-from utils import parse_updated_at, pluck, DESIRED_QUOTE_KEYS
+from utils import parse_instrument_url, parse_updated_at, pluck, DESIRED_QUOTE_KEYS
 
 INDEX_COL = get_db()['index']
 
 TRADER = Robinhood()
-
-INSTRUMENT_ID_RGX = r'https://api.robinhood.com/instruments/(.+?)/'
-
-
-def parse_instrument_url(instrument_url: str) -> str:
-    return instrument_url.split('instruments/')[1][:-1]
 
 
 def store_popularities(popularity_map: dict, collection: pymongo.collection.Collection):
@@ -46,14 +40,10 @@ def store_quotes(quotes: list, collection: pymongo.collection.Collection):
     """ Creates entries in the database for the provided quotes. """
 
     def map_quote(quote: dict) -> dict:
-        match = re.match(INSTRUMENT_ID_RGX, quote.get('instrument') or '')
-        if not match:
-            print(
-                'ERROR: Unable to extract instrument id from quote response: {}'.format(quote))
-            return
+        instrument_id = parse_instrument_url(quote['instrument'])
 
         plucked = {
-            'instrument_id': match[1],
+            'instrument_id': instrument_id,
             **pluck(DESIRED_QUOTE_KEYS, quote)
         }
         plucked['updated_at'] = parse_updated_at(plucked['updated_at'])
@@ -62,12 +52,16 @@ def store_quotes(quotes: list, collection: pymongo.collection.Collection):
     quotes = list(filter(lambda quote: quote != None, quotes))
 
     def format_quote(quote: dict) -> dict:
-        return {'symbol': quote['symbol'], 'bid': quote['bid_price'], 'ask': quote['ask_price']}
+        return {
+            'symbol': quote['symbol'],
+            'bid': quote['bid_price'],
+            'ask': quote['ask_price'],
+        }
 
     pprint(list(map(format_quote, quotes)))
 
     # Update the index collection with up-to-date tradability info
-    timestamp = datetime.datetime.utcnow(),
+    timestamp = datetime.datetime.utcnow()
 
     def update_index_symbol(datum: dict) -> pymongo.operations.UpdateOne:
         data = {
