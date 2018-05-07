@@ -16,7 +16,7 @@ from Robinhood.exceptions import InvalidTickerSymbol
 
 from common import parse_throttle_res
 from db import get_db
-from utils import pluck, DESIRED_QUOTE_KEYS
+from utils import parse_updated_at, pluck, DESIRED_QUOTE_KEYS
 
 INDEX_COL = get_db()['index']
 
@@ -52,10 +52,12 @@ def store_quotes(quotes: list, collection: pymongo.collection.Collection):
                 'ERROR: Unable to extract instrument id from quote response: {}'.format(quote))
             return
 
-        return {
+        plucked = {
             'instrument_id': match[1],
             **pluck(DESIRED_QUOTE_KEYS, quote)
         }
+        plucked['updated_at'] = parse_updated_at(plucked['updated_at'])
+        return plucked
 
     quotes = list(filter(lambda quote: quote != None, quotes))
 
@@ -71,7 +73,7 @@ def store_quotes(quotes: list, collection: pymongo.collection.Collection):
         data = {
             'timestamp': timestamp,
             'has_traded': datum.get('has_traded'),
-            'updated_at': datum.get('updated_at'),
+            'updated_at': parse_updated_at(datum.get('updated_at')),
             'trading_halted': datum.get('trading_halted'),
         }
         instrument_id = parse_instrument_url(datum['instrument'])

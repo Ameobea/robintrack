@@ -1,3 +1,4 @@
+from datetime import datetime
 from functools import reduce
 from typing import List
 
@@ -12,3 +13,10 @@ def pluck(keys: List[str], dictionary: dict) -> dict:
         return {**acc, key: value} if key in keys else acc
 
     return reduce(pluck_inner, dictionary.items(), {})
+
+
+UPDATED_AT_TIME_FORMAT_STRING = '%Y-%m-%dT%H:%M:%SZ'
+
+
+def parse_updated_at(updated_at: str) -> datetime:
+    return datetime.strptime(updated_at, UPDATED_AT_TIME_FORMAT_STRING)
