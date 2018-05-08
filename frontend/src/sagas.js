@@ -1,4 +1,4 @@
-import { call, select, put, takeLatest } from 'redux-saga/effects';
+import { call, select, put, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import * as apiActions from 'src/actions/api';
 import * as Api from 'src/api';
@@ -8,6 +8,7 @@ import {
   getQuoteHistory,
   getTopSymbols,
   getBottomSymbols,
+  getPopularityChanges,
 } from 'src/selectors/api';
 
 function* fetchQuote({ symbol }) {
@@ -20,25 +21,34 @@ function* fetchQuote({ symbol }) {
   yield put({ type: apiActions.QUOTE_FETCHED, symbol, quote });
 }
 
-function* fetchTopSymbols() {
-  const existingTopSymbols = yield select(getTopSymbols);
-  if (existingTopSymbols) {
+function* fetchTopSymbols({ limit, startIndex }) {
+  const existingTopSymbols = yield select(getTopSymbols(limit, startIndex));
+  if (existingTopSymbols.length === limit) {
     return;
   }
 
-  const topSymbols = yield call(Api.fetchTopSymbols);
-  yield put({ type: apiActions.TOP_SYMBOLS_FETCHED, payload: topSymbols });
+  const topSymbols = yield call(Api.fetchTopSymbols, limit, startIndex);
+  yield put({
+    type: apiActions.TOP_SYMBOLS_FETCHED,
+    limit,
+    startIndex,
+    payload: topSymbols,
+  });
 }
 
-function* fetchBottomSymbols() {
-  const existingBottomSymbols = yield select(getBottomSymbols);
-  if (existingBottomSymbols) {
+function* fetchBottomSymbols({ limit, startIndex }) {
+  const existingBottomSymbols = yield select(
+    getBottomSymbols(limit, startIndex)
+  );
+  if (existingBottomSymbols.length === limit) {
     return;
   }
 
-  const bottomSymbols = yield call(Api.fetchBottomSymbols);
+  const bottomSymbols = yield call(Api.fetchBottomSymbols, limit, startIndex);
   yield put({
     type: apiActions.BOTTOM_SYMBOLS_FETCHED,
+    limit,
+    startIndex,
     payload: bottomSymbols,
   });
 }
@@ -71,10 +81,39 @@ function* fetchQuoteHistory({ symbol }) {
   });
 }
 
+const mapSuffixToApiMethod = suffix =>
+  ({
+    [apiActions.INCREASES]: Api.fetchLargestPopularityIncreases,
+    [apiActions.CHANGES]: Api.fetchLargestPopularityChanges,
+    [apiActions.DECREASES]: Api.fetchLargestPopularityDecreases,
+  }[suffix]);
+
+function* fetchLargestPopularityChanges({ suffix, relative, minPopularity }) {
+  const popularityChangesFetcher = getPopularityChanges(
+    suffix,
+    relative,
+    minPopularity
+  );
+  const existingPopularityChanges = yield select(popularityChangesFetcher);
+  if (existingPopularityChanges) {
+    return;
+  }
+
+  const apiMethod = mapSuffixToApiMethod(suffix);
+  const popularityChanges = yield call(apiMethod);
+  yield put({
+    type: apiActions.LARGEST_POPULARITY_CHANGES_FETCHED,
+    suffix,
+    relative,
+    minPopularity,
+    payload: popularityChanges,
+  });
+}
+
 function* rootSaga() {
   yield takeLatest(apiActions.FETCH_QUOTE_REQUESTED, fetchQuote);
-  yield takeLatest(apiActions.FETCH_TOP_SYMBOLS_REQUESTED, fetchTopSymbols);
-  yield takeLatest(
+  yield takeEvery(apiActions.FETCH_TOP_SYMBOLS_REQUESTED, fetchTopSymbols);
+  yield takeEvery(
     apiActions.FETCH_BOTTOM_SYMBOLS_REQUESTED,
     fetchBottomSymbols
   );
@@ -83,6 +122,10 @@ function* rootSaga() {
     fetchPopularityHistory
   );
   yield takeLatest(apiActions.FETCH_QUOTE_HISTORY_REQUESTED, fetchQuoteHistory);
+  yield takeEvery(
+    apiActions.FETCH_LARGEST_POPULARITY_CHANGES_REQUESTED,
+    fetchLargestPopularityChanges
+  );
 }
 
 export default rootSaga;

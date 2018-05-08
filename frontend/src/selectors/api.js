@@ -1,3 +1,5 @@
+import * as R from 'ramda';
+
 const namedApiFetcher = key => symbol => ({ api }) => api[key][symbol];
 
 export const getQuote = namedApiFetcher('quotes');
@@ -6,6 +8,12 @@ export const getPopularityHistory = namedApiFetcher('popularityHistory');
 
 export const getQuoteHistory = namedApiFetcher('quoteHistory');
 
-export const getBottomSymbols = ({ api: { bottomSymbols } }) => bottomSymbols;
+export const getBottomSymbols = (limit, startIndex) => ({
+  api: { bottomSymbols },
+}) => R.slice(startIndex, startIndex + limit, bottomSymbols);
 
-export const getTopSymbols = ({ api: { topSymbols } }) => topSymbols;
+export const getTopSymbols = (limit, startIndex) => ({ api: { topSymbols } }) =>
+  R.slice(startIndex, startIndex + limit, topSymbols);
+
+export const getPopularityChanges = (suffix, relative, minPopularity) =>
+  R.path(['api', 'largestPopularityChanges', suffix, relative, minPopularity]);

@@ -5,14 +5,38 @@
 export const fetchQuote = symbol =>
   fetch(`/stocks/${symbol}/quote`).then(res => res.json());
 
-export const fetchTopSymbols = () =>
-  fetch('/most_popular').then(res => res.json());
+export const fetchTopSymbols = (limit = 25, startIndex = 0) => {
+  const url = `/most_popular?limit=${limit}&start_index=${startIndex}`;
+  return fetch(url).then(res => res.json());
+};
 
-export const fetchBottomSymbols = () =>
-  fetch('/least_popular').then(res => res.json());
+export const fetchBottomSymbols = (limit = 25, startIndex = 0) => {
+  const url = `/least_popular?limit=${limit}&start_index=${startIndex}`;
+  return fetch(url).then(res => res.json());
+};
 
 export const fetchPopularityHistory = symbol =>
   fetch(`/stocks/${symbol}/popularity_history`).then(res => res.json());
 
 export const fetchQuoteHistory = symbol =>
   fetch(`/stocks/${symbol}/quote_history`).then(res => res.json());
+
+const popularityChangesBase = suffix => (
+  limit,
+  hoursAgo,
+  relative,
+  minPopularity = 0
+) => {
+  const url = `/largest_popularity_${suffix}?hoursAgo=${hoursAgo}&limit=${limit}&percentage=${relative}&minPopularity=${minPopularity}`;
+  return fetch(url).then(res => res.json());
+};
+
+export const fetchLargestPopularityChanges = popularityChangesBase('changes');
+
+export const fetchLargestPopularityIncreases = popularityChangesBase(
+  'increases'
+);
+
+export const fetchLargestPopularityDecreases = popularityChangesBase(
+  'decreases'
+);

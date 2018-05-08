@@ -60,7 +60,7 @@ const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => {
   const seriesDefaults = {
     symbol: 'circle',
     type: 'line',
-    smooth: true,
+    smooth: false,
   };
 
   const yAxisDefaults = {
