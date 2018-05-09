@@ -21,7 +21,7 @@ function* fetchQuote({ symbol }) {
   yield put({ type: apiActions.QUOTE_FETCHED, symbol, quote });
 }
 
-function* fetchTopSymbols({ limit, startIndex }) {
+function* fetchTopSymbols({ limit, startIndex, cb }) {
   const existingTopSymbols = yield select(getTopSymbols(limit, startIndex));
   if (existingTopSymbols.length === limit) {
     return;
@@ -34,9 +34,11 @@ function* fetchTopSymbols({ limit, startIndex }) {
     startIndex,
     payload: topSymbols,
   });
+
+  cb && cb();
 }
 
-function* fetchBottomSymbols({ limit, startIndex }) {
+function* fetchBottomSymbols({ limit, startIndex, cb }) {
   const existingBottomSymbols = yield select(
     getBottomSymbols(limit, startIndex)
   );
@@ -51,6 +53,8 @@ function* fetchBottomSymbols({ limit, startIndex }) {
     startIndex,
     payload: bottomSymbols,
   });
+
+  cb && cb();
 }
 
 function* fetchPopularityHistory({ symbol }) {

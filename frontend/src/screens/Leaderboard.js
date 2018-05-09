@@ -3,196 +3,192 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import numeral from 'numeral';
 import * as R from 'ramda';
+import { AutoSizer, Column, InfiniteLoader, Table } from 'react-virtualized';
+import 'react-virtualized/styles.css';
 
-import { requestBottomSymbols, requestTopSymbols } from 'src/actions/api';
+import {
+  requestBottomSymbols,
+  requestTopSymbols,
+  requestPopularityHistory,
+  requestQuoteHistory,
+} from 'src/actions/api';
 import { fontColor, backgroundColor } from 'src/style';
 import Loading from 'src/components/Loading';
-import { emphasis, emphasisDarker } from 'src/style';
+import PopularityChart from 'src/components/PopularityChart';
 
 const textStyle = {
   fontSize: 24,
 };
 
-const SymbolTableCell = ({ style = {}, children }) => (
-  <div style={{ display: 'flex', flex: 1, ...textStyle, ...style }}>
-    {children}
-  </div>
-);
-
-const pagerLinkStyle = {
-  color: emphasis,
-  cursor: 'pointer',
-  fontSize: 26,
-};
-
-const SymbolTablePager = ({
-  curPage,
-  hasNextPage = true,
-  onPageBack,
-  onPageForward,
-}) => (
-  <div>
-    {curPage > 0 && (
-      <span onClick={onPageBack} style={pagerLinkStyle}>
-        {'<'}
-      </span>
-    )}
-    <span
-      style={{ fontSize: 24, color: emphasisDarker }}
-    >{` ${curPage} `}</span>
-    {hasNextPage && (
-      <span onClick={onPageForward} style={pagerLinkStyle}>
-        {'>'}
-      </span>
-    )}
-  </div>
-);
-
-const SymbolTableRow = ({ children }) => (
-  <div
-    style={{
-      display: 'flex',
-      flex: 1,
-      justifyContent: 'space-between',
-      flexDirection: 'row',
-    }}
-  >
-    {children}
-  </div>
-);
-
 const SymbolTable = ({
-  pageSize,
   label,
   data,
-  style,
-  page,
-  onPageBack,
-  onPageForward,
-}) => (
-  <div style={{ paddingLeft: 20, paddingRight: 20, ...style }}>
-    <div
-      style={{
-        width: '80vw',
-        maxWidth: 300,
-        display: 'flex',
-        flexDirection: 'column',
-        alignSelf: 'center',
-        color: fontColor,
-      }}
-    >
-      <h2 style={{ textAlign: 'center', fontSize: 34, fontWeight: 'bold' }}>
-        {label}
-      </h2>
-
-      {data.map(({ symbol, popularity }, i) => (
-        <SymbolTableRow key={i}>
-          <SymbolTableCell style={{ flex: 0.5 }}>
-            {page * pageSize + i + 1}
-          </SymbolTableCell>
-          <SymbolTableCell>
-            <Link to={`/symbol/${symbol}`}>
-              {<span style={textStyle}>{symbol}</span>}
-            </Link>
-          </SymbolTableCell>
-          <SymbolTableCell>{numeral(popularity).format('0,0')}</SymbolTableCell>
-        </SymbolTableRow>
-      ))}
-
-      {R.isEmpty(data) && (
-        <SymbolTableRow>
-          <SymbolTableCell>Loading...</SymbolTableCell>
-        </SymbolTableRow>
-      )}
-      {R.range(data.length, pageSize - (R.isEmpty(data) ? 1 : 0)).map(i => (
-        <SymbolTableRow key={i}>
-          <SymbolTableCell>
-            <br />
-          </SymbolTableCell>
-        </SymbolTableRow>
-      ))}
-
-      {(page > 0 || data.length > 0) && (
-        <center>
-          <SymbolTablePager
-            curPage={page}
-            onPageBack={onPageBack}
-            onPageForward={onPageForward}
-          />
-        </center>
-      )}
-    </div>
-  </div>
-);
-
-class Leaderboard extends Component {
-  constructor() {
-    super();
-    this.state = { bottomSymbolsPage: 0, topSymbolsPage: 0 };
-  }
-
-  getBottomSymbolsData = () =>
-    R.slice(
-      this.state.bottomSymbolsPage * this.props.pageSize,
-      this.state.bottomSymbolsPage * this.props.pageSize + this.props.pageSize,
-      this.props.bottomSymbols
-    );
-
-  getTopSymbolsData = () =>
-    R.slice(
-      this.state.topSymbolsPage * this.props.pageSize,
-      this.state.topSymbolsPage * this.props.pageSize + this.props.pageSize,
-      this.props.topSymbols
-    );
-
-  pageTopSymbols = amount => {
-    const newTopSymbolsPage = this.state.topSymbolsPage + amount;
-    this.setState({ topSymbolsPage: newTopSymbolsPage });
-    this.props.requestTopSymbols(
-      this.props.pageSize,
-      newTopSymbolsPage * this.props.pageSize
-    );
-    this.props.requestTopSymbols(
-      this.props.pageSize,
-      newTopSymbolsPage * this.props.pageSize + this.props.pageSize
-    );
+  loadMoreData,
+  totalRowCount = 6000,
+  onRowClick,
+}) => {
+  const rowGetter = ({ index }) => {
+    const { popularity, symbol } = data[index];
+    return {
+      symbol,
+      popularity: numeral(popularity).format('0,0'),
+      i: index + 1,
+    };
   };
 
-  pageBottomSymbols = amount => {
-    const newBottomSymbolsPage = this.state.bottomSymbolsPage + amount;
-    this.setState({ bottomSymbolsPage: newBottomSymbolsPage });
-    this.props.requestBottomSymbols(
-      this.props.pageSize,
-      newBottomSymbolsPage * this.props.pageSize
-    );
-    this.props.requestBottomSymbols(
-      this.props.pageSize,
-      newBottomSymbolsPage * this.props.pageSize + this.props.pageSize
-    );
-  };
+  const renderSymbol = ({ cellData }) => (
+    <Link to={`/symbol/${cellData}`}>
+      <span style={textStyle}>{cellData}</span>
+    </Link>
+  );
 
-  componentWillMount() {
-    const { pageSize, requestBottomSymbols, requestTopSymbols } = this.props;
-
-    if (R.isEmpty(this.getBottomSymbolsData())) {
-      requestBottomSymbols(pageSize, this.state.bottomSymbolsPage * pageSize);
-    }
-
-    if (R.isEmpty(this.getTopSymbolsData())) {
-      requestTopSymbols(pageSize, this.state.topSymbolsPage * pageSize);
-    }
-  }
-
-  render = () => {
-    if (!this.props.bottomSymbols || !this.props.topSymbols) {
-      return <Loading />;
-    }
-
-    const symbolTableStyle = {
+  const styles = {
+    root: {
       display: 'flex',
       flex: 1,
       flexDirection: 'column',
-    };
+      alignSelf: 'center',
+      minWidth: 250,
+      maxWidth: 300,
+      color: fontColor,
+    },
+    header: {
+      textAlign: 'center',
+      fontSize: 34,
+      fontWeight: 'bold',
+    },
+  };
+
+  return (
+    <div style={styles.root}>
+      <h2 style={styles.header}>{label}</h2>
+
+      <div style={{ height: '80vh', flexDirection: 'row' }}>
+        <InfiniteLoader
+          isRowLoaded={({ index }) => !!data[index]}
+          loadMoreRows={loadMoreData}
+          rowCount={totalRowCount}
+          minimumBatchSize={25}
+          threshold={25}
+        >
+          {({ onRowsRendered, registerChild }) => (
+            <AutoSizer>
+              {({ height, width }) => (
+                <Table
+                  disableHeader
+                  ref={registerChild}
+                  headerHeight={30}
+                  height={height}
+                  width={width}
+                  rowCount={data.length}
+                  rowGetter={rowGetter}
+                  rowHeight={40}
+                  onRowsRendered={onRowsRendered}
+                  onRowClick={({ rowData }) => onRowClick(rowData)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <Column
+                    label="#"
+                    dataKey="i"
+                    width={75}
+                    flexGrow={0.5}
+                    style={textStyle}
+                  />
+                  <Column
+                    label="Symbol"
+                    dataKey="symbol"
+                    cellRenderer={renderSymbol}
+                    width={125}
+                    flexGrow={1}
+                    style={textStyle}
+                  />
+                  <Column
+                    label="Popularity"
+                    dataKey="popularity"
+                    width={125}
+                    flexGrow={1}
+                    style={textStyle}
+                  />
+                </Table>
+              )}
+            </AutoSizer>
+          )}
+        </InfiniteLoader>
+      </div>
+    </div>
+  );
+};
+
+class Leaderboard extends Component {
+  state = {};
+
+  componentWillMount() {
+    const {
+      initialPageSize,
+      requestBottomSymbols,
+      requestTopSymbols,
+    } = this.props;
+
+    if (R.isEmpty(this.props.bottomSymbols)) {
+      requestBottomSymbols(initialPageSize, 0);
+    }
+
+    if (R.isEmpty(this.props.topSymbols)) {
+      requestTopSymbols(initialPageSize, 0);
+    }
+  }
+
+  fetchMoreTopSymbols = ({ startIndex, stopIndex }) =>
+    new Promise((f, r) =>
+      this.props.requestTopSymbols(stopIndex - startIndex, startIndex, f)
+    );
+
+  fetchMoreBottomSymbols = ({ startIndex, stopIndex }) =>
+    new Promise((f, r) =>
+      this.props.requestBottomSymbols(stopIndex - startIndex, startIndex, f)
+    );
+
+  updateSymbolChart = ({ symbol }) => {
+    console.log(this);
+    this.setState({ symbol });
+    this.props.requestPopularityHistory(symbol);
+    this.props.requestQuoteHistory(symbol);
+  };
+
+  renderSymbolChart = () => {
+    const symbol = this.state.symbol;
+    const popularityHistoryForSymbol = this.props.popularityHistory[symbol];
+    const quoteHistoryForSymbol = this.props.quoteHistory[symbol];
+
+    if (!symbol) {
+      return (
+        <div style={{ ...textStyle, color: fontColor, textAlign: 'center' }}>
+          Click a row from the tables to view a chart.
+        </div>
+      );
+    }
+
+    if (!popularityHistoryForSymbol || !quoteHistoryForSymbol) {
+      return <Loading />;
+    }
+
+    return (
+      <PopularityChart
+        symbol={symbol}
+        popularityHistory={popularityHistoryForSymbol}
+        quoteHistory={quoteHistoryForSymbol}
+      />
+    );
+  };
+
+  symbolChart = null;
+
+  render = () => {
+    const { topSymbols, bottomSymbols } = this.props;
+
+    if (!this.props.bottomSymbols || !this.props.topSymbols) {
+      return <Loading />;
+    }
 
     return (
       <div
@@ -200,43 +196,64 @@ class Leaderboard extends Component {
           display: 'flex',
           flex: 1,
           flexWrap: 'wrap',
+          flexDirection: 'row',
           paddingBottom: 50,
           backgroundColor,
         }}
       >
-        <SymbolTable
-          pageSize={this.props.pageSize}
-          label="Most Popular Assets"
-          data={this.getTopSymbolsData()}
-          style={symbolTableStyle}
-          page={this.state.topSymbolsPage}
-          onPageForward={() => this.pageTopSymbols(1)}
-          onPageBack={() => this.pageTopSymbols(-1)}
-        />
-        <SymbolTable
-          pageSize={this.props.pageSize}
-          label="Least Popular Assets"
-          data={this.getBottomSymbolsData()}
-          style={symbolTableStyle}
-          page={this.state.bottomSymbolsPage}
-          onPageForward={() => this.pageBottomSymbols(1)}
-          onPageBack={() => this.pageBottomSymbols(-1)}
-        />
+        <div
+          style={{
+            display: 'flex',
+            flex: 1.4,
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+          }}
+        >
+          <SymbolTable
+            label="Most Popular"
+            data={topSymbols}
+            loadMoreData={this.fetchMoreTopSymbols}
+            onRowClick={this.updateSymbolChart}
+          />
+          <SymbolTable
+            label="Least Popular"
+            data={bottomSymbols}
+            loadMoreData={this.fetchMoreBottomSymbols}
+            onRowClick={this.updateSymbolChart}
+          />
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            flex: 1,
+            justifyContent: 'center',
+            minWidth: '50vw',
+            paddingTop: 50,
+            paddingLeft: 40,
+            paddingRight: 40,
+          }}
+        >
+          <div style={{ width: '100%' }}>{this.renderSymbolChart()}</div>
+        </div>
       </div>
     );
   };
 }
 
 Leaderboard.defaultProps = {
-  pageSize: 20,
+  initialPageSize: 50,
 };
 
-const mapStateToProps = ({ api: { bottomSymbols, topSymbols } }) => ({
-  bottomSymbols,
-  topSymbols,
-});
+const mapStateToProps = ({ api }) =>
+  R.pick(
+    ['bottomSymbols', 'topSymbols', 'popularityHistory', 'quoteHistory'],
+    api
+  );
 
 export default connect(mapStateToProps, {
   requestBottomSymbols,
   requestTopSymbols,
+  requestPopularityHistory,
+  requestQuoteHistory,
 })(Leaderboard);

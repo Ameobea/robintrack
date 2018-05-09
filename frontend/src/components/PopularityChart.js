@@ -9,6 +9,7 @@ import echarts from 'echarts/lib/echarts';
 import 'echarts/lib/chart/line';
 import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/legend';
+import 'echarts/lib/component/dataZoom';
 import * as R from 'ramda';
 
 import { emphasis, emphasis2 } from 'src/style';
@@ -104,6 +105,14 @@ const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => {
       },
     ],
     tooltip: { trigger: 'axis' },
+    dataZoom: [
+      {
+        type: 'slider',
+        show: true,
+        xAxisIndex: [0, 1],
+        showDetail: true,
+      },
+    ],
     series: [
       {
         ...seriesDefaults,

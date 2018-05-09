@@ -23,16 +23,18 @@ export const CHANGES = 'changes';
 
 export const requestQuote = symbol => ({ type: FETCH_QUOTE_REQUESTED, symbol });
 
-export const requestTopSymbols = (limit, startIndex) => ({
+export const requestTopSymbols = (limit, startIndex, cb) => ({
   type: FETCH_TOP_SYMBOLS_REQUESTED,
   limit,
   startIndex,
+  cb,
 });
 
-export const requestBottomSymbols = (limit, startIndex) => ({
+export const requestBottomSymbols = (limit, startIndex, cb) => ({
   type: FETCH_BOTTOM_SYMBOLS_REQUESTED,
   limit,
   startIndex,
+  cb,
 });
 
 export const requestPopularityHistory = symbol => ({
