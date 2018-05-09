@@ -16,10 +16,6 @@ import { fontColor, backgroundColor } from 'src/style';
 import Loading from 'src/components/Loading';
 import PopularityChart from 'src/components/PopularityChart';
 
-const textStyle = {
-  fontSize: 24,
-};
-
 const SymbolTable = ({
   label,
   data,
@@ -38,7 +34,7 @@ const SymbolTable = ({
 
   const renderSymbol = ({ cellData }) => (
     <Link to={`/symbol/${cellData}`}>
-      <span style={textStyle}>{cellData}</span>
+      <span style={styles.text}>{cellData}</span>
     </Link>
   );
 
@@ -57,7 +53,37 @@ const SymbolTable = ({
       fontSize: 34,
       fontWeight: 'bold',
     },
+    text: { fontSize: 24 },
+    row: { backgroundColor: '#111' },
   };
+
+  const renderRow = ({
+    key,
+    style,
+    index,
+    columns,
+    onRowClick,
+    className,
+    rowData,
+  }) => (
+    <div key={key} style={style} className={className}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          flex: 1,
+          backgroundColor: '#111',
+          marginTop: 15,
+          marginBottom: 15,
+          cursor: 'pointer',
+          boxShadow: '2px 2px 4px 1px rgba(0,0,0,0.75)',
+        }}
+        onClick={() => onRowClick({ rowData })}
+      >
+        {columns}
+      </div>
+    </div>
+  );
 
   return (
     <div style={styles.root}>
@@ -82,17 +108,17 @@ const SymbolTable = ({
                   width={width}
                   rowCount={data.length}
                   rowGetter={rowGetter}
+                  rowRenderer={renderRow}
                   rowHeight={40}
                   onRowsRendered={onRowsRendered}
                   onRowClick={({ rowData }) => onRowClick(rowData)}
-                  style={{ cursor: 'pointer' }}
                 >
                   <Column
                     label="#"
                     dataKey="i"
                     width={75}
                     flexGrow={0.5}
-                    style={textStyle}
+                    style={styles.text}
                   />
                   <Column
                     label="Symbol"
@@ -100,14 +126,14 @@ const SymbolTable = ({
                     cellRenderer={renderSymbol}
                     width={125}
                     flexGrow={1}
-                    style={textStyle}
+                    style={styles.text}
                   />
                   <Column
                     label="Popularity"
                     dataKey="popularity"
                     width={125}
                     flexGrow={1}
-                    style={textStyle}
+                    style={styles.text}
                   />
                 </Table>
               )}
@@ -149,7 +175,6 @@ class Leaderboard extends Component {
     );
 
   updateSymbolChart = ({ symbol }) => {
-    console.log(this);
     this.setState({ symbol });
     this.props.requestPopularityHistory(symbol);
     this.props.requestQuoteHistory(symbol);
@@ -162,7 +187,7 @@ class Leaderboard extends Component {
 
     if (!symbol) {
       return (
-        <div style={{ ...textStyle, color: fontColor, textAlign: 'center' }}>
+        <div style={{ fontSize: 24, color: fontColor, textAlign: 'center' }}>
           Click a row from the tables to view a chart.
         </div>
       );

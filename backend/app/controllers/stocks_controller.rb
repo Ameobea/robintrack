@@ -84,6 +84,7 @@ class StocksController < ApplicationController
       {
         bid: quote["bid_price"].to_f,
         ask: quote["ask_price"].to_f,
+        last_trade_price: quote["last_trade_price"].to_f,
         timestamp: quote["updated_at"],
       }
     end

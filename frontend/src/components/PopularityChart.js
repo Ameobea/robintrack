@@ -26,10 +26,12 @@ const analyzeTimeSeries = series => {
 };
 
 const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => {
-  const quoteSeries = quoteHistory.map(({ timestamp, bid, ask }) => [
-    new Date(timestamp),
-    (bid + ask) / 2,
-  ]);
+  const quoteSeries = quoteHistory.map(
+    ({ timestamp, last_trade_price: lastTradePrice }) => [
+      new Date(timestamp),
+      lastTradePrice,
+    ]
+  );
   const popularitySeries = popularityHistory.map(
     ({ timestamp, popularity }) => [new Date(timestamp), popularity]
   );
@@ -49,13 +51,27 @@ const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => {
     popularityOffset,
   ] = analyzeTimeSeries(popularitySeries);
 
+  const splitLineOptions = {
+    lineStyle: { color: '#323232' },
+  };
+
   const xAxisOptions = {
     type: 'time',
     splitNumber: 20,
-    axisLabel: { color: 'white' },
+    axisLabel: {
+      color: 'white',
+      showMinLabel: false,
+      showMaxLabel: false,
+      formatter: (value, index) => {
+        // Formatted to be month/day; display year only in the first label
+        const date = new Date(value);
+        return `${date.getMonth() + 1}/${date.getDate()}`;
+      },
+    },
     axisPointer: { snap: false },
     min: R.minBy(R.head, firstPopularity, firstQuote)[0],
     max: R.maxBy(R.head, lastPopularity, lastQuote)[0],
+    splitLine: splitLineOptions,
   };
 
   const seriesDefaults = {
@@ -72,12 +88,14 @@ const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => {
       color: 'white',
     },
     splitNumber: 10,
+    splitLine: splitLineOptions,
   };
 
   return {
-    backgroundColor: '#2c343c',
+    backgroundColor: '#1d2126',
     title: { text: `Popularity History for ${symbol}` },
     legend: { show: true, textStyle: { color: '#fff' } },
+    grid: { bottom: 75 },
     xAxis: [
       xAxisOptions,
       {
@@ -95,13 +113,13 @@ const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => {
           ...yAxisDefaults.axisLabel,
           formatter: value => `$${value.toFixed(2)}`,
         },
-        splitLine: { show: true },
+        splitLine: { ...yAxisDefaults.splitLine, show: true },
       },
       {
         ...yAxisDefaults,
         min: minPopularity - popularityOffset,
         max: maxPopularity + popularityOffset,
-        splitLine: { show: false },
+        splitLine: { ...yAxisDefaults.axisLabel, show: false },
       },
     ],
     tooltip: { trigger: 'axis' },
@@ -111,6 +129,8 @@ const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => {
         show: true,
         xAxisIndex: [0, 1],
         showDetail: true,
+        fillerColor: '#2d2f33',
+        bottom: 5,
       },
     ],
     series: [
