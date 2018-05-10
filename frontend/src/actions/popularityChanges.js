@@ -6,6 +6,13 @@ export const SET_POPULARITY_CHANGES_HOURS_AGO =
   'SET_POPULARITY_CHANGES_HOURS_AGO';
 export const SET_POPULARITY_CHANGES_MIN_POPULARITY =
   'SET_POPULARITY_CHANGES_MIN_POPULARITY';
+export const SET_POPULARITY_SELECTED_SYMBOL = 'SET_POPULARITY_SELECTED_SYMBOL';
+
+export const CHANGE_TYPE = {
+  INCREASES: 'increases',
+  DECREASES: 'decreases',
+  CHANGES: 'changes',
+};
 
 export const setPopularityChangesChangeType = changeType => ({
   type: SET_POPULARITY_CHANGES_CHANGE_TYPE,
@@ -24,4 +31,9 @@ export const setPopularityChangesHoursAgo = hours => ({
 export const setPopularityChangesMinPopularity = minPopularity => ({
   type: SET_POPULARITY_CHANGES_MIN_POPULARITY,
   minPopularity,
+});
+
+export const setSelectedSymbol = symbol => ({
+  type: SET_POPULARITY_SELECTED_SYMBOL,
+  symbol,
 });

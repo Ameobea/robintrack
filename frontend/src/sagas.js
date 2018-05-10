@@ -1,6 +1,7 @@
 import { call, select, put, takeEvery, takeLatest } from 'redux-saga/effects';
 
 import * as apiActions from 'src/actions/api';
+import { CHANGE_TYPE } from 'src/actions/popularityChanges';
 import * as Api from 'src/api';
 import {
   getQuote,
@@ -87,9 +88,9 @@ function* fetchQuoteHistory({ symbol }) {
 
 const mapSuffixToApiMethod = suffix =>
   ({
-    [apiActions.INCREASES]: Api.fetchLargestPopularityIncreases,
-    [apiActions.CHANGES]: Api.fetchLargestPopularityChanges,
-    [apiActions.DECREASES]: Api.fetchLargestPopularityDecreases,
+    [CHANGE_TYPE.INCREASES]: Api.fetchLargestPopularityIncreases,
+    [CHANGE_TYPE.CHANGES]: Api.fetchLargestPopularityChanges,
+    [CHANGE_TYPE.DECREASES]: Api.fetchLargestPopularityDecreases,
   }[suffix]);
 
 function* fetchLargestPopularityChanges({ type, ...props }) {

@@ -1,3 +1,5 @@
+import { CHANGE_TYPE } from 'src/actions/popularityChanges';
+
 export const FETCH_QUOTE_REQUESTED = 'FETCH_QUOTE';
 export const QUOTE_FETCHED = 'QUOTE_FETCHED';
 
@@ -18,9 +20,6 @@ export const FETCH_LARGEST_POPULARITY_CHANGES_REQUESTED =
   'FETCH_LARGEST_POPULARITY_CHANGES_REQUESTED';
 export const LARGEST_POPULARITY_CHANGES_FETCHED =
   'LARGEST_POPULARITY_CHANGES_FETCHED';
-export const INCREASES = 'increases';
-export const DECREASES = 'decreases';
-export const CHANGES = 'changes';
 
 export const requestQuote = symbol => ({ type: FETCH_QUOTE_REQUESTED, symbol });
 
@@ -55,13 +54,13 @@ const largestPopularityChangesBase = suffix => config => ({
 });
 
 export const requestLargestPopularityIncreases = largestPopularityChangesBase(
-  INCREASES
+  CHANGE_TYPE.INCREASES
 );
 
 export const requestLargestPopularityChanges = largestPopularityChangesBase(
-  CHANGES
+  CHANGE_TYPE.CHANGES
 );
 
 export const requestLargestPopularityDecreases = largestPopularityChangesBase(
-  DECREASES
+  CHANGE_TYPE.DECREASES
 );

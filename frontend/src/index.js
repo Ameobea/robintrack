@@ -5,6 +5,7 @@ import { Route, Switch } from 'react-router';
 import { ConnectedRouter } from 'react-router-redux';
 import 'react-virtualized/styles.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
+import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 
 import { history, store } from 'src/reducers';
 import Home from 'src/screens/Home';
@@ -21,7 +22,7 @@ const ConnectedSwitch = connect(({ router: { location } }) => ({
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-      <div style={{ height: '100vh', backgroundColor }}>
+      <div style={{ height: '100vh', backgroundColor }} className="pt-dark">
         <Header />
         <ConnectedSwitch>
           <Route exact path="/" component={Home} />

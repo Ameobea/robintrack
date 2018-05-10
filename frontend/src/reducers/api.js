@@ -8,6 +8,7 @@ import {
   QUOTE_HISTORY_FETCHED,
   LARGEST_POPULARITY_CHANGES_FETCHED,
 } from 'src/actions/api';
+import { getPopularityChangesPath } from 'src/selectors/api';
 
 const getInitialState = () => ({
   quotes: {},
@@ -62,16 +63,9 @@ export default (state = getInitialState(), action = {}) => {
     }
 
     case LARGEST_POPULARITY_CHANGES_FETCHED: {
-      const { payload, suffix, hoursAgo, relative, minPopularity } = action;
+      const { payload, ...config } = action;
       return R.set(
-        R.lensPath([
-          'api',
-          'largestPopularityChanges',
-          suffix,
-          hoursAgo,
-          relative,
-          minPopularity,
-        ]),
+        R.lensPath(getPopularityChangesPath(config)),
         payload,
         state
       );

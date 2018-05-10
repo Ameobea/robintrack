@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import * as R from 'ramda';
-import { Link } from 'react-router-dom';
 import { Column } from 'react-virtualized';
 import numeral from 'numeral';
 
@@ -14,17 +13,34 @@ import {
 import { fontColor, backgroundColor } from 'src/style';
 import Loading from 'src/components/Loading';
 import PopularityChart from 'src/components/PopularityChart';
-import SymbolTable from 'src/components/SymbolTable';
+import SymbolTable, { SymbolColumn } from 'src/components/SymbolTable';
 
 const styles = {
+  root: {
+    display: 'flex',
+    flex: 1,
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+    paddingBottom: 50,
+    backgroundColor,
+  },
+  tablesWrapper: {
+    display: 'flex',
+    flex: 1.4,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
   text: { fontSize: 24 },
+  chartWrapper: {
+    display: 'flex',
+    flex: 1,
+    justifyContent: 'center',
+    minWidth: '50vw',
+    paddingTop: 50,
+    paddingLeft: 40,
+    paddingRight: 40,
+  },
 };
-
-const renderSymbol = ({ cellData }) => (
-  <Link to={`/symbol/${cellData}`}>
-    <span style={styles.text}>{cellData}</span>
-  </Link>
-);
 
 class Leaderboard extends Component {
   state = {};
@@ -96,15 +112,7 @@ class Leaderboard extends Component {
       flexGrow={0.5}
       style={styles.text}
     />,
-    <Column
-      key={2}
-      label="Symbol"
-      dataKey="symbol"
-      cellRenderer={renderSymbol}
-      width={125}
-      flexGrow={1}
-      style={styles.text}
-    />,
+    SymbolColumn,
     <Column
       key={3}
       label="Popularity"
@@ -134,24 +142,8 @@ class Leaderboard extends Component {
     }
 
     return (
-      <div
-        style={{
-          display: 'flex',
-          flex: 1,
-          flexWrap: 'wrap',
-          flexDirection: 'row',
-          paddingBottom: 50,
-          backgroundColor,
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flex: 1.4,
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-          }}
-        >
+      <div style={styles.root}>
+        <div style={styles.tablesWrapper}>
           <SymbolTable
             label="Most Popular"
             data={topSymbols}
@@ -170,17 +162,7 @@ class Leaderboard extends Component {
           />
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            flex: 1,
-            justifyContent: 'center',
-            minWidth: '50vw',
-            paddingTop: 50,
-            paddingLeft: 40,
-            paddingRight: 40,
-          }}
-        >
+        <div style={styles.chartWrapper}>
           <div style={{ width: '100%' }}>{this.renderSymbolChart()}</div>
         </div>
       </div>

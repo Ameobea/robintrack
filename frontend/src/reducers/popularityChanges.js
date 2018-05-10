@@ -3,16 +3,12 @@ import {
   TOGGLE_POPULARITY_CHANGES_RELATIVE,
   SET_POPULARITY_CHANGES_HOURS_AGO,
   SET_POPULARITY_CHANGES_MIN_POPULARITY,
+  CHANGE_TYPE,
+  SET_POPULARITY_SELECTED_SYMBOL,
 } from 'src/actions/popularityChanges';
 
-const CHANGE_TYPE = {
-  INCREASE: 'INCREASE',
-  DECREASE: 'DECREASE',
-  CHANGE: 'CHANGE',
-};
-
 const getInitialState = () => ({
-  changeType: CHANGE_TYPE.CHANGE,
+  changeType: CHANGE_TYPE.CHANGES,
   relative: true,
   hoursAgo: 24,
   minPopularity: 50,
@@ -34,6 +30,10 @@ export default (state = getInitialState(), action = {}) => {
 
     case SET_POPULARITY_CHANGES_MIN_POPULARITY: {
       return { ...state, minPopularity: action.minPopularity };
+    }
+
+    case SET_POPULARITY_SELECTED_SYMBOL: {
+      return { ...state, selectedSymbol: action.symbol };
     }
 
     default: {
