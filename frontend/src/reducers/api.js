@@ -62,12 +62,13 @@ export default (state = getInitialState(), action = {}) => {
     }
 
     case LARGEST_POPULARITY_CHANGES_FETCHED: {
-      const { payload, suffix, relative, minPopularity } = action;
+      const { payload, suffix, hoursAgo, relative, minPopularity } = action;
       return R.set(
         R.lensPath([
           'api',
           'largestPopularityChanges',
           suffix,
+          hoursAgo,
           relative,
           minPopularity,
         ]),

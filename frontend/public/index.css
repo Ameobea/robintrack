@@ -1,3 +1,6 @@
+@import '~@blueprintjs/core/lib/css/blueprint.css';
+@import '~@blueprintjs/icons/lib/css/blueprint-icons.css';
+
 body {
   background-color: #1d1816;
 }
@@ -15,4 +18,35 @@ a {
 
 a:visited {
   color: #891751;
+}
+
+.feedbackButton {
+  background-color: #31708f;
+  cursor: pointer;
+  display: block;
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 0;
+  padding: 4px 10px;
+  position: fixed;
+  text-align: center;
+  text-decoration: none;
+  z-index: 100000;
+  transform: rotate(270deg);
+  transform-origin: 0 0 0;
+  color: #ffffff;
+  top: 75%;
+  border-bottom: solid 1px #333;
+  border-left: solid 1px #333;
+  border-right: solid 1px #333;
+  -webkit-border-bottom-right-radius: 3px;
+  -webkit-border-bottom-left-radius: 3px;
+  -moz-border-radius-bottomright: 3px;
+  -moz-border-radius-bottomleft: 3px;
+  border-bottom-right-radius: 3px;
+  border-bottom-left-radius: 3px;
+  -webkit-transition: all 0.2s ease;
+  -moz-transition: all 0.2s ease;
+  -o-transition: all 0.2s ease;
+  transition: all 0.2s ease;
 }

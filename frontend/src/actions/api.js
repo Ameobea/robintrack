@@ -15,8 +15,9 @@ export const FETCH_QUOTE_HISTORY_REQUESTED = 'FETCH_QUOTE_HISTORY_REQUESTED';
 export const QUOTE_HISTORY_FETCHED = 'QUOTE_HISTORY_FETCHED';
 
 export const FETCH_LARGEST_POPULARITY_CHANGES_REQUESTED =
-  'FETCH_POPULARITY_CHANGES_REQUESTED';
-export const LARGEST_POPULARITY_CHANGES_FETCHED = 'POPULARITY_CHANGES_FETCHED';
+  'FETCH_LARGEST_POPULARITY_CHANGES_REQUESTED';
+export const LARGEST_POPULARITY_CHANGES_FETCHED =
+  'LARGEST_POPULARITY_CHANGES_FETCHED';
 export const INCREASES = 'increases';
 export const DECREASES = 'decreases';
 export const CHANGES = 'changes';
@@ -47,14 +48,10 @@ export const requestQuoteHistory = symbol => ({
   symbol,
 });
 
-const largestPopularityChangesBase = suffix => (
-  relative = false,
-  minPopularity = 0
-) => ({
+const largestPopularityChangesBase = suffix => config => ({
   type: FETCH_LARGEST_POPULARITY_CHANGES_REQUESTED,
   suffix,
-  relative,
-  minPopularity,
+  ...config,
 });
 
 export const requestLargestPopularityIncreases = largestPopularityChangesBase(

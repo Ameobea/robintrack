@@ -92,25 +92,19 @@ const mapSuffixToApiMethod = suffix =>
     [apiActions.DECREASES]: Api.fetchLargestPopularityDecreases,
   }[suffix]);
 
-function* fetchLargestPopularityChanges({ suffix, relative, minPopularity }) {
-  const popularityChangesFetcher = getPopularityChanges(
-    suffix,
-    relative,
-    minPopularity
-  );
+function* fetchLargestPopularityChanges({ type, ...props }) {
+  const popularityChangesFetcher = getPopularityChanges(props);
   const existingPopularityChanges = yield select(popularityChangesFetcher);
   if (existingPopularityChanges) {
     return;
   }
 
-  const apiMethod = mapSuffixToApiMethod(suffix);
-  const popularityChanges = yield call(apiMethod);
+  const apiMethod = mapSuffixToApiMethod(props.suffix);
+  const popularityChanges = yield call(apiMethod, props);
   yield put({
     type: apiActions.LARGEST_POPULARITY_CHANGES_FETCHED,
-    suffix,
-    relative,
-    minPopularity,
     payload: popularityChanges,
+    ...props,
   });
 }
 

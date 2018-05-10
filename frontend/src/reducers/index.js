@@ -5,8 +5,12 @@ import createSagaMiddleware from 'redux-saga';
 
 import rootSaga from 'src/sagas';
 import apiReducer from 'src/reducers/api';
+import popularityChangesReducer from 'src/reducers/popularityChanges';
 
-const reducers = { api: apiReducer };
+const reducers = {
+  api: apiReducer,
+  popularityChanges: popularityChangesReducer,
+};
 
 export const history = createHistory();
 

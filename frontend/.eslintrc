@@ -44,7 +44,7 @@
       "experimentalObjectRestSpread": true,
       "jsx": true
     },
-    "ecmaVersion": 7
+    "ecmaVersion": 2017
   },
   "plugins": ["react"],
   "globals": {

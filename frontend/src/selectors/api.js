@@ -15,5 +15,17 @@ export const getBottomSymbols = (limit, startIndex) => ({
 export const getTopSymbols = (limit, startIndex) => ({ api: { topSymbols } }) =>
   R.slice(startIndex, startIndex + limit, topSymbols);
 
-export const getPopularityChanges = (suffix, relative, minPopularity) =>
-  R.path(['api', 'largestPopularityChanges', suffix, relative, minPopularity]);
+export const getPopularityChanges = ({
+  suffix,
+  relative,
+  hoursAgo,
+  minPopularity,
+}) =>
+  R.path([
+    'api',
+    'largestPopularityChanges',
+    suffix,
+    hoursAgo,
+    relative,
+    minPopularity,
+  ]);

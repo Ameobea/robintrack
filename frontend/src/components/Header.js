@@ -30,6 +30,7 @@ const HeaderItem = connect(mapStateToProps)(({ content, url, pathname }) => (
 const items = [
   { content: 'Home', url: '/' },
   { content: 'Leaderboard', url: '/leaderboard' },
+  { content: 'Popularity Changes', url: '/popularity_changes' },
 ];
 
 const Header = () => (
