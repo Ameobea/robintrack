@@ -83,6 +83,7 @@ class Popularity
     take_absoute_value = options[:take_absoute_value]
     percentage         = options[:percentage]
     min_popularity     = options[:min_popularity]
+    start_index        = options[:start_index]
 
     if percentage
       difference_query = { "$multiply" => [100, { "$divide" => [{ "$subtract" => ["$end_popularity", "$start_popularity"] }, "$start_popularity"] }] }
@@ -115,6 +116,7 @@ class Popularity
       { "$addFields" => { popularity_difference: difference_query } },
       take_absoute_value && { "$addFields" => { abs_popularity_difference: { "$abs" => "$popularity_difference" } } },
       sorter,
+      { "$skip" => start_index },
       { "$limit" => limit },
     ].compact)
   end

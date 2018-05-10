@@ -24,7 +24,16 @@ class PopularitiesController < ApplicationController
       limit: limit_param,
       percentage: percentage_param,
       min_popularity: min_popularity_param,
+      start_index: start_index_param,
     }
+  end
+
+  def start_index_param
+    start_index = params[:start_index].to_i
+    if start_index < 0
+      raise BadRequest, "please provide a positive integer for start_index"
+    end
+    start_index
   end
 
   def hours_ago_param
