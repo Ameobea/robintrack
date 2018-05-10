@@ -47,20 +47,7 @@ export const requestQuoteHistory = symbol => ({
   symbol,
 });
 
-const largestPopularityChangesBase = suffix => config => ({
+export const requestLargestPopularityChanges = config => ({
   type: FETCH_LARGEST_POPULARITY_CHANGES_REQUESTED,
-  suffix,
   ...config,
 });
-
-export const requestLargestPopularityIncreases = largestPopularityChangesBase(
-  CHANGE_TYPE.INCREASES
-);
-
-export const requestLargestPopularityChanges = largestPopularityChangesBase(
-  CHANGE_TYPE.CHANGES
-);
-
-export const requestLargestPopularityDecreases = largestPopularityChangesBase(
-  CHANGE_TYPE.DECREASES
-);

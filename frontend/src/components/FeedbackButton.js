@@ -4,8 +4,22 @@
  */
 
 import React from 'react';
-import { Alert, Modal, Form, Icon, Input } from 'antd';
-const FormItem = Form.Item;
+import {
+  Button,
+  Callout,
+  Dialog,
+  FormGroup,
+  InputGroup,
+  Intent,
+  TextArea,
+} from '@blueprintjs/core';
+
+const buttonStyle = {
+  display: 'flex',
+  flex: 1,
+  marginLeft: 5,
+  marginRight: 5,
+};
 
 class FeedbackButton extends React.Component {
   constructor(props) {
@@ -20,6 +34,8 @@ class FeedbackButton extends React.Component {
       confirmLoading: false,
       feedbackSuccess: false,
       feedbackError: false,
+      email: '',
+      message: '',
     };
   }
 
@@ -31,80 +47,69 @@ class FeedbackButton extends React.Component {
     this.setState({ modalShown: false });
   }
 
-  handleSubmit = () => {
-    this.props.form.validateFields(async (err, values) => {
-      if (err) {
+  handleSubmit = async () => {
+    // TODO: Manually validate
+
+    this.setState({
+      confirmLoading: true,
+      feedbackSuccess: false,
+      feedbackError: false,
+    });
+
+    try {
+      const resBody = await fetch('https://ameo.link/u/feedback', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: this.state.email || 'Not Supplied',
+          message: this.state.message,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      }).then(res => res.json());
+
+      if (!resBody.success) {
+        this.setState({
+          confirmLoading: false,
+          feedbackSuccess: false,
+          feedbackError: true,
+        });
         return;
       }
 
       this.setState({
-        confirmLoading: true,
-        feedbackSuccess: false,
+        confirmLoading: false,
+        feedbackSuccess: true,
         feedbackError: false,
       });
 
-      try {
-        const resBody = await fetch('https://ameo.link/u/feedback', {
-          method: 'POST',
-          body: JSON.stringify({
-            email: values.email || 'Not Supplied',
-            message: values.message,
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-        }).then(res => res.json());
-
-        if (!resBody.success) {
-          this.setState({
-            confirmLoading: false,
-            feedbackSuccess: false,
-            feedbackError: true,
-          });
-          return;
-        }
-
+      setTimeout(() => {
+        // hide the feedback modal after showing the user that their feedback was successfully sent
         this.setState({
-          confirmLoading: false,
-          feedbackSuccess: true,
+          modalShown: false,
+          feedbackSuccess: false,
           feedbackError: false,
         });
-
-        setTimeout(() => {
-          // hide the feedback modal after showing the user that their feedback was successfully sent
-          this.setState({
-            modalShown: false,
-            feedbackSuccess: false,
-            feedbackError: false,
-          });
-        }, 1293);
-      } catch (err) {
-        console.error(err);
-        this.setState({
-          feedbackSuccess: false,
-          feedbackError: true,
-          confirmLoading: false,
-        });
-      }
-    });
+      }, 1293);
+    } catch (err) {
+      console.error(err);
+      this.setState({
+        feedbackSuccess: false,
+        feedbackError: true,
+        confirmLoading: false,
+      });
+    }
   };
 
   render() {
-    const { getFieldDecorator } = this.props.form;
-
-    const success = this.state.feedbackSuccess ? (
-      <Alert message="Feedback successfully received!" type="success" />
-    ) : (
-      <div />
+    const success = this.state.feedbackSuccess && (
+      <Callout intent={Intent.SUCCESS}>Feedback successfully received!</Callout>
     );
-    const error = this.state.feedbackError ? (
-      <Alert
-        message="There was an error submitting your feedback!  Maybe try again later :/"
-        type="error"
-      />
-    ) : (
-      <span />
+    const error = this.state.feedbackError && (
+      <Callout intent={Intent.DANGER}>
+        There was an error submitting your feedback! Maybe try again later :/
+      </Callout>
     );
 
     return (
@@ -112,11 +117,14 @@ class FeedbackButton extends React.Component {
         <div className="feedbackButton" onClick={this.handleClick}>
           Issues + Feedback
         </div>
-        <Modal
+
+        <Dialog
+          icon="mailbox"
           confirmLoading={this.state.confirmLoading}
           onCancel={this.hideModal}
-          onOk={this.handleSubmit}
-          visible={this.state.modalShown}
+          isOpen={this.state.modalShown}
+          className="pt-dark"
+          style={{ padding: 15 }}
         >
           <h1>Send Issues or Feedback</h1>
           <p>
@@ -129,35 +137,39 @@ class FeedbackButton extends React.Component {
           {success}
           {error}
 
-          <Form onSubmit={this.handleSubmit} className="login-form">
-            <FormItem>
-              {getFieldDecorator('email', {
-                rules: [{ required: false }],
-              })(
-                <Input
-                  prefix={<Icon type="mail" style={{ fontSize: 13 }} />}
-                  placeholder="Your Email (optional)"
-                />
-              )}
-            </FormItem>
-            <FormItem>
-              {getFieldDecorator('message', {
-                rules: [
-                  {
-                    required: true,
-                    message: 'You have to supply a message to send in!',
-                  },
-                ],
-              })(
-                <Input
-                  placeholder="Feedback"
-                  prefix={<Icon type="message" style={{ fontSize: 13 }} />}
-                  type="textarea"
-                />
-              )}
-            </FormItem>
-          </Form>
-        </Modal>
+          <FormGroup>
+            <InputGroup
+              leftIcon="mail"
+              placeholder="Your Email Address (optional)"
+              value={this.state.email}
+              onChange={e => this.setState({ email: e.target.value })}
+            />
+          </FormGroup>
+          <FormGroup>
+            <TextArea
+              onChange={e => this.setState({ message: e.target.value })}
+              value={this.state.message}
+              style={{ width: '100%' }}
+            />
+          </FormGroup>
+
+          <div style={{ display: 'flex' }}>
+            <Button
+              fill={false}
+              text="Cancel"
+              onClick={this.hideModal}
+              style={buttonStyle}
+              intent={Intent.NONE}
+            />
+            <Button
+              fill={false}
+              text="Submit"
+              onClick={this.handleSubmit}
+              style={buttonStyle}
+              intent={Intent.PRIMARY}
+            />
+          </div>
+        </Dialog>
       </div>
     );
   }
@@ -165,4 +177,4 @@ class FeedbackButton extends React.Component {
 
 FeedbackButton.propTypes = {};
 
-export default Form.create()(FeedbackButton);
+export default FeedbackButton;

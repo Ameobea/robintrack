@@ -25,7 +25,7 @@ export default (state = getInitialState(), action = {}) => {
     }
 
     case SET_POPULARITY_CHANGES_HOURS_AGO: {
-      return { ...state, hoursAgo: action.hoursAgo };
+      return { ...state, hoursAgo: action.hours };
     }
 
     case SET_POPULARITY_CHANGES_MIN_POPULARITY: {

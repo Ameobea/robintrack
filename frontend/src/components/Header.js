@@ -2,7 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 
-import { backgroundColor, fontColor } from 'src/style';
+import FeedbackButton from 'src/components/FeedbackButton';
+import { backgroundColor, fontColor, emphasis } from 'src/style';
 
 const mapStateToProps = ({
   router: {
@@ -10,27 +11,38 @@ const mapStateToProps = ({
   },
 }) => ({ pathname });
 
-const textStyle = {
-  fontSize: 26,
-  color: fontColor,
+const styles = {
+  headerItem: { display: 'flex', padding: 20, alignItems: 'flex-end' },
+  text: {
+    fontSize: 30,
+    color: fontColor,
+    fontWeight: 'bold',
+  },
 };
 
-const HeaderItem = connect(mapStateToProps)(({ content, url, pathname }) => (
-  <div style={{ paddingLeft: 20, paddingRight: 20 }}>
-    {pathname === url ? (
-      <span style={textStyle}>{content}</span>
-    ) : (
-      <Link to={url} style={{ fontSize: 26 }}>
-        {content}
-      </Link>
-    )}
-  </div>
-));
+const HeaderItem = connect(mapStateToProps)(
+  ({ content, url, pathname, style = {}, textStyle = {} }) => (
+    <div style={{ ...styles.headerItem, ...style }}>
+      {pathname === url || !url ? (
+        <span style={{ ...styles.text, ...textStyle }}>{content}</span>
+      ) : (
+        <Link to={url} style={{ fontSize: 26 }}>
+          <span style={{ ...styles.text, color: emphasis }}>{content}</span>
+        </Link>
+      )}
+    </div>
+  )
+);
 
 const items = [
   { content: 'Home', url: '/' },
   { content: 'Leaderboard', url: '/leaderboard' },
   { content: 'Popularity Changes', url: '/popularity_changes' },
+  {
+    content: <FeedbackButton />,
+    style: { paddingLeft: 10 },
+    textStyle: { fontSize: 20, color: emphasis, cursor: 'pointer' },
+  },
 ];
 
 const Header = () => (

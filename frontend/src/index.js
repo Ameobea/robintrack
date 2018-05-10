@@ -13,7 +13,7 @@ import Leaderboard from 'src/screens/Leaderboard';
 import SymbolDetails from 'src/screens/SymbolDetails';
 import Header from 'src/components/Header';
 import { backgroundColor } from 'src/style';
-import PopularityChanges from './screens/PopularityChanges';
+import PopularityChanges from 'src/screens/PopularityChanges';
 
 const ConnectedSwitch = connect(({ router: { location } }) => ({
   location,
@@ -24,6 +24,7 @@ ReactDOM.render(
     <ConnectedRouter history={history}>
       <div style={{ height: '100vh', backgroundColor }} className="pt-dark">
         <Header />
+
         <ConnectedSwitch>
           <Route exact path="/" component={Home} />
           <Route path="/leaderboard" component={Leaderboard} />
