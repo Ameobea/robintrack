@@ -38,7 +38,7 @@ const styles = {
     display: 'flex',
     flex: 1,
     justifyContent: 'center',
-    minWidth: '45vw',
+    minWidth: '50vw',
     paddingTop: 50,
     paddingLeft: 40,
     paddingRight: 40,
@@ -163,8 +163,11 @@ const PopularityChangesConfig = connect(
   )
 );
 
-const fetchNewData = ({ config, requestLargestPopularityChanges }) =>
-  console.log(config) || requestLargestPopularityChanges(config);
+const fetchNewData = ({ config, requestLargestPopularityChanges }, cb) =>
+  requestLargestPopularityChanges(
+    { ...config, startIndex: config.startIndex || 0 },
+    cb
+  );
 
 const defaultColumnProps = {
   width: 150,
@@ -182,7 +185,20 @@ class PopularityChanges extends React.Component {
     fetchNewData(this.props);
   }
 
-  loadMoreData = ({ startIndex, stopIndex }) => Promise.resolve(null); // TODO
+  loadMoreData = ({ startIndex, stopIndex }) =>
+    new Promise((f, r) =>
+      fetchNewData(
+        {
+          ...this.props,
+          config: {
+            ...this.props.config,
+            startIndex,
+            limit: stopIndex - startIndex,
+          },
+        },
+        f
+      )
+    );
 
   getColumns = () => {
     const relative = this.props.config.relative;
@@ -284,6 +300,7 @@ class PopularityChanges extends React.Component {
         onRowClick={this.handleRowClick}
         style={{ minWidth: 600, maxWidth: 750 }}
         disableHeader={false}
+        height="70vh"
       />
     );
   };

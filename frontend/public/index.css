@@ -1,6 +1,11 @@
+html {
+  height: 100%;
+}
+
 body {
   background-color: #16161d;
   margin: 0;
+  height: 100%;
 }
 
 #root {

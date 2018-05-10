@@ -23,11 +23,14 @@ const styles = {
     flexDirection: 'row',
     paddingBottom: 50,
     backgroundColor,
+    justifyContent: 'center',
   },
   tablesWrapper: {
     display: 'flex',
     flex: 1.4,
     flexDirection: 'row',
+    maxWidth: 700,
+    minWidth: 575,
     justifyContent: 'space-around',
   },
   text: { fontSize: 24 },
@@ -151,6 +154,7 @@ class Leaderboard extends Component {
             onRowClick={this.updateSymbolChart}
             columns={this.getColumns()}
             rowGetter={this.getRowGetter(topSymbols)}
+            height="80vh"
           />
           <SymbolTable
             label="Least Popular"
@@ -159,6 +163,7 @@ class Leaderboard extends Component {
             onRowClick={this.updateSymbolChart}
             columns={this.getColumns()}
             rowGetter={this.getRowGetter(bottomSymbols)}
+            height="80vh"
           />
         </div>
 

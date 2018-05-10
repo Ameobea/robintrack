@@ -61,11 +61,12 @@ const SymbolTable = ({
   rowGetter,
   style = {},
   disableHeader = true,
+  height = '80vh',
 }) => (
   <div style={{ ...styles.root, ...style }}>
     <h2 style={styles.header}>{label}</h2>
 
-    <div style={{ height: '80vh', flexDirection: 'row' }}>
+    <div style={{ height, flexDirection: 'row' }}>
       <InfiniteLoader
         isRowLoaded={({ index }) => !!data[index]}
         loadMoreRows={loadMoreData}
@@ -85,7 +86,7 @@ const SymbolTable = ({
                 rowCount={data.length}
                 rowGetter={rowGetter}
                 rowRenderer={renderRow}
-                rowHeight={40}
+                rowHeight={34}
                 onRowsRendered={onRowsRendered}
                 onRowClick={({ rowData }) => onRowClick(rowData)}
               >
@@ -111,7 +112,7 @@ export const SymbolColumn = (
     label="Symbol"
     dataKey="symbol"
     cellRenderer={renderSymbol}
-    width={125}
+    width={100}
     flexGrow={1}
     style={styles.text}
   />

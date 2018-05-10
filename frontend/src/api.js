@@ -21,22 +21,25 @@ export const fetchPopularityHistory = symbol =>
 export const fetchQuoteHistory = symbol =>
   fetch(`/stocks/${symbol}/quote_history`).then(res => res.json());
 
-const popularityChangesBase = suffix => ({
+export const fetchPopularityChanges = ({
   limit,
   relative,
   hoursAgo,
   minPopularity,
+  suffix,
+  startIndex,
 }) => {
-  const url = `/largest_popularity_${suffix}?hours_ago=${hoursAgo}&limit=${limit}&percentage=${relative}&min_popularity=${minPopularity}`;
+  const params = [
+    ['hours_ago', hoursAgo],
+    ['limit', limit],
+    ['percentage', relative],
+    ['min_popularity', minPopularity],
+    ['start_index', startIndex],
+  ];
+  const paramsString = params
+    .map(([key, value]) => `${key}=${value}`)
+    .join('&');
+
+  const url = `/largest_popularity_${suffix}?${paramsString}`;
   return fetch(url).then(res => res.json());
 };
-
-export const fetchLargestPopularityChanges = popularityChangesBase('changes');
-
-export const fetchLargestPopularityIncreases = popularityChangesBase(
-  'increases'
-);
-
-export const fetchLargestPopularityDecreases = popularityChangesBase(
-  'decreases'
-);

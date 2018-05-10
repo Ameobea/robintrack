@@ -22,7 +22,7 @@ const ConnectedSwitch = connect(({ router: { location } }) => ({
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-      <div style={{ height: '100vh', backgroundColor }} className="pt-dark">
+      <div style={{ height: '100%', backgroundColor }} className="pt-dark">
         <Header />
 
         <ConnectedSwitch>

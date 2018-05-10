@@ -1,7 +1,7 @@
 import { call, select, put, takeEvery, takeLatest } from 'redux-saga/effects';
+import * as R from 'ramda';
 
 import * as apiActions from 'src/actions/api';
-import { CHANGE_TYPE } from 'src/actions/popularityChanges';
 import * as Api from 'src/api';
 import {
   getQuote,
@@ -86,27 +86,26 @@ function* fetchQuoteHistory({ symbol }) {
   });
 }
 
-const mapSuffixToApiMethod = suffix =>
-  ({
-    [CHANGE_TYPE.INCREASES]: Api.fetchLargestPopularityIncreases,
-    [CHANGE_TYPE.CHANGES]: Api.fetchLargestPopularityChanges,
-    [CHANGE_TYPE.DECREASES]: Api.fetchLargestPopularityDecreases,
-  }[suffix]);
-
-function* fetchLargestPopularityChanges({ type, ...props }) {
-  const popularityChangesFetcher = getPopularityChanges(props);
-  const existingPopularityChanges = yield select(popularityChangesFetcher);
-  if (existingPopularityChanges) {
+function* fetchLargestPopularityChanges({ type, cb, ...props }) {
+  console.log(props);
+  const popularityChangesSelector = getPopularityChanges(props);
+  const existingPopularityChanges = R.slice(
+    props.startIndex,
+    props.startIndex + props.limit,
+    (yield select(popularityChangesSelector)) || []
+  );
+  if (existingPopularityChanges.length === props.limit) {
     return;
   }
 
-  const apiMethod = mapSuffixToApiMethod(props.suffix);
-  const popularityChanges = yield call(apiMethod, props);
+  const popularityChanges = yield call(Api.fetchPopularityChanges, props);
   yield put({
     type: apiActions.LARGEST_POPULARITY_CHANGES_FETCHED,
     payload: popularityChanges,
     ...props,
   });
+
+  cb && cb();
 }
 
 function* rootSaga() {

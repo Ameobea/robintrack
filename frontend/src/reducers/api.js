@@ -64,11 +64,13 @@ export default (state = getInitialState(), action = {}) => {
 
     case LARGEST_POPULARITY_CHANGES_FETCHED: {
       const { payload, ...config } = action;
-      return R.set(
-        R.lensPath(getPopularityChangesPath(config)),
-        payload,
-        state
-      );
+      const lens = R.lensPath(getPopularityChangesPath(config));
+      const data = R.clone(R.view(lens, state)) || [];
+      payload.forEach((datum, i) => {
+        data[i + action.startIndex] = datum;
+      });
+
+      return R.set(lens, data, state);
     }
 
     default: {
