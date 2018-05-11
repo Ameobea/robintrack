@@ -10,6 +10,14 @@ class Popularity
     sort_by_popularity(SORT_ASCENDING, limit, start_index)
   end
 
+  def self.total_symbols(hours_ago)
+    MongoClient[:popularity].aggregate([
+      hours_ago && { "$match" => { timestamp: { "$gte": hours_ago.hours.ago.utc } } },
+      { "$group" => { _id: "$instrument_id" } },
+      { "$count" => "total_symbols" },
+    ].compact)
+  end
+
   def self.sort_by_popularity(sort_direction, limit, start_index)
     MongoClient[:popularity].aggregate([
       { "$match" => { timestamp: { "$gte": 2.hour.ago.utc } } },

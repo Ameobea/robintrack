@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   get :most_popular, to: "stocks#most_popular", defaults: { format: :json }
   get :least_popular, to: "stocks#least_popular", defaults: { format: :json }
   get :quotes, to: "stocks#quotes", defaults: { format: :json }
+  get :total_symbols, to: "stocks#total_symbols", defaults: { format: :json }
 
   resources :stocks, only: [], id: /[A-Z0-9\.]+?/i, defaults: { format: :json } do
     member do

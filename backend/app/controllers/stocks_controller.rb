@@ -47,7 +47,23 @@ class StocksController < ApplicationController
     render json: format_quote_history(entries)
   end
 
+  def total_symbols
+    entry = Popularity.total_symbols(hours_ago_param)
+
+    render json: { total_symbols: entry.first["total_symbols"] }
+  end
+
   private
+
+  def hours_ago_param
+    if params[:hours_ago]
+      hours_ago = params[:hours_ago].to_i
+      if hours_ago <= 0
+        raise BadRequest, "please provide a positive integer for hours_ago"
+      end
+      hours_ago
+    end
+  end
 
   def start_index_param
     start_index = params[:start_index].to_i
