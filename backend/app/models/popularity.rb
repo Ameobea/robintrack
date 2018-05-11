@@ -96,9 +96,11 @@ class Popularity
     end
 
     if take_absoute_value
-      sorter = { "$sort" => { abs_popularity_difference: sort_direction, symbol: SORT_ASCENDING } }
+      sort_field = :abs_popularity_difference
+      sorter = { "$sort" => { diff_is_null: SORT_ASCENDING, abs_popularity_difference: sort_direction, symbol: SORT_ASCENDING } }
     else
-      sorter = { "$sort" => { popularity_difference: sort_direction, symbol: SORT_ASCENDING } }
+      sort_field = :popularity_difference
+      sorter = { "$sort" => { diff_is_null: SORT_ASCENDING, popularity_difference: sort_direction, symbol: SORT_ASCENDING } }
     end
 
     MongoClient[:popularity].aggregate([
@@ -118,6 +120,7 @@ class Popularity
       } },
       { "$addFields" => { symbol: { "$arrayElemAt" => ["$indexes.symbol", 0] } } },
       { "$addFields" => { popularity_difference: difference_query } },
+      { "$addFields" => { diff_is_null: { "$eq" => [{ "$type" => "$#{sort_field}" }, "null"] } } },
       take_absoute_value && { "$addFields" => { abs_popularity_difference: { "$abs" => "$popularity_difference" } } },
       sorter,
       { "$skip" => start_index },
