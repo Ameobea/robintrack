@@ -86,15 +86,19 @@ class Popularity
     start_index        = options[:start_index]
 
     if percentage
-      difference_query = { "$multiply" => [100, { "$divide" => [{ "$subtract" => ["$end_popularity", "$start_popularity"] }, "$start_popularity"] }] }
+      difference_query = { "$cond" => [
+        { "$eq" => ["$start_popularity", 0] },
+        nil,
+        { "$multiply" => [100, { "$divide" => [{ "$subtract" => ["$end_popularity", "$start_popularity"] }, "$start_popularity"] }] },
+      ]}
     else
       difference_query = { "$subtract" => ["$end_popularity", "$start_popularity"] }
     end
 
     if take_absoute_value
-      sorter = { "$sort" => { abs_popularity_difference: sort_direction } }
+      sorter = { "$sort" => { abs_popularity_difference: sort_direction, symbol: SORT_ASCENDING } }
     else
-      sorter = { "$sort" => { popularity_difference: sort_direction } }
+      sorter = { "$sort" => { popularity_difference: sort_direction, symbol: SORT_ASCENDING } }
     end
 
     MongoClient[:popularity].aggregate([
