@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import * as R from 'ramda';
 import { Column } from 'react-virtualized';
+import { Link } from 'react-router-dom';
 import numeral from 'numeral';
 
 import {
@@ -98,11 +99,19 @@ class Leaderboard extends Component {
     }
 
     return (
-      <PopularityChart
-        symbol={symbol}
-        popularityHistory={popularityHistoryForSymbol}
-        quoteHistory={quoteHistoryForSymbol}
-      />
+      <div>
+        <center>
+          <h1>
+            <Link to={`/symbol/${symbol}`}>{symbol}</Link>
+          </h1>
+        </center>
+
+        <PopularityChart
+          symbol={symbol}
+          popularityHistory={popularityHistoryForSymbol}
+          quoteHistory={quoteHistoryForSymbol}
+        />
+      </div>
     );
   };
 

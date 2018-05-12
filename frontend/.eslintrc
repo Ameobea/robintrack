@@ -48,8 +48,6 @@
   },
   "plugins": ["react"],
   "globals": {
-    "require": true,
-    "module": true,
-    "Module": true
+    "process": true
   }
 }

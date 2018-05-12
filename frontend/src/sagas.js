@@ -12,13 +12,49 @@ import {
   getPopularityChanges,
 } from 'src/selectors/api';
 
+const retryCount = 3;
+const retryTimeoutMs = 5000;
+
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+/**
+ * Generic wrapper that makes a request to and API endpoint and handles errors with the
+ * request including non-success response codes and connection errors.  Handles automatically
+ * re-requesting the endpoints with timeouts in between.
+ *
+ * @param {string} endpoint string appended to the API base path to create the final URL.
+ */
+function* apiCall(apiFunction, args, retries = 0) {
+  try {
+    const res = yield call(apiFunction, ...args);
+
+    if (res.status === 200) {
+      return yield res.json();
+    } else {
+      // TODO: show alert to user
+    }
+  } catch (err) {
+    if (retries < retryCount) {
+      console.warn(
+        `API request failed; retrying #${retries +
+          1} after ${retryTimeoutMs}ms...`
+      );
+      yield delay(retryTimeoutMs);
+      yield apiCall(apiFunction, args, retries + 1);
+    } else {
+      console.error('API request failed and max retries reached!');
+      // TODO: show alert to user
+    }
+  }
+}
+
 function* fetchQuote({ symbol }) {
   const existingQuote = yield select(getQuote(symbol));
   if (existingQuote) {
     return;
   }
 
-  const quote = yield call(Api.fetchQuote, symbol);
+  const quote = yield apiCall(Api.fetchQuote, [symbol]);
   yield put({ type: apiActions.QUOTE_FETCHED, symbol, quote });
 }
 
@@ -28,7 +64,7 @@ function* fetchTopSymbols({ limit, startIndex, cb }) {
     return;
   }
 
-  const topSymbols = yield call(Api.fetchTopSymbols, limit, startIndex);
+  const topSymbols = yield apiCall(Api.fetchTopSymbols, [limit, startIndex]);
   yield put({
     type: apiActions.TOP_SYMBOLS_FETCHED,
     limit,
@@ -47,7 +83,10 @@ function* fetchBottomSymbols({ limit, startIndex, cb }) {
     return;
   }
 
-  const bottomSymbols = yield call(Api.fetchBottomSymbols, limit, startIndex);
+  const bottomSymbols = yield apiCall(Api.fetchBottomSymbols, [
+    limit,
+    startIndex,
+  ]);
   yield put({
     type: apiActions.BOTTOM_SYMBOLS_FETCHED,
     limit,
@@ -64,7 +103,7 @@ function* fetchPopularityHistory({ symbol }) {
     return;
   }
 
-  const popHistory = yield call(Api.fetchPopularityHistory, symbol);
+  const popHistory = yield apiCall(Api.fetchPopularityHistory, [symbol]);
   yield put({
     type: apiActions.POPULARITY_HISTORY_FETCHED,
     symbol,
@@ -78,7 +117,7 @@ function* fetchQuoteHistory({ symbol }) {
     return;
   }
 
-  const quoteHistory = yield call(Api.fetchQuoteHistory, symbol);
+  const quoteHistory = yield apiCall(Api.fetchQuoteHistory, [symbol]);
   yield put({
     type: apiActions.QUOTE_HISTORY_FETCHED,
     symbol,
@@ -87,7 +126,6 @@ function* fetchQuoteHistory({ symbol }) {
 }
 
 function* fetchLargestPopularityChanges({ type, cb, ...props }) {
-  console.log(props);
   const popularityChangesSelector = getPopularityChanges(props);
   const existingPopularityChanges = R.slice(
     props.startIndex,
@@ -98,7 +136,7 @@ function* fetchLargestPopularityChanges({ type, cb, ...props }) {
     return;
   }
 
-  const popularityChanges = yield call(Api.fetchPopularityChanges, props);
+  const popularityChanges = yield apiCall(Api.fetchPopularityChanges, [props]);
   yield put({
     type: apiActions.LARGEST_POPULARITY_CHANGES_FETCHED,
     payload: popularityChanges,

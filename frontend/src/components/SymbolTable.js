@@ -2,7 +2,7 @@ import React from 'react';
 import { AutoSizer, Column, InfiniteLoader, Table } from 'react-virtualized';
 import { Link } from 'react-router-dom';
 
-import { fontColor } from 'src/style';
+import { emphasis, fontColor } from 'src/style';
 
 const styles = {
   root: {
@@ -63,7 +63,7 @@ const SymbolTable = ({
   disableHeader = true,
   height = '80vh',
 }) => (
-  <div style={{ ...styles.root, ...style }}>
+  <div style={{ ...styles.root, ...style }} className="symbol-table">
     <h2 style={styles.header}>{label}</h2>
 
     <div style={{ height, flexDirection: 'row' }}>
@@ -102,7 +102,7 @@ const SymbolTable = ({
 
 const renderSymbol = ({ cellData }) => (
   <Link to={`/symbol/${cellData}`}>
-    <span style={styles.text}>{cellData}</span>
+    <span style={{ ...styles.text, color: emphasis }}>{cellData}</span>
   </Link>
 );
 

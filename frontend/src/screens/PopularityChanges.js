@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Switch } from '@blueprintjs/core';
 import { Column } from 'react-virtualized';
+import { Link } from 'react-router-dom';
 import * as R from 'ramda';
 import numeral from 'numeral';
 import { Card, Label, NumericInput } from '@blueprintjs/core';
@@ -265,11 +266,19 @@ class PopularityChanges extends React.Component {
     }
 
     return (
-      <PopularityChart
-        symbol={selectedSymbol}
-        popularityHistory={popularityHistoryForSymbol}
-        quoteHistory={quoteHistoryForSymbol}
-      />
+      <div>
+        <center>
+          <h1>
+            <Link to={`/symbol/${selectedSymbol}`}>{selectedSymbol}</Link>
+          </h1>
+        </center>
+
+        <PopularityChart
+          symbol={selectedSymbol}
+          popularityHistory={popularityHistoryForSymbol}
+          quoteHistory={quoteHistoryForSymbol}
+        />
+      </div>
     );
   };
 

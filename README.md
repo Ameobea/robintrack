@@ -1,6 +1,8 @@
-# RHTrack
+# Robintrack
 
-RHTrack is a tool for viewing data about the popularity of various stocks on the Robinhood brokerage. It allows users to view information about which are the most (and least) popular stocks held by its users and view trends over time. When combined with price history and other forms of data, this can be a useful tool for analyzing market sentiment.
+[https://robintrack.net/](https://robintrack.net/)
+
+Robintrack is a tool for viewing data about the popularity of various stocks on the Robinhood brokerage. It allows users to view information about which are the most (and least) popular stocks held by its users and view trends over time. When combined with price history and other forms of data, this can be a useful tool for analyzing market sentiment.
 
 ## Components
 

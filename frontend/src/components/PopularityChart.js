@@ -131,6 +131,9 @@ const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => {
         showDetail: true,
         fillerColor: '#2d2f33',
         bottom: 5,
+        textStyle: {
+          color: '#fff',
+        },
       },
     ],
     series: [

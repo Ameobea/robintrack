@@ -62,14 +62,16 @@ class FeedbackButton extends React.Component {
         body: JSON.stringify({
           email: this.state.email || 'Not Supplied',
           message: this.state.message,
+          password: '1ML2NbebobgqcPUcW6Cl', // ayy lmao
+          appName: 'RobinTrack',
         }),
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
-      }).then(res => res.json());
+      });
 
-      if (!resBody.success) {
+      if (!resBody.status === 200) {
         this.setState({
           confirmLoading: false,
           feedbackSuccess: false,
