@@ -2,7 +2,7 @@
 IDs of tradable instruments into a RabbitMQ queue. """
 
 from time import sleep
-from typing import List
+from typing import Dict, Iterable, List, Tuple
 
 import click
 from Robinhood import Robinhood
@@ -13,18 +13,20 @@ from common import parse_throttle_res
 from db import get_db
 
 
-def get_tradable_instrument_ids(instruments: dict) -> List[str]:
+def get_tradable_instrument_ids(instruments: List[Dict[str, str]]) -> List[Tuple[str, str]]:
     """ Returns the instrument IDs and symbols of all tradable instruments in the provided list
     of instruments. """
-    tradable_instruments = filter(
+    tradable_instruments: Iterable[Dict[str, str]] = filter(
         lambda instrument: instrument.get('tradability') == 'tradable',
         instruments
     )
 
-    return list(map(
+    tuples: Iterable[Tuple[str, str]] = map(
         lambda instrument: (instrument['id'], instrument['symbol']),
         tradable_instruments
-    ))
+    )
+
+    return list(tuples)
 
 
 @click.command()
@@ -49,7 +51,7 @@ def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds
     quotes = []
     instrument_ids = []
     while True:
-        fetched_instruments = res['results']
+        fetched_instruments: List[Dict[str, str]] = res['results']
         tradable_instrument_ids = get_tradable_instrument_ids(
             fetched_instruments)
         total_ids += len(tradable_instrument_ids)

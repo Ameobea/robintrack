@@ -4,7 +4,7 @@ import json
 import re
 
 
-def pp_json(x: object) -> str:
+def pp_json(x: object) -> None:
     """ Pretty-prints the provided JSON-serializable object. """
     print(json.dumps(x, indent=2, sort_keys=True))
 
