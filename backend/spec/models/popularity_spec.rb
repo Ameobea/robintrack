@@ -13,8 +13,13 @@ RSpec.describe Popularity do
       # same popularity to test sorting by symbol
       { timestamp: 20.minutes.ago.utc, instrument_id: "goog_id", popularity: 893 },
       { timestamp: 20.minutes.ago.utc, instrument_id: "aapl_id", popularity: 893 },
-      { timestamp: 20.minutes.ago.utc, instrument_id: "spy_id", popularity: 33 },
-      { timestamp: 20.minutes.ago.utc, instrument_id: "amd_id", popularity: 90 },
+      { timestamp: 20.minutes.ago.utc, instrument_id: "spy_id", popularity: 8 },
+      { timestamp: 20.minutes.ago.utc, instrument_id: "amd_id", popularity: 25 },
+
+      { timestamp: 90.minutes.ago.utc, instrument_id: "goog_id", popularity: 20 },
+      { timestamp: 90.minutes.ago.utc, instrument_id: "aapl_id", popularity: 20 },
+      { timestamp: 90.minutes.ago.utc, instrument_id: "spy_id", popularity: 20 },
+      { timestamp: 90.minutes.ago.utc, instrument_id: "amd_id", popularity: 20 },
     ])
   end
 
@@ -41,6 +46,54 @@ RSpec.describe Popularity do
     expect(top_4_stocks).to eq(%w[SPY AMD AAPL GOOG])
     expect(top_2_stocks).to eq(%w[SPY AMD])
     expect(top_2_stocks_offset_1).to eq(%w[AMD AAPL])
+  end
+
+  it "returns the number of symbols" do
+    entry = Popularity.total_symbols
+    expect(entry["total_symbols"]).to eq(4)
+  end
+
+  it "returns the ranking of a symbol" do
+    entry = Popularity.get_ranking("AMD")
+    expect(entry["ranking"]).to eq(3)
+  end
+
+  it "returns error for get_ranking of symbol that doesnt exist" do
+    entry = Popularity.get_ranking("QQWEQWE")
+    expect(entry).to eq(nil)
+  end
+
+  it "returns the history of a symbol" do
+    entries = Popularity.get_history_for_symbol("AMD").map do |entry|
+      entry["popularity"]
+    end
+    expect(entries).to eq([25, 20])
+  end
+
+  it "returns error for get_history_for_symbol of symbol that doesnt exist" do
+    entries = Popularity.get_history_for_symbol("QQWEQWE")
+    expect(entries).to eq(nil)
+  end
+
+  it "gets the largest_popularity_changes" do
+    entries = Popularity.largest_popularity_changes(hours_ago: 2, limit: 50, start_index: 0).map do |entry|
+      entry["symbol"]
+    end
+    expect(entries).to eq(["AAPL", "GOOG", "SPY", "AMD"])
+  end
+
+  it "gets the largest_popularity_decreases" do
+    entries = Popularity.largest_popularity_decreases(hours_ago: 2, limit: 50, start_index: 0).map do |entry|
+      entry["symbol"]
+    end
+    expect(entries).to eq(["SPY", "AMD", "AAPL", "GOOG"])
+  end
+
+    it "gets the largest_popularity_increases" do
+    entries = Popularity.largest_popularity_increases(hours_ago: 2, limit: 50, start_index: 0).map do |entry|
+      entry["symbol"]
+    end
+    expect(entries).to eq(["AAPL", "GOOG", "AMD", "SPY"])
   end
 
 end

@@ -50,7 +50,7 @@ class StocksController < ApplicationController
   def total_symbols
     entry = Popularity.total_symbols(hours_ago_param)
 
-    render json: { total_symbols: entry.first["total_symbols"] }
+    render json: { total_symbols: entry["total_symbols"] }
   end
 
   private
