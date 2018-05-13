@@ -6,7 +6,7 @@ import { backgroundColor } from 'src/style';
 const Home = () => (
   <div style={{ backgroundColor }}>
     <center>
-      <h1>RH-Track</h1>
+      <h1>Robintrack</h1>
     </center>
     <div>
       <Link to="/leaderboard">Leaderboard</Link>

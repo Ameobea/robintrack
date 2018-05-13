@@ -25,7 +25,11 @@ const analyzeTimeSeries = series => {
   return [min, max, first, last, offset];
 };
 
-const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => {
+const getChartOptions = ({
+  symbol,
+  quoteHistory = [],
+  popularityHistory = [],
+}) => {
   const quoteSeries = quoteHistory.map(
     ({ timestamp, last_trade_price: lastTradePrice }) => [
       new Date(timestamp),
@@ -78,6 +82,7 @@ const getChartOptions = ({ symbol, quoteHistory, popularityHistory }) => {
     symbol: 'circle',
     type: 'line',
     smooth: false,
+    animation: false,
   };
 
   const yAxisDefaults = {

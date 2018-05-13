@@ -9,6 +9,7 @@ import popularityChangesReducer from 'src/reducers/popularityChanges';
 import symbolSearchReducer from 'src/reducers/symbolSearch';
 
 const reducers = {
+  router: routerReducer,
   api: apiReducer,
   popularityChanges: popularityChangesReducer,
   symbolSearch: symbolSearchReducer,
@@ -16,15 +17,12 @@ const reducers = {
 
 export const history = createHistory();
 
-const _routerMiddleware = routerMiddleware(history);
+const createdRouterMiddleware = routerMiddleware(history);
 const sagaMiddleware = createSagaMiddleware();
 
 export const store = createStore(
-  combineReducers({
-    ...reducers,
-    router: routerReducer,
-  }),
-  applyMiddleware(_routerMiddleware, sagaMiddleware)
+  combineReducers(reducers),
+  applyMiddleware(createdRouterMiddleware, sagaMiddleware)
 );
 
 sagaMiddleware.run(rootSaga);

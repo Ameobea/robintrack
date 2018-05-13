@@ -19,6 +19,13 @@ export const FETCH_LARGEST_POPULARITY_CHANGES_REQUESTED =
 export const LARGEST_POPULARITY_CHANGES_FETCHED =
   'LARGEST_POPULARITY_CHANGES_FETCHED';
 
+export const FETCH_POPULARITY_RANKING = 'FETCH_POPULARITY_RANKING';
+export const POPULARITY_RANKING_FETCHED = 'POPULARITY_RANKING_FETCHED';
+
+export const FETCH_NEIGHBOR_RANKING_SYMBOLS = 'FETCH_NEIGHBOR_RANKING_SYMBOLS';
+export const NEIGHBOR_RANKING_SYMBOLS_FETCHED =
+  'NEIGHBOR_RANKING_SYMBOLS_FETCHED';
+
 export const requestQuote = symbol => ({ type: FETCH_QUOTE_REQUESTED, symbol });
 
 export const requestTopSymbols = (limit, startIndex, cb) => ({
@@ -49,4 +56,14 @@ export const requestLargestPopularityChanges = (config, cb) => ({
   type: FETCH_LARGEST_POPULARITY_CHANGES_REQUESTED,
   cb,
   ...config,
+});
+
+export const fetchPopularityRanking = symbol => ({
+  type: FETCH_POPULARITY_RANKING,
+  symbol,
+});
+
+export const fetchNeighborRankingSymbols = middleRanking => ({
+  type: FETCH_NEIGHBOR_RANKING_SYMBOLS,
+  middleRanking,
 });

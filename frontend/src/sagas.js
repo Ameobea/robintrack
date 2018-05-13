@@ -10,6 +10,8 @@ import {
   getTopSymbols,
   getBottomSymbols,
   getPopularityChanges,
+  getPopularityRanking,
+  getNeighborRankings,
 } from 'src/selectors/api';
 
 const retryCount = 3;
@@ -146,6 +148,73 @@ function* fetchLargestPopularityChanges({ type, cb, ...props }) {
   cb && cb();
 }
 
+function* fetchPopularityRanking({ symbol }) {
+  const existingPopularityRanking = yield select(getPopularityRanking(symbol));
+  if (!R.isNil(existingPopularityRanking)) {
+    return;
+  }
+
+  const { ranking: popularityRanking } = yield apiCall(
+    Api.fetchSymbolPopularityRanking,
+    [symbol]
+  );
+  yield put({
+    type: apiActions.POPULARITY_RANKING_FETCHED,
+    symbol,
+    popularityRanking,
+  });
+}
+
+function* fetchNeighborRankingSymbols({ middleRanking }) {
+  const existingNeighborRankings = yield select(
+    getNeighborRankings(middleRanking)
+  );
+  const expectedLength = middleRanking === 1 ? 2 : 3;
+  if (
+    existingNeighborRankings.length === expectedLength &&
+    !!existingNeighborRankings[0]
+  ) {
+    return;
+  }
+
+  // Insert placeholder values for the symbols while the API request is pending to
+  // avoid making duplicate requests
+  yield put({
+    type: apiActions.NEIGHBOR_RANKING_SYMBOLS_FETCHED,
+    middleRanking,
+    curSymbol: null,
+    previousSymbol: null,
+    nextSymbol: null,
+  });
+
+  const apiRes = yield apiCall(Api.fetchLastNextPopularities, [middleRanking]);
+  const [previousSymbol, curSymbol, nextSymbol] =
+    apiRes.length === 2 ? [null, ...apiRes] : apiRes;
+
+  yield put({
+    type: apiActions.NEIGHBOR_RANKING_SYMBOLS_FETCHED,
+    middleRanking,
+    curSymbol,
+    previousSymbol,
+    nextSymbol,
+  });
+
+  if (previousSymbol) {
+    yield put({
+      type: apiActions.POPULARITY_RANKING_FETCHED,
+      symbol: previousSymbol.symbol,
+      popularityRanking: middleRanking - 1,
+    });
+  }
+  if (nextSymbol) {
+    yield put({
+      type: apiActions.POPULARITY_RANKING_FETCHED,
+      symbol: nextSymbol.symbol,
+      popularityRanking: middleRanking + 1,
+    });
+  }
+}
+
 function* rootSaga() {
   yield takeLatest(apiActions.FETCH_QUOTE_REQUESTED, fetchQuote);
   yield takeEvery(apiActions.FETCH_TOP_SYMBOLS_REQUESTED, fetchTopSymbols);
@@ -161,6 +230,11 @@ function* rootSaga() {
   yield takeEvery(
     apiActions.FETCH_LARGEST_POPULARITY_CHANGES_REQUESTED,
     fetchLargestPopularityChanges
+  );
+  yield takeEvery(apiActions.FETCH_POPULARITY_RANKING, fetchPopularityRanking);
+  yield takeEvery(
+    apiActions.FETCH_NEIGHBOR_RANKING_SYMBOLS,
+    fetchNeighborRankingSymbols
   );
 }
 

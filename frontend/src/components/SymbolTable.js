@@ -1,6 +1,7 @@
 import React from 'react';
 import { AutoSizer, Column, InfiniteLoader, Table } from 'react-virtualized';
 import { Link } from 'react-router-dom';
+import * as R from 'ramda';
 
 import { emphasis, fontColor } from 'src/style';
 
@@ -20,7 +21,16 @@ const styles = {
     fontWeight: 'bold',
   },
   text: { fontSize: 24 },
-  row: { backgroundColor: '#111' },
+  row: {
+    display: 'flex',
+    flexDirection: 'row',
+    flex: 1,
+    backgroundColor: '#111',
+    marginTop: 15,
+    marginBottom: 15,
+    cursor: 'pointer',
+    boxShadow: '2px 2px 4px 1px rgba(0,0,0,0.75)',
+  },
 };
 
 const renderRow = ({
@@ -33,19 +43,7 @@ const renderRow = ({
   rowData,
 }) => (
   <div key={key} style={style} className={className}>
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        flex: 1,
-        backgroundColor: '#111',
-        marginTop: 15,
-        marginBottom: 15,
-        cursor: 'pointer',
-        boxShadow: '2px 2px 4px 1px rgba(0,0,0,0.75)',
-      }}
-      onClick={() => onRowClick({ rowData })}
-    >
+    <div style={styles.row} onClick={() => onRowClick({ rowData })}>
       {columns}
     </div>
   </div>
@@ -63,7 +61,7 @@ const SymbolTable = ({
   disableHeader = true,
   height = '80vh',
 }) => (
-  <div style={{ ...styles.root, ...style }} className="symbol-table">
+  <div style={R.merge(styles.root, style)} className="symbol-table">
     <h2 style={styles.header}>{label}</h2>
 
     <div style={{ height, flexDirection: 'row' }}>
@@ -112,7 +110,7 @@ export const SymbolColumn = (
     label="Symbol"
     dataKey="symbol"
     cellRenderer={renderSymbol}
-    width={100}
+    width={125}
     flexGrow={1}
     style={styles.text}
   />

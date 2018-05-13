@@ -7,6 +7,8 @@ import {
   POPULARITY_HISTORY_FETCHED,
   QUOTE_HISTORY_FETCHED,
   LARGEST_POPULARITY_CHANGES_FETCHED,
+  POPULARITY_RANKING_FETCHED,
+  NEIGHBOR_RANKING_SYMBOLS_FETCHED,
 } from 'src/actions/api';
 import { getPopularityChangesPath } from 'src/selectors/api';
 
@@ -16,6 +18,8 @@ const getInitialState = () => ({
   quoteHistory: {},
   topSymbols: [],
   bottomSymbols: [],
+  symbolPopularities: {},
+  popularityMapping: [],
 });
 
 export default (state = getInitialState(), action = {}) => {
@@ -63,14 +67,33 @@ export default (state = getInitialState(), action = {}) => {
     }
 
     case LARGEST_POPULARITY_CHANGES_FETCHED: {
-      const { payload, ...config } = action;
+      const { payload, startIndex, ...config } = action;
       const lens = R.lensPath(getPopularityChangesPath(config));
       const data = R.clone(R.view(lens, state)) || [];
       payload.forEach((datum, i) => {
-        data[i + action.startIndex] = datum;
+        data[i + startIndex] = datum;
       });
 
       return R.set(lens, data, state);
+    }
+
+    case POPULARITY_RANKING_FETCHED: {
+      return R.set(
+        R.lensPath(['symbolPopularities', action.symbol]),
+        action.popularityRanking,
+        state
+      );
+    }
+
+    case NEIGHBOR_RANKING_SYMBOLS_FETCHED: {
+      const mapping = R.clone(state.popularityMapping);
+
+      ['previousSymbol', 'curSymbol', 'nextSymbol'].forEach((key, i) => {
+        const index = action.middleRanking + (i - 1);
+        mapping[index] = action[key] || mapping[index];
+      });
+
+      return R.set(R.lensProp('popularityMapping'), mapping, state);
     }
 
     default: {

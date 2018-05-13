@@ -57,6 +57,11 @@ const styles = {
     marginBottom: 10,
   },
   setting: { display: 'flex', flex: 1 },
+  placeholder: {
+    fontSize: 24,
+    color: fontColor,
+    textAlign: 'center',
+  },
 };
 
 const Setting = ({ label, style = {}, flex = 1, children }) => (
@@ -83,6 +88,13 @@ const changeTypeOptionLabels = {
   [CHANGE_TYPE.DECREASES]: 'Decreases',
 };
 
+const mapLabelsToOptions = labels =>
+  Object.entries(labels).map(([changeType, label], i) => (
+    <option key={i} value={changeType}>
+      {label}
+    </option>
+  ));
+
 const PopularityChangesConfig = connect(
   ({ popularityChanges }) => ({ config: popularityChanges }),
   {
@@ -107,10 +119,7 @@ const PopularityChangesConfig = connect(
           <Switch
             large
             checked={relative}
-            onChange={() => {
-              togglePopularityChangesRelative();
-              setSelectedSymbol(null);
-            }}
+            onChange={togglePopularityChangesRelative}
           />
         </div>
       </Setting>
@@ -119,14 +128,10 @@ const PopularityChangesConfig = connect(
           <select
             value={hoursAgo}
             onChange={e =>
-              setPopularityChangesHoursAgo(parseInt(e.target.value))
+              setPopularityChangesHoursAgo(parseInt(e.target.value, 10))
             }
           >
-            {Object.entries(lookbackOptionLabels).map(([hours, label], i) => (
-              <option key={i} value={hours}>
-                {label}
-              </option>
-            ))}
+            {mapLabelsToOptions(lookbackOptionLabels)}
           </select>
         </div>
       </Setting>
@@ -150,13 +155,7 @@ const PopularityChangesConfig = connect(
             value={changeType}
             onChange={e => setPopularityChangesChangeType(e.target.value)}
           >
-            {Object.entries(changeTypeOptionLabels).map(
-              ([changeType, label], i) => (
-                <option key={i} value={changeType}>
-                  {label}
-                </option>
-              )
-            )}
+            {mapLabelsToOptions(changeTypeOptionLabels)}
           </select>
         </div>
       </Setting>
@@ -178,25 +177,17 @@ const defaultColumnProps = {
 };
 
 class PopularityChanges extends React.Component {
-  componentDidMount() {
-    fetchNewData(this.props);
-  }
+  componentDidMount = () => fetchNewData(this.props);
 
-  componentDidUpdate() {
-    fetchNewData(this.props);
-  }
+  componentDidUpdate = () => fetchNewData(this.props);
 
   loadMoreData = ({ startIndex, stopIndex }) =>
     new Promise((f, r) =>
       fetchNewData(
-        {
-          ...this.props,
-          config: {
-            ...this.props.config,
-            startIndex,
-            limit: stopIndex - startIndex,
-          },
-        },
+        R.mergeDeepLeft(
+          { config: { startIndex, limit: stopIndex - startIndex } },
+          this.props
+        ),
         f
       )
     );
@@ -242,27 +233,21 @@ class PopularityChanges extends React.Component {
       />,
       <Column
         {...defaultColumnProps}
-        key={3}
+        key={4}
         label="End"
         dataKey="end_popularity"
       />,
     ];
   };
+
   renderPopularityChart = () => {
     const { selectedSymbol, popularityHistory, quoteHistory } = this.props;
     if (!selectedSymbol) {
       return (
-        <div style={{ fontSize: 24, color: fontColor, textAlign: 'center' }}>
+        <div style={styles.placeholder}>
           Click a row from the tables to view a chart.
         </div>
       );
-    }
-
-    const popularityHistoryForSymbol = popularityHistory[selectedSymbol];
-    const quoteHistoryForSymbol = quoteHistory[selectedSymbol];
-
-    if (!popularityHistoryForSymbol || !quoteHistoryForSymbol) {
-      return <Loading />;
     }
 
     return (
@@ -275,8 +260,8 @@ class PopularityChanges extends React.Component {
 
         <PopularityChart
           symbol={selectedSymbol}
-          popularityHistory={popularityHistoryForSymbol}
-          quoteHistory={quoteHistoryForSymbol}
+          popularityHistory={popularityHistory[selectedSymbol]}
+          quoteHistory={quoteHistory[selectedSymbol]}
         />
       </div>
     );
@@ -288,6 +273,7 @@ class PopularityChanges extends React.Component {
       requestPopularityHistory,
       requestQuoteHistory,
     } = this.props;
+
     setSelectedSymbol(symbol);
     requestPopularityHistory(symbol);
     requestQuoteHistory(symbol);

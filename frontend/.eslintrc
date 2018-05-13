@@ -22,7 +22,10 @@
     "comma-dangle": [2, "only-multiline"],
     "no-console": 0,
     "no-global-assign": 0,
-    "no-unused-vars": [1, { "vars": "all", "args": "none" }],
+    "no-unused-vars": [
+      1,
+      { "vars": "all", "args": "none", "argsIgnorePattern": "^_.*$" }
+    ],
     "no-multiple-empty-lines": [2, { "max": 1 }],
     "prefer-const": [
       "error",

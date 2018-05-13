@@ -44,6 +44,11 @@ const styles = {
     paddingLeft: 40,
     paddingRight: 40,
   },
+  placeholder: {
+    fontSize: 24,
+    color: fontColor,
+    textAlign: 'center',
+  },
 };
 
 class Leaderboard extends Component {
@@ -54,13 +59,15 @@ class Leaderboard extends Component {
       initialPageSize,
       requestBottomSymbols,
       requestTopSymbols,
+      bottomSymbols,
+      topSymbols,
     } = this.props;
 
-    if (R.isEmpty(this.props.bottomSymbols)) {
+    if (R.isEmpty(bottomSymbols)) {
       requestBottomSymbols(initialPageSize, 0);
     }
 
-    if (R.isEmpty(this.props.topSymbols)) {
+    if (R.isEmpty(topSymbols)) {
       requestTopSymbols(initialPageSize, 0);
     }
   }
@@ -88,14 +95,10 @@ class Leaderboard extends Component {
 
     if (!symbol) {
       return (
-        <div style={{ fontSize: 24, color: fontColor, textAlign: 'center' }}>
+        <div style={styles.placeholder}>
           Click a row from the tables to view a chart.
         </div>
       );
-    }
-
-    if (!popularityHistoryForSymbol || !quoteHistoryForSymbol) {
-      return <Loading />;
     }
 
     return (
@@ -146,42 +149,44 @@ class Leaderboard extends Component {
 
   symbolChart = null;
 
-  render = () => {
-    const { topSymbols, bottomSymbols } = this.props;
+  getDefaultSymbolTableProps = data => ({
+    onRowClick: this.updateSymbolChart,
+    columns: this.getColumns(),
+    height: '80vh',
+    rowGetter: this.getRowGetter(data),
+    data,
+  });
 
-    if (!this.props.bottomSymbols || !this.props.topSymbols) {
+  PopulatedSymbolTable = ({ data, ...props }) => {
+    if (R.isEmpty(data)) {
       return <Loading />;
     }
 
     return (
-      <div style={styles.root}>
-        <div style={styles.tablesWrapper}>
-          <SymbolTable
-            label="Most Popular"
-            data={topSymbols}
-            loadMoreData={this.fetchMoreTopSymbols}
-            onRowClick={this.updateSymbolChart}
-            columns={this.getColumns()}
-            rowGetter={this.getRowGetter(topSymbols)}
-            height="80vh"
-          />
-          <SymbolTable
-            label="Least Popular"
-            data={bottomSymbols}
-            loadMoreData={this.fetchMoreBottomSymbols}
-            onRowClick={this.updateSymbolChart}
-            columns={this.getColumns()}
-            rowGetter={this.getRowGetter(bottomSymbols)}
-            height="80vh"
-          />
-        </div>
-
-        <div style={styles.chartWrapper}>
-          <div style={{ width: '100%' }}>{this.renderSymbolChart()}</div>
-        </div>
-      </div>
+      <SymbolTable {...this.getDefaultSymbolTableProps(data)} {...props} />
     );
   };
+
+  render = () => (
+    <div style={styles.root}>
+      <div style={styles.tablesWrapper}>
+        <this.PopulatedSymbolTable
+          label="Most Popular"
+          loadMoreData={this.fetchMoreTopSymbols}
+          data={this.props.topSymbols}
+        />
+        <this.PopulatedSymbolTable
+          label="Least Popular"
+          loadMoreData={this.fetchMoreBottomSymbols}
+          data={this.props.bottomSymbols}
+        />
+      </div>
+
+      <div style={styles.chartWrapper}>
+        <div style={{ width: '100%' }}>{this.renderSymbolChart()}</div>
+      </div>
+    </div>
+  );
 }
 
 Leaderboard.defaultProps = {

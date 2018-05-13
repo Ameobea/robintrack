@@ -4,8 +4,8 @@
 
 const apiPrefix = process.env.REACT_APP_API_PREFIX || '';
 
-const apiBaseCaller = mapArgsToUrlSuffix => args =>
-  fetch(`${apiPrefix}/${mapArgsToUrlSuffix(args)}`);
+const apiBaseCaller = mapArgsToUrlSuffix => (...args) =>
+  fetch(`${apiPrefix}/${mapArgsToUrlSuffix(...args)}`);
 
 export const fetchQuote = apiBaseCaller(symbol => `stocks/${symbol}/quote`);
 
@@ -43,3 +43,15 @@ export const fetchPopularityChanges = apiBaseCaller(
     return `largest_popularity_${suffix}?${paramsString}`;
   }
 );
+
+export const fetchSymbolPopularityRanking = apiBaseCaller(
+  symbol => `stocks/${symbol}/popularity_ranking`
+);
+
+export const fetchLastNextPopularities = popularityRanking => {
+  const first = popularityRanking === 1;
+  const limit = first ? 2 : 3;
+  const startIndex = first ? 0 : popularityRanking - 2;
+
+  return fetchTopSymbols(limit, startIndex);
+};

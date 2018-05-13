@@ -30,3 +30,13 @@ export const getPopularityChangesPath = ({
 
 export const getPopularityChanges = config =>
   R.path(['api', ...getPopularityChangesPath(config)]);
+
+export const getPopularityRanking = symbol =>
+  R.path(['api', 'symbolPopularities', symbol]);
+
+export const getNeighborRankings = middlePopularity => ({
+  api: { popularityMapping },
+}) => {
+  const startIndex = middlePopularity === 1 ? 0 : middlePopularity - 1;
+  return R.slice(startIndex, middlePopularity + 2, popularityMapping);
+};
