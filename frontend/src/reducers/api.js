@@ -9,6 +9,7 @@ import {
   LARGEST_POPULARITY_CHANGES_FETCHED,
   POPULARITY_RANKING_FETCHED,
   NEIGHBOR_RANKING_SYMBOLS_FETCHED,
+  TOTAL_SYMBOLS_FETCHED,
 } from 'src/actions/api';
 import { getPopularityChangesPath } from 'src/selectors/api';
 
@@ -94,6 +95,10 @@ export default (state = getInitialState(), action = {}) => {
       });
 
       return R.set(R.lensProp('popularityMapping'), mapping, state);
+    }
+
+    case TOTAL_SYMBOLS_FETCHED: {
+      return { ...state, totalSymbols: action.totalSymbols };
     }
 
     default: {

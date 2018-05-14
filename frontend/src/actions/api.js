@@ -26,6 +26,9 @@ export const FETCH_NEIGHBOR_RANKING_SYMBOLS = 'FETCH_NEIGHBOR_RANKING_SYMBOLS';
 export const NEIGHBOR_RANKING_SYMBOLS_FETCHED =
   'NEIGHBOR_RANKING_SYMBOLS_FETCHED';
 
+export const FETCH_TOTAL_SYMBOLS = 'FETCH_TOTAL_SYMBOLS';
+export const TOTAL_SYMBOLS_FETCHED = 'TOTAL_SYMBOLS_FETCHED';
+
 export const requestQuote = symbol => ({ type: FETCH_QUOTE_REQUESTED, symbol });
 
 export const requestTopSymbols = (limit, startIndex, cb) => ({
@@ -66,4 +69,9 @@ export const fetchPopularityRanking = symbol => ({
 export const fetchNeighborRankingSymbols = middleRanking => ({
   type: FETCH_NEIGHBOR_RANKING_SYMBOLS,
   middleRanking,
+});
+
+export const requestTotalSymbols = hoursAgo => ({
+  type: FETCH_TOTAL_SYMBOLS,
+  hoursAgo,
 });

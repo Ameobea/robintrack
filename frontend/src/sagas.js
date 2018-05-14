@@ -12,6 +12,7 @@ import {
   getPopularityChanges,
   getPopularityRanking,
   getNeighborRankings,
+  getTotalSymbols,
 } from 'src/selectors/api';
 
 const retryCount = 3;
@@ -215,6 +216,18 @@ function* fetchNeighborRankingSymbols({ middleRanking }) {
   }
 }
 
+function* fetchTotalSymbols({ hoursAgo }) {
+  const existingSymbolCount = yield select(getTotalSymbols);
+  if (!R.isNil(existingSymbolCount)) {
+    return;
+  }
+
+  const { total_symbols: totalSymbols } = yield apiCall(Api.fetchSymbolCount, [
+    hoursAgo,
+  ]);
+  yield put({ type: apiActions.TOTAL_SYMBOLS_FETCHED, totalSymbols });
+}
+
 function* rootSaga() {
   yield takeLatest(apiActions.FETCH_QUOTE_REQUESTED, fetchQuote);
   yield takeEvery(apiActions.FETCH_TOP_SYMBOLS_REQUESTED, fetchTopSymbols);
@@ -236,6 +249,7 @@ function* rootSaga() {
     apiActions.FETCH_NEIGHBOR_RANKING_SYMBOLS,
     fetchNeighborRankingSymbols
   );
+  yield takeLatest(apiActions.FETCH_TOTAL_SYMBOLS, fetchTotalSymbols);
 }
 
 export default rootSaga;

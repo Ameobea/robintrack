@@ -82,12 +82,10 @@ const SymbolSearch = connect(mapSymbolSearchStateToProps, {
           value={searchContent}
           style={styles.searchInput}
           onKeyDown={e => e.key === 'Enter' && submitSymbolSearch()}
+          onFocus={e => e.target.select()}
         />
+        <Button minimal icon="arrow-right" onClick={submitSymbolSearch} />
       </div>
-
-      <Button onClick={submitSymbolSearch} small style={{ height: 30 }}>
-        Search
-      </Button>
     </div>
   );
 });

@@ -125,6 +125,7 @@ const getChartOptions = ({
         min: minPopularity - popularityOffset,
         max: maxPopularity + popularityOffset,
         splitLine: { ...yAxisDefaults.axisLabel, show: false },
+        minInterval: 1,
       },
     ],
     tooltip: { trigger: 'axis' },
@@ -136,9 +137,7 @@ const getChartOptions = ({
         showDetail: true,
         fillerColor: '#2d2f33',
         bottom: 5,
-        textStyle: {
-          color: '#fff',
-        },
+        textStyle: { color: '#fff' },
       },
     ],
     series: [

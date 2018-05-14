@@ -55,3 +55,7 @@ export const fetchLastNextPopularities = popularityRanking => {
 
   return fetchTopSymbols(limit, startIndex);
 };
+
+export const fetchSymbolCount = apiBaseCaller(
+  hoursAgo => `total_symbols?hours_ago=${hoursAgo || 2}`
+);

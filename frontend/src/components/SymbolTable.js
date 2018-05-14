@@ -1,6 +1,7 @@
 import React from 'react';
 import { AutoSizer, Column, InfiniteLoader, Table } from 'react-virtualized';
 import { Link } from 'react-router-dom';
+import { connect } from 'react-redux';
 import * as R from 'ramda';
 
 import { emphasis, fontColor } from 'src/style';
@@ -11,8 +12,8 @@ const styles = {
     flex: 1,
     flexDirection: 'column',
     alignSelf: 'center',
-    minWidth: 250,
-    maxWidth: 300,
+    minWidth: 300,
+    maxWidth: 350,
     color: fontColor,
   },
   header: {
@@ -116,4 +117,8 @@ export const SymbolColumn = (
   />
 );
 
-export default SymbolTable;
+const mapStateToProps = ({ api: { totalSymbols } }) => ({
+  totalRowCount: totalSymbols,
+});
+
+export default connect(mapStateToProps)(SymbolTable);

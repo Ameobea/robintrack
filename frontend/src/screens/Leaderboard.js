@@ -10,6 +10,7 @@ import {
   requestTopSymbols,
   requestPopularityHistory,
   requestQuoteHistory,
+  requestTotalSymbols,
 } from 'src/actions/api';
 import { fontColor, backgroundColor } from 'src/style';
 import Loading from 'src/components/Loading';
@@ -61,6 +62,7 @@ class Leaderboard extends Component {
       requestTopSymbols,
       bottomSymbols,
       topSymbols,
+      requestTotalSymbols,
     } = this.props;
 
     if (R.isEmpty(bottomSymbols)) {
@@ -70,6 +72,8 @@ class Leaderboard extends Component {
     if (R.isEmpty(topSymbols)) {
       requestTopSymbols(initialPageSize, 0);
     }
+
+    requestTotalSymbols();
   }
 
   fetchMoreTopSymbols = ({ startIndex, stopIndex }) =>
@@ -123,7 +127,7 @@ class Leaderboard extends Component {
       key={1}
       label="#"
       dataKey="i"
-      width={75}
+      width={100}
       flexGrow={0.5}
       style={styles.text}
     />,
@@ -132,7 +136,7 @@ class Leaderboard extends Component {
       key={3}
       label="Popularity"
       dataKey="popularity"
-      width={125}
+      width={150}
       flexGrow={1}
       style={styles.text}
     />,
@@ -143,7 +147,7 @@ class Leaderboard extends Component {
     return {
       symbol,
       popularity: numeral(popularity).format('0,0'),
-      i: index + 1,
+      i: index + 1000,
     };
   };
 
@@ -204,4 +208,5 @@ export default connect(mapStateToProps, {
   requestTopSymbols,
   requestPopularityHistory,
   requestQuoteHistory,
+  requestTotalSymbols,
 })(Leaderboard);

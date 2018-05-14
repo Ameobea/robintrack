@@ -12,6 +12,7 @@ import {
   requestLargestPopularityChanges,
   requestPopularityHistory,
   requestQuoteHistory,
+  requestTotalSymbols,
 } from 'src/actions/api';
 import {
   setPopularityChangesChangeType,
@@ -163,11 +164,21 @@ const PopularityChangesConfig = connect(
   )
 );
 
-const fetchNewData = ({ config, requestLargestPopularityChanges }, cb) =>
+const fetchData = (
+  {
+    config,
+    requestLargestPopularityChanges,
+    requestTotalSymbols,
+    totalSymbols,
+  },
+  cb
+) => {
   requestLargestPopularityChanges(
     { ...config, startIndex: config.startIndex || 0 },
     cb
   );
+  R.isNil(totalSymbols) && requestTotalSymbols();
+};
 
 const defaultColumnProps = {
   width: 150,
@@ -177,13 +188,13 @@ const defaultColumnProps = {
 };
 
 class PopularityChanges extends React.Component {
-  componentDidMount = () => fetchNewData(this.props);
+  componentDidMount = () => fetchData(this.props);
 
-  componentDidUpdate = () => fetchNewData(this.props);
+  componentDidUpdate = () => fetchData(this.props);
 
   loadMoreData = ({ startIndex, stopIndex }) =>
     new Promise((f, r) =>
-      fetchNewData(
+      fetchData(
         R.mergeDeepLeft(
           { config: { startIndex, limit: stopIndex - startIndex } },
           this.props
@@ -201,7 +212,7 @@ class PopularityChanges extends React.Component {
         key={0}
         label="#"
         dataKey="i"
-        width={75}
+        width={100}
         flexGrow={0.5}
       />,
       SymbolColumn,
@@ -332,7 +343,12 @@ const mapStateToProps = (state, { pageSize = 50 }) => {
     selectedSymbol: state.popularityChanges.selectedSymbol,
     data: data ? data.map((datum, i) => ({ ...datum, i: i + 1 })) : null,
     ...R.pick(
-      ['largestPopularityChanges', 'popularityHistory', 'quoteHistory'],
+      [
+        'largestPopularityChanges',
+        'popularityHistory',
+        'quoteHistory',
+        'totalSymbols',
+      ],
       state.api
     ),
   };
@@ -345,4 +361,5 @@ export default connect(mapStateToProps, {
   setSelectedSymbol,
   requestPopularityHistory,
   requestQuoteHistory,
+  requestTotalSymbols,
 })(PopularityChanges);
