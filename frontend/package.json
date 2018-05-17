@@ -9,7 +9,7 @@
     "history": "^4.7.2",
     "numeral": "^2.0.6",
     "prop-types": "^15.6.1",
-    "query-string": "^6.1.0",
+    "query-string": "5",
     "ramda": "^0.25.0",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
@@ -26,7 +26,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "REACT_APP_API_PREFIX='/api' react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },

@@ -200,7 +200,7 @@ class Leaderboard extends Component {
           <div style={styles.configWrapper}>
             Bottom
             <Switch
-              checked={show != 'bottom'}
+              checked={show !== 'bottom'}
               onChange={() =>
                 push({
                   search: queryString.stringify({
