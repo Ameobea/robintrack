@@ -16,7 +16,7 @@ import {
 } from 'src/actions/api';
 import {
   setPopularityChangesChangeType,
-  togglePopularityChangesRelative,
+  setPopularityChangesRelative,
   setSelectedSymbol,
   setPopularityChangesHoursAgo,
   setPopularityChangesMinPopularity,
@@ -25,7 +25,8 @@ import { getPopularityChanges } from 'src/selectors/api';
 import Loading from 'src/components/Loading';
 import PopularityChart from 'src/components/PopularityChart';
 import { fontColor } from 'src/style';
-import { CHANGE_TYPE } from '../actions/popularityChanges';
+import { CHANGE_TYPE, RELATIVITY } from 'src/actions/popularityChanges';
+import { getPopularityChangesConfig } from 'src/selectors/popularityChanges';
 
 const styles = {
   text: { fontSize: 24 },
@@ -96,72 +97,77 @@ const mapLabelsToOptions = labels =>
     </option>
   ));
 
-const PopularityChangesConfig = connect(
-  ({ popularityChanges }) => ({ config: popularityChanges }),
-  {
-    setSelectedSymbol,
-    togglePopularityChangesRelative,
-    setPopularityChangesHoursAgo,
-    setPopularityChangesMinPopularity,
-    setPopularityChangesChangeType,
-  }
-)(
+const PopularityChangesConfig = connect(undefined, {
+  setSelectedSymbol,
+  setPopularityChangesRelative,
+  setPopularityChangesHoursAgo,
+  setPopularityChangesMinPopularity,
+  setPopularityChangesChangeType,
+})(
   ({
     config: { relative, hoursAgo, minPopularity, changeType },
-    togglePopularityChangesRelative,
+    setPopularityChangesRelative,
     setSelectedSymbol,
     setPopularityChangesHoursAgo,
     setPopularityChangesMinPopularity,
     setPopularityChangesChangeType,
-  }) => (
-    <Card style={styles.config}>
-      <Setting label="Relative" flex={0.5}>
-        <div style={{ paddingTop: 8 }}>
-          <Switch
-            large
-            checked={relative}
-            onChange={togglePopularityChangesRelative}
+  }) => {
+    const isRelative = relative === RELATIVITY.RELATIVE;
+
+    return (
+      <Card style={styles.config}>
+        <Setting label="Relative" flex={0.5}>
+          <div style={{ paddingTop: 8 }}>
+            <Switch
+              large
+              checked={isRelative}
+              onChange={() =>
+                setPopularityChangesRelative(
+                  isRelative ? RELATIVITY.NOT_RELATIVE : RELATIVITY.RELATIVE
+                )
+              }
+            />
+          </div>
+        </Setting>
+        <Setting label="Lookback Period">
+          <div className="pt-select">
+            <select
+              value={hoursAgo}
+              onChange={e =>
+                setPopularityChangesHoursAgo(parseInt(e.target.value, 10))
+              }
+            >
+              {mapLabelsToOptions(lookbackOptionLabels)}
+            </select>
+          </div>
+        </Setting>
+        <Setting label="Minimum Popularity" flex={1.1}>
+          <NumericInput
+            size={8}
+            buttonPosition="left"
+            fill={false}
+            min={0}
+            width={50}
+            minorStepSize={10}
+            stepSize={25}
+            majorStepSize={50}
+            value={minPopularity}
+            onValueChange={setPopularityChangesMinPopularity}
           />
-        </div>
-      </Setting>
-      <Setting label="Lookback Period">
-        <div className="pt-select">
-          <select
-            value={hoursAgo}
-            onChange={e =>
-              setPopularityChangesHoursAgo(parseInt(e.target.value, 10))
-            }
-          >
-            {mapLabelsToOptions(lookbackOptionLabels)}
-          </select>
-        </div>
-      </Setting>
-      <Setting label="Minimum Popularity" flex={1.1}>
-        <NumericInput
-          size={8}
-          buttonPosition="left"
-          fill={false}
-          min={0}
-          width={50}
-          minorStepSize={10}
-          stepSize={25}
-          majorStepSize={50}
-          value={minPopularity}
-          onValueChange={setPopularityChangesMinPopularity}
-        />
-      </Setting>
-      <Setting label="Change Type">
-        <div className="pt-select">
-          <select
-            value={changeType}
-            onChange={e => setPopularityChangesChangeType(e.target.value)}
-          >
-            {mapLabelsToOptions(changeTypeOptionLabels)}
-          </select>
-        </div>
-      </Setting>
-    </Card>
-  )
+        </Setting>
+        <Setting label="Change Type">
+          <div className="pt-select">
+            <select
+              value={changeType}
+              onChange={e => setPopularityChangesChangeType(e.target.value)}
+            >
+              {mapLabelsToOptions(changeTypeOptionLabels)}
+            </select>
+          </div>
+        </Setting>
+      </Card>
+    );
+  }
 );
 
 const fetchData = (
@@ -170,6 +176,9 @@ const fetchData = (
     requestLargestPopularityChanges,
     requestTotalSymbols,
     totalSymbols,
+    selectedSymbol,
+    requestPopularityHistory,
+    requestQuoteHistory,
   },
   cb
 ) => {
@@ -178,6 +187,10 @@ const fetchData = (
     cb
   );
   R.isNil(totalSymbols) && requestTotalSymbols();
+  if (selectedSymbol) {
+    requestPopularityHistory(selectedSymbol);
+    requestQuoteHistory(selectedSymbol);
+  }
 };
 
 const defaultColumnProps = {
@@ -193,18 +206,18 @@ class PopularityChanges extends React.Component {
   componentDidUpdate = () => fetchData(this.props);
 
   loadMoreData = ({ startIndex, stopIndex }) =>
-    new Promise((f, r) =>
+    new Promise((fulfill, reject) =>
       fetchData(
         R.mergeDeepLeft(
           { config: { startIndex, limit: stopIndex - startIndex } },
           this.props
         ),
-        f
+        fulfill
       )
     );
 
   getColumns = () => {
-    const relative = this.props.config.relative;
+    const isRelative = this.props.config.relative === RELATIVITY.RELATIVE;
 
     return [
       <Column
@@ -219,7 +232,7 @@ class PopularityChanges extends React.Component {
       <Column
         {...defaultColumnProps}
         key={2}
-        label={relative ? 'Change %' : 'Change'}
+        label={isRelative ? 'Change %' : 'Change'}
         dataKey="popularity_difference"
         cellRenderer={({ cellData }) => (
           <span
@@ -228,7 +241,7 @@ class PopularityChanges extends React.Component {
               color: cellData > 0 ? '#43b249' : '#b24343',
             }}
           >
-            {relative
+            {isRelative
               ? numeral(cellData / 100).format('+0.00%')
               : numeral(cellData).format('+0,0')}
           </span>
@@ -314,7 +327,7 @@ class PopularityChanges extends React.Component {
   render = () => (
     <div style={styles.root}>
       <div>
-        <PopularityChangesConfig />
+        <PopularityChangesConfig config={this.props.config} />
         {this.renderSymbolTable()}
       </div>
 
@@ -331,8 +344,7 @@ PopularityChanges.defaultProps = {
 
 const mapStateToProps = (state, { pageSize = 50 }) => {
   const config = {
-    ...state.popularityChanges,
-    suffix: state.popularityChanges.changeType,
+    ...getPopularityChangesConfig(state),
     limit: pageSize,
   };
   const dataSelector = getPopularityChanges(config);
@@ -340,7 +352,7 @@ const mapStateToProps = (state, { pageSize = 50 }) => {
 
   return {
     config,
-    selectedSymbol: state.popularityChanges.selectedSymbol,
+    selectedSymbol: config.symbol,
     data: data ? data.map((datum, i) => ({ ...datum, i: i + 1 })) : null,
     ...R.pick(
       [
@@ -357,7 +369,7 @@ const mapStateToProps = (state, { pageSize = 50 }) => {
 export default connect(mapStateToProps, {
   requestLargestPopularityChanges,
   setPopularityChangesChangeType,
-  togglePopularityChangesRelative,
+  setPopularityChangesRelative,
   setSelectedSymbol,
   requestPopularityHistory,
   requestQuoteHistory,

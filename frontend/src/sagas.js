@@ -1,7 +1,10 @@
 import { call, select, put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { push } from 'react-router-redux';
+import queryString from 'query-string';
 import * as R from 'ramda';
 
 import * as apiActions from 'src/actions/api';
+import * as routerActions from 'src/actions/router';
 import * as Api from 'src/api';
 import {
   getQuote,
@@ -14,6 +17,7 @@ import {
   getNeighborRankings,
   getTotalSymbols,
 } from 'src/selectors/api';
+import { getQueryParams } from 'src/selectors/router';
 
 const retryCount = 3;
 const retryTimeoutMs = 5000;
@@ -228,6 +232,22 @@ function* fetchTotalSymbols({ hoursAgo }) {
   yield put({ type: apiActions.TOTAL_SYMBOLS_FETCHED, totalSymbols });
 }
 
+function* addQueryParam({ newParams, defaults }) {
+  console.log(defaults);
+  const existingParams = yield select(getQueryParams);
+  const mergedParams = R.merge(existingParams, newParams);
+  // Remove query params that are default if defaults are provided
+  const nonDefaultParams = defaults
+    ? R.pickBy(
+        (val, key) =>
+          console.log(val, key, defaults[key]) || defaults[key] !== val,
+        mergedParams
+      )
+    : mergedParams;
+
+  yield put(push({ search: queryString.stringify(nonDefaultParams) }));
+}
+
 function* rootSaga() {
   yield takeLatest(apiActions.FETCH_QUOTE_REQUESTED, fetchQuote);
   yield takeEvery(apiActions.FETCH_TOP_SYMBOLS_REQUESTED, fetchTopSymbols);
@@ -250,6 +270,7 @@ function* rootSaga() {
     fetchNeighborRankingSymbols
   );
   yield takeLatest(apiActions.FETCH_TOTAL_SYMBOLS, fetchTotalSymbols);
+  yield takeEvery(routerActions.ADD_QUERY_PARAMS, addQueryParam);
 }
 
 export default rootSaga;

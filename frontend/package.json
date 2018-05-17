@@ -9,6 +9,7 @@
     "history": "^4.7.2",
     "numeral": "^2.0.6",
     "prop-types": "^15.6.1",
+    "query-string": "^6.1.0",
     "ramda": "^0.25.0",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",

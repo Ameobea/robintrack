@@ -1,12 +1,4 @@
-export const SET_POPULARITY_CHANGES_CHANGE_TYPE =
-  'SET_POPULARITY_CHANGES_CHANGE_TYPE';
-export const TOGGLE_POPULARITY_CHANGES_RELATIVE =
-  'TOGGLE_POPULARITY_CHANGES_RELATIVE';
-export const SET_POPULARITY_CHANGES_HOURS_AGO =
-  'SET_POPULARITY_CHANGES_HOURS_AGO';
-export const SET_POPULARITY_CHANGES_MIN_POPULARITY =
-  'SET_POPULARITY_CHANGES_MIN_POPULARITY';
-export const SET_POPULARITY_SELECTED_SYMBOL = 'SET_POPULARITY_SELECTED_SYMBOL';
+import { addQueryParam } from 'src/actions/router';
 
 export const CHANGE_TYPE = {
   INCREASES: 'increases',
@@ -14,26 +6,31 @@ export const CHANGE_TYPE = {
   CHANGES: 'changes',
 };
 
-export const setPopularityChangesChangeType = changeType => ({
-  type: SET_POPULARITY_CHANGES_CHANGE_TYPE,
-  changeType,
-});
+export const RELATIVITY = {
+  RELATIVE: 'true',
+  NOT_RELATIVE: 'false',
+};
 
-export const togglePopularityChangesRelative = () => ({
-  type: TOGGLE_POPULARITY_CHANGES_RELATIVE,
-});
+export const defaultConfig = {
+  changeType: CHANGE_TYPE.CHANGES,
+  relative: 'true',
+  hoursAgo: 24,
+  minPopularity: 50,
+};
 
-export const setPopularityChangesHoursAgo = hours => ({
-  type: SET_POPULARITY_CHANGES_HOURS_AGO,
-  hours,
-});
+const createQueryParamAdder = key => value =>
+  addQueryParam({ [key]: value }, defaultConfig);
 
-export const setPopularityChangesMinPopularity = minPopularity => ({
-  type: SET_POPULARITY_CHANGES_MIN_POPULARITY,
-  minPopularity,
-});
+export const setPopularityChangesChangeType = createQueryParamAdder(
+  'changeType'
+);
 
-export const setSelectedSymbol = symbol => ({
-  type: SET_POPULARITY_SELECTED_SYMBOL,
-  symbol,
-});
+export const setPopularityChangesRelative = createQueryParamAdder('relative');
+
+export const setPopularityChangesHoursAgo = createQueryParamAdder('hoursAgo');
+
+export const setPopularityChangesMinPopularity = createQueryParamAdder(
+  'minPopularity'
+);
+
+export const setSelectedSymbol = createQueryParamAdder('symbol');

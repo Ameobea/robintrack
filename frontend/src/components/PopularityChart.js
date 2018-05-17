@@ -166,14 +166,19 @@ const getChartOptions = ({
   };
 };
 
-const PopularityChart = ({ symbol, quoteHistory, popularityHistory }) => (
+const PopularityChart = ({
+  symbol,
+  quoteHistory,
+  popularityHistory,
+  style = {},
+}) => (
   <ReactEchartsCore
     option={getChartOptions({ symbol, quoteHistory, popularityHistory })}
     echarts={echarts}
     notMerge={true}
     lazyUpdate={true}
     opts={{}}
-    style={{ height: 600 }}
+    style={{ height: 600, ...style }}
   />
 );
 

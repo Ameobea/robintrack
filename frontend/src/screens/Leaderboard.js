@@ -3,7 +3,10 @@ import { connect } from 'react-redux';
 import * as R from 'ramda';
 import { Column } from 'react-virtualized';
 import { Link } from 'react-router-dom';
+import { push } from 'react-router-redux';
 import numeral from 'numeral';
+import queryString from 'query-string';
+import { Switch } from '@blueprintjs/core';
 
 import {
   requestBottomSymbols,
@@ -30,9 +33,9 @@ const styles = {
   tablesWrapper: {
     display: 'flex',
     flex: 1.4,
-    flexDirection: 'row',
-    maxWidth: 700,
-    minWidth: 575,
+    flexDirection: 'column',
+    maxWidth: 400,
+    minWidth: 300,
     justifyContent: 'space-around',
   },
   text: { fontSize: 24 },
@@ -50,12 +53,17 @@ const styles = {
     color: fontColor,
     textAlign: 'center',
   },
+  configWrapper: {
+    display: 'flex',
+    alignSelf: 'center',
+    flexDirection: 'row',
+  },
 };
 
 class Leaderboard extends Component {
   state = {};
 
-  componentDidMount() {
+  componentDidMount = () => {
     const {
       initialPageSize,
       requestBottomSymbols,
@@ -74,7 +82,7 @@ class Leaderboard extends Component {
     }
 
     requestTotalSymbols();
-  }
+  };
 
   fetchMoreTopSymbols = ({ startIndex, stopIndex }) =>
     new Promise((f, r) =>
@@ -100,7 +108,7 @@ class Leaderboard extends Component {
     if (!symbol) {
       return (
         <div style={styles.placeholder}>
-          Click a row from the tables to view a chart.
+          Click a row from the table to view a chart.
         </div>
       );
     }
@@ -117,6 +125,7 @@ class Leaderboard extends Component {
           symbol={symbol}
           popularityHistory={popularityHistoryForSymbol}
           quoteHistory={quoteHistoryForSymbol}
+          style={{ height: '68vh' }}
         />
       </div>
     );
@@ -147,61 +156,91 @@ class Leaderboard extends Component {
     return {
       symbol,
       popularity: numeral(popularity).format('0,0'),
-      i: index + 1000,
+      i: index + 1,
     };
   };
 
   symbolChart = null;
 
-  getDefaultSymbolTableProps = data => ({
-    onRowClick: this.updateSymbolChart,
-    columns: this.getColumns(),
-    height: '80vh',
-    rowGetter: this.getRowGetter(data),
-    data,
-  });
+  render = () => {
+    const {
+      topSymbols,
+      bottomSymbols,
+      location: { search = '' },
+      push,
+    } = this.props;
 
-  PopulatedSymbolTable = ({ data, ...props }) => {
-    if (R.isEmpty(data)) {
+    if (!bottomSymbols || !topSymbols) {
       return <Loading />;
     }
 
+    const { show = 'top' } = queryString.parse(search);
+
+    const symbolTablePropMap = {
+      top: {
+        label: 'Most Popular',
+        data: topSymbols,
+        loadMoreData: this.fetchMoreTopSymbols,
+        rowGetter: this.getRowGetter(topSymbols),
+      },
+      bottom: {
+        label: 'Least Popular',
+        data: bottomSymbols,
+        loadMoreData: this.fetchMoreBottomSymbols,
+        rowGetter: this.getRowGetter(bottomSymbols),
+      },
+    };
+
+    const symbolTableProps =
+      symbolTablePropMap[show] || symbolTablePropMap['top'];
+
     return (
-      <SymbolTable {...this.getDefaultSymbolTableProps(data)} {...props} />
+      <div style={styles.root}>
+        <div style={styles.tablesWrapper}>
+          <div style={styles.configWrapper}>
+            Bottom
+            <Switch
+              checked={show != 'bottom'}
+              onChange={() =>
+                push({
+                  search: queryString.stringify({
+                    show: show === 'top' ? 'bottom' : 'top',
+                  }),
+                })
+              }
+              style={{ marginLeft: 8 }}
+              large
+            />
+            Top
+          </div>
+
+          <SymbolTable
+            onRowClick={this.updateSymbolChart}
+            columns={this.getColumns()}
+            height="70vh"
+            {...symbolTableProps}
+          />
+        </div>
+
+        <div style={styles.chartWrapper}>
+          <div style={{ width: '100%' }}>{this.renderSymbolChart()}</div>
+        </div>
+      </div>
     );
   };
-
-  render = () => (
-    <div style={styles.root}>
-      <div style={styles.tablesWrapper}>
-        <this.PopulatedSymbolTable
-          label="Most Popular"
-          loadMoreData={this.fetchMoreTopSymbols}
-          data={this.props.topSymbols}
-        />
-        <this.PopulatedSymbolTable
-          label="Least Popular"
-          loadMoreData={this.fetchMoreBottomSymbols}
-          data={this.props.bottomSymbols}
-        />
-      </div>
-
-      <div style={styles.chartWrapper}>
-        <div style={{ width: '100%' }}>{this.renderSymbolChart()}</div>
-      </div>
-    </div>
-  );
 }
 
 Leaderboard.defaultProps = {
   initialPageSize: 50,
 };
 
-const mapStateToProps = ({ api }) =>
-  R.pick(
+const mapStateToProps = ({ api, router: { location } }) => ({
+  ...R.pick(
     ['bottomSymbols', 'topSymbols', 'popularityHistory', 'quoteHistory'],
     api
-  );
+  ),
+  location,
+});
 
 export default connect(mapStateToProps, {
   requestBottomSymbols,
@@ -209,4 +248,5 @@ export default connect(mapStateToProps, {
   requestPopularityHistory,
   requestQuoteHistory,
   requestTotalSymbols,
+  push,
 })(Leaderboard);
