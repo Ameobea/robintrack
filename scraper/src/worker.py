@@ -131,6 +131,9 @@ def fetch_popularity(instrument_ids: str, collection: pymongo.collection.Collect
                          collection,
                          sleep,
                          worker_request_cooldown_seconds=worker_request_cooldown_seconds)
+    except TypeError:  # They sent back some broken data; just ignore it.
+        print('Robinhood sent back garbage; ignoring.')
+        sleep(cooldown_seconds)
 
 
 def fetch_quote(symbols: str, collection: pymongo.collection.Collection, sleep,
