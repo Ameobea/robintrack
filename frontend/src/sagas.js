@@ -233,16 +233,11 @@ function* fetchTotalSymbols({ hoursAgo }) {
 }
 
 function* addQueryParam({ newParams, defaults }) {
-  console.log(defaults);
   const existingParams = yield select(getQueryParams);
   const mergedParams = R.merge(existingParams, newParams);
   // Remove query params that are default if defaults are provided
   const nonDefaultParams = defaults
-    ? R.pickBy(
-        (val, key) =>
-          console.log(val, key, defaults[key]) || defaults[key] !== val,
-        mergedParams
-      )
+    ? R.pickBy((val, key) => defaults[key] !== val, mergedParams)
     : mergedParams;
 
   yield put(push({ search: queryString.stringify(nonDefaultParams) }));

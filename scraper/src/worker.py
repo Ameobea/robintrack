@@ -3,6 +3,7 @@ quotes, popularity, or stores the ID in a database. """
 
 import datetime
 from functools import reduce
+from json.decoder import JSONDecodeError
 from pprint import pprint
 
 import click
@@ -133,6 +134,9 @@ def fetch_popularity(instrument_ids: str, collection: pymongo.collection.Collect
                          worker_request_cooldown_seconds=worker_request_cooldown_seconds)
     except TypeError:  # They sent back some broken data; just ignore it.
         print('Robinhood sent back garbage; ignoring.')
+        sleep(cooldown_seconds)
+    except JSONDecodeError:
+        print('Robinhood API sending back HTML; backing off.')
         sleep(cooldown_seconds)
 
 
