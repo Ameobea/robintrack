@@ -5,9 +5,9 @@ from time import sleep
 from typing import Dict, Iterable, List, Tuple
 
 import click
-from Robinhood import Robinhood
 import pika
 import pymongo
+from Robinhood import Robinhood
 
 from common import parse_throttle_res
 from db import get_db
@@ -17,49 +17,45 @@ def get_tradable_instrument_ids(instruments: List[Dict[str, str]]) -> List[Tuple
     """ Returns the instrument IDs and symbols of all tradable instruments in the provided list
     of instruments. """
     tradable_instruments: Iterable[Dict[str, str]] = filter(
-        lambda instrument: instrument.get('tradability') == 'tradable',
-        instruments
+        lambda instrument: instrument.get("tradability") == "tradable", instruments
     )
 
     tuples: Iterable[Tuple[str, str]] = map(
-        lambda instrument: (instrument['id'], instrument['symbol']),
-        tradable_instruments
+        lambda instrument: (instrument["id"], instrument["symbol"]), tradable_instruments
     )
 
     return list(tuples)
 
 
 @click.command()
-@click.option('--rabbitmq_host', type=click.STRING, default='localhost')
-@click.option('--rabbitmq_port', type=click.INT, default=5672)
-@click.option('--scraper_request_cooldown_seconds', type=click.FLOAT, default=1.0)
+@click.option("--rabbitmq_host", type=click.STRING, default="localhost")
+@click.option("--rabbitmq_port", type=click.INT, default=5672)
+@click.option("--scraper_request_cooldown_seconds", type=click.FLOAT, default=1.0)
 def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds: float):
     rabbitmq_connection = pika.BlockingConnection(
         pika.ConnectionParameters(host=rabbitmq_host, port=rabbitmq_port)
     )
     rabbitmq_channel = rabbitmq_connection.channel()
-    rabbitmq_channel.queue_declare(queue='instrument_ids')
+    rabbitmq_channel.queue_declare(queue="instrument_ids")
 
     trader = Robinhood()
     res = trader.get_url("https://api.robinhood.com/instruments/")
 
     db = get_db()
-    index_col = db['index']
-    index_col.create_index('instrument_id', unique=True)
+    index_col = db["index"]
+    index_col.create_index("instrument_id", unique=True)
 
     total_ids = 0
     quotes = []
     instrument_ids = []
     while True:
-        fetched_instruments: List[Dict[str, str]] = res['results']
-        tradable_instrument_ids = get_tradable_instrument_ids(
-            fetched_instruments)
+        fetched_instruments: List[Dict[str, str]] = res["results"]
+        tradable_instrument_ids = get_tradable_instrument_ids(fetched_instruments)
         total_ids += len(tradable_instrument_ids)
 
         for instrument_id, symbol in tradable_instrument_ids:
             try:
-                index_col.insert_one(
-                    {'instrument_id': instrument_id, 'symbol': symbol})
+                index_col.insert_one({"instrument_id": instrument_id, "symbol": symbol})
             except pymongo.errors.DuplicateKeyError:
                 pass
 
@@ -68,41 +64,41 @@ def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds
 
             if len(quotes) == 20:
                 rabbitmq_channel.basic_publish(
-                    exchange='',
-                    routing_key='symbols',
-                    body=','.join(quotes)
+                    exchange="", routing_key="symbols", body=",".join(quotes)
                 )
 
                 rabbitmq_channel.basic_publish(
-                    exchange='',
-                    routing_key='instrument_ids',
-                    body=','.join(instrument_ids)
+                    exchange="", routing_key="instrument_ids", body=",".join(instrument_ids)
                 )
 
                 quotes = []
                 instrument_ids = []
 
-        if res.get('detail'):
-            cooldown_seconds = parse_throttle_res(res['detail'])
-            print('Instruments fetch request failed; waiting for {} second cooldown...'.format(
-                cooldown_seconds))
+        if res.get("detail"):
+            cooldown_seconds = parse_throttle_res(res["detail"])
+            print(
+                "Instruments fetch request failed; waiting for {} second cooldown...".format(
+                    cooldown_seconds
+                )
+            )
             sleep(cooldown_seconds)
-        elif res.get('next'):
+        elif res.get("next"):
             sleep(scraper_request_cooldown_seconds)
-            res = trader.get_url(res['next'])
+            res = trader.get_url(res["next"])
         else:
             rabbitmq_channel.basic_publish(
-                exchange='',
-                routing_key='symbols',
-                body=','.join(quotes)
+                exchange="", routing_key="symbols", body=",".join(quotes)
             )
 
-            print('Finished scraping; fetched a total of {} tradable instrument IDs.'.format(
-                total_ids))
+            print(
+                "Finished scraping; fetched a total of {} tradable instrument IDs.".format(
+                    total_ids
+                )
+            )
             break
 
     rabbitmq_connection.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()  # pylint: disable=E1120
