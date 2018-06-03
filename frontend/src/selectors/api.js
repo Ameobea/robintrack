@@ -41,4 +41,4 @@ export const getNeighborRankings = middlePopularity => ({
   return R.slice(startIndex, middlePopularity + 2, popularityMapping);
 };
 
-export const getTotalSymbols = R.prop('totalSymbols');
+export const getTotalSymbols = R.path(['api', 'totalSymbols']);

@@ -170,28 +170,38 @@ const PopularityChangesConfig = connect(undefined, {
   }
 );
 
-const fetchData = (
-  {
-    config,
-    requestLargestPopularityChanges,
-    requestTotalSymbols,
-    totalSymbols,
-    selectedSymbol,
-    requestPopularityHistory,
-    requestQuoteHistory,
-  },
+const fetchSymbolData = (
+  symbol,
+  { requestPopularityHistory, requestQuoteHistory }
+) => {
+  requestPopularityHistory(symbol);
+  requestQuoteHistory(symbol);
+};
+
+export const fetchPopularityChangesData = ({
+  config,
+  requestLargestPopularityChanges,
+}) =>
+  requestLargestPopularityChanges({
+    ...config,
+    startIndex: config.startIndex || 0,
+  });
+
+const fetchAllData = (
+  { requestTotalSymbols, totalSymbols, selectedSymbol, ...props },
   cb
 ) => {
-  requestLargestPopularityChanges(
-    { ...config, startIndex: config.startIndex || 0 },
-    cb
-  );
+  fetchPopularityChangesData(props);
+
   R.isNil(totalSymbols) && requestTotalSymbols();
+
   if (selectedSymbol) {
-    requestPopularityHistory(selectedSymbol);
-    requestQuoteHistory(selectedSymbol);
+    fetchSymbolData(selectedSymbol, props);
   }
 };
+
+const popularityChangesSettingsDiffer = (oldProps, newProps) =>
+  R.equals(oldProps.config, newProps.config);
 
 const defaultColumnProps = {
   width: 150,
@@ -201,13 +211,26 @@ const defaultColumnProps = {
 };
 
 class PopularityChanges extends React.Component {
-  componentDidMount = () => fetchData(this.props);
+  componentDidMount = () => {
+    fetchAllData(this.props);
+  };
 
-  componentDidUpdate = () => fetchData(this.props);
+  componentDidUpdate = prevProps => {
+    if (prevProps.selectedSymbol !== this.props.selectedSymbol) {
+      fetchSymbolData(this.props.selectedSymbol, this.props);
+    }
+
+    if (popularityChangesSettingsDiffer(prevProps, this.props)) {
+      requestLargestPopularityChanges({
+        ...this.props.config,
+        startIndex: this.props.config.startIndex || 0,
+      });
+    }
+  };
 
   loadMoreData = ({ startIndex, stopIndex }) =>
     new Promise((fulfill, reject) =>
-      fetchData(
+      fetchPopularityChangesData(
         R.mergeDeepLeft(
           { config: { startIndex, limit: stopIndex - startIndex } },
           this.props
@@ -291,17 +314,7 @@ class PopularityChanges extends React.Component {
     );
   };
 
-  handleRowClick = ({ symbol }) => {
-    const {
-      setSelectedSymbol,
-      requestPopularityHistory,
-      requestQuoteHistory,
-    } = this.props;
-
-    setSelectedSymbol(symbol);
-    requestPopularityHistory(symbol);
-    requestQuoteHistory(symbol);
-  };
+  handleRowClick = ({ symbol }) => this.props.setSelectedSymbol(symbol);
 
   renderSymbolTable = () => {
     const { data } = this.props;
