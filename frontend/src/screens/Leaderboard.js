@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { compose } from 'recompose';
 import * as R from 'ramda';
 import { Column } from 'react-virtualized';
 import { Link } from 'react-router-dom';
@@ -19,7 +20,7 @@ import { fontColor, backgroundColor } from 'src/style';
 import Loading from 'src/components/Loading';
 import PopularityChart from 'src/components/PopularityChart';
 import SymbolTable, { SymbolColumn } from 'src/components/SymbolTable';
-import { ResponsiveStyler } from 'src/components/ResponsiveHelpers';
+import { withMobileProp } from 'src/components/ResponsiveHelpers';
 
 const styles = {
   root: {
@@ -54,6 +55,7 @@ const styles = {
     flex: 1,
     justifyContent: 'center',
     minWidth: '50vw',
+    paddingTop: 10,
   },
   placeholder: {
     fontSize: 24,
@@ -132,7 +134,7 @@ class Leaderboard extends Component {
           symbol={symbol}
           popularityHistory={popularityHistoryForSymbol}
           quoteHistory={quoteHistoryForSymbol}
-          style={{ height: '68vh' }}
+          style={{ height: this.props.mobile ? '50vh' : '68vh' }}
         />
       </div>
     );
@@ -147,7 +149,7 @@ class Leaderboard extends Component {
       flexGrow={0.5}
       style={styles.text}
     />,
-    SymbolColumn,
+    SymbolColumn({ mobile: false }),
     <Column
       key={3}
       label="Popularity"
@@ -160,6 +162,7 @@ class Leaderboard extends Component {
 
   getRowGetter = data => ({ index }) => {
     const { popularity, symbol } = data[index];
+
     return {
       symbol,
       popularity: numeral(popularity).format('0,0'),
@@ -185,13 +188,11 @@ class Leaderboard extends Component {
 
     const symbolTablePropMap = {
       top: {
-        label: 'Most Popular',
         data: topSymbols,
         loadMoreData: this.fetchMoreTopSymbols,
         rowGetter: this.getRowGetter(topSymbols),
       },
       bottom: {
-        label: 'Least Popular',
         data: bottomSymbols,
         loadMoreData: this.fetchMoreBottomSymbols,
         rowGetter: this.getRowGetter(bottomSymbols),
@@ -205,7 +206,7 @@ class Leaderboard extends Component {
       <div style={styles.root}>
         <div style={styles.tablesWrapper}>
           <div style={styles.configWrapper}>
-            Bottom
+            Least Popular
             <Switch
               checked={show !== 'bottom'}
               onChange={() =>
@@ -218,25 +219,25 @@ class Leaderboard extends Component {
               style={{ marginLeft: 8 }}
               large
             />
-            Top
+            Most Popular
           </div>
 
           <SymbolTable
             onRowClick={this.updateSymbolChart}
             columns={this.getColumns()}
             height="70vh"
+            fullHeight
             {...symbolTableProps}
           />
         </div>
 
-        <ResponsiveStyler
-          styler={matches =>
-            matches ? styles.chartWrapper : styles.mobileChartWrapper
+        <div
+          style={
+            this.props.mobile ? styles.mobileChartWrapper : styles.chartWrapper
           }
-          minDeviceWidth={600}
         >
           <div style={{ width: '100%' }}>{this.renderSymbolChart()}</div>
-        </ResponsiveStyler>
+        </div>
       </div>
     );
   };
@@ -254,11 +255,14 @@ const mapStateToProps = ({ api, router: { location } }) => ({
   location,
 });
 
-export default connect(mapStateToProps, {
-  requestBottomSymbols,
-  requestTopSymbols,
-  requestPopularityHistory,
-  requestQuoteHistory,
-  requestTotalSymbols,
-  push,
-})(Leaderboard);
+export default compose(
+  connect(mapStateToProps, {
+    requestBottomSymbols,
+    requestTopSymbols,
+    requestPopularityHistory,
+    requestQuoteHistory,
+    requestTotalSymbols,
+    push,
+  }),
+  withMobileProp({ maxDeviceWidth: 600 })
+)(Leaderboard);

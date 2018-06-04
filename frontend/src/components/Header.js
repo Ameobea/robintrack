@@ -25,7 +25,7 @@ const styles = {
   },
   headerItem: { display: 'flex', padding: 20, alignItems: 'flex-end' },
   text: {
-    fontSize: 30,
+    fontSize: 26,
     color: fontColor,
     fontWeight: 'bold',
   },
@@ -43,6 +43,7 @@ const styles = {
   mobileHeader: {
     display: 'flex',
     flexDirection: 'row',
+    justifyContent: 'space-between',
   },
 };
 
@@ -117,7 +118,7 @@ const MobileNavMenu = ({ onItemSelect }) => (
       <HeaderItem
         key={i}
         style={{ padding: 2 }}
-        textStyle={{ ...textStyle, fontSize: 12 }}
+        textStyle={{ ...textStyle, fontSize: 16 }}
         onItemSelect={onItemSelect}
         {...props}
       />

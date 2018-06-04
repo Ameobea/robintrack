@@ -90,11 +90,15 @@ const getChartOptions = ({
 
   const yAxisDefaults = {
     type: 'value',
-    axisLabel: {
-      showMinLabel: false,
-      showMaxLabel: false,
-      color: 'white',
-    },
+    ...(mobile
+      ? {}
+      : {
+          axisLabel: {
+            showMinLabel: false,
+            showMaxLabel: false,
+            color: 'white',
+          },
+        }),
     splitNumber: mobile ? 7 : 10,
     splitLine: splitLineOptions,
   };
@@ -103,7 +107,12 @@ const getChartOptions = ({
     backgroundColor: '#1d2126',
     title: { text: `Popularity History for ${symbol}` },
     legend: { show: true, textStyle: { color: '#fff' } },
-    grid: { bottom: 75 },
+    grid: {
+      bottom: 75,
+      top: mobile ? 25 : 75,
+      left: mobile ? 0 : 75,
+      right: mobile ? 5 : 75,
+    },
     xAxis: [
       xAxisOptions,
       {
@@ -118,6 +127,7 @@ const getChartOptions = ({
         min: minQuote - quoteOffset,
         max: maxQuote + quoteOffset,
         axisLabel: {
+          show: !mobile,
           ...yAxisDefaults.axisLabel,
           formatter: value => `$${value.toFixed(2)}`,
         },
@@ -169,25 +179,14 @@ const getChartOptions = ({
   };
 };
 
-const PopularityChart = ({
-  symbol,
-  quoteHistory,
-  popularityHistory,
-  style = {},
-  mobile,
-}) => (
+const PopularityChart = ({ style, ...props }) => (
   <ReactEchartsCore
-    option={getChartOptions({
-      symbol,
-      quoteHistory,
-      popularityHistory,
-      mobile,
-    })}
+    option={getChartOptions(props)}
     echarts={echarts}
     notMerge={true}
     lazyUpdate={true}
     opts={{}}
-    style={{ height: 600, ...style }}
+    style={{ height: props.mobile ? 300 : 600, style }}
   />
 );
 

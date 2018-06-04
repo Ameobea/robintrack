@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { compose } from 'recompose';
 import { Switch } from '@blueprintjs/core';
 import { Column } from 'react-virtualized';
 import { Link } from 'react-router-dom';
@@ -27,9 +28,11 @@ import PopularityChart from 'src/components/PopularityChart';
 import { fontColor } from 'src/style';
 import { CHANGE_TYPE, RELATIVITY } from 'src/actions/popularityChanges';
 import { getPopularityChangesConfig } from 'src/selectors/popularityChanges';
+import { withMobileProp } from 'src/components/ResponsiveHelpers';
+
+const getTextStyle = mobile => ({ fontSize: mobile ? 12 : 24 });
 
 const styles = {
-  text: { fontSize: 24 },
   root: {
     display: 'flex',
     flex: 1,
@@ -42,9 +45,17 @@ const styles = {
     flex: 1,
     justifyContent: 'center',
     minWidth: '50vw',
-    paddingTop: 50,
+    paddingTop: 25,
     paddingLeft: 40,
     paddingRight: 40,
+  },
+  mobileChartWrapper: {
+    display: 'flex',
+    flex: 1,
+    padding: 5,
+    paddingTop: 20,
+    justifyContent: 'center',
+    maxWidth: '90vw',
   },
   config: {
     backgroundColor: '#1f2939',
@@ -58,7 +69,22 @@ const styles = {
     paddingBottom: 0,
     marginBottom: 10,
   },
+  mobileConfig: {
+    flex: 1,
+    minWidth: '90vw',
+    justifyContent: 'flexStart',
+    flexWrap: 'wrap',
+    paddingLeft: 0,
+    paddingRight: 0,
+    paddingTop: 20,
+  },
   setting: { display: 'flex', flex: 1 },
+  mobileSetting: {
+    paddingLeft: 20,
+    paddingRight: 20,
+    alignItems: 'flex-end',
+    marginTop: -15,
+  },
   placeholder: {
     fontSize: 24,
     color: fontColor,
@@ -66,13 +92,23 @@ const styles = {
   },
 };
 
-const Setting = ({ label, style = {}, flex = 1, children }) => (
-  <div style={{ ...styles.setting, flex, ...style }}>
-    <Label>
-      {label}
-      {children}
-    </Label>
-  </div>
+const Setting = withMobileProp({ maxDeviceWidth: 600 })(
+  ({ label, style = {}, flex = 1, mobile, children }) => (
+    <div
+      style={{
+        ...styles.setting,
+        ...(mobile ? styles.mobileSetting : {}),
+        flex,
+        flexBasis: mobile ? '40vw' : undefined,
+        ...style,
+      }}
+    >
+      <Label>
+        {label}
+        {children}
+      </Label>
+    </div>
+  )
 );
 
 const lookbackOptionLabels = {
@@ -106,6 +142,7 @@ const PopularityChangesConfig = connect(undefined, {
 })(
   ({
     config: { relative, hoursAgo, minPopularity, changeType },
+    mobile,
     setPopularityChangesRelative,
     setSelectedSymbol,
     setPopularityChangesHoursAgo,
@@ -115,11 +152,11 @@ const PopularityChangesConfig = connect(undefined, {
     const isRelative = relative === RELATIVITY.RELATIVE;
 
     return (
-      <Card style={styles.config}>
+      <Card style={R.merge(styles.config, mobile ? styles.mobileConfig : {})}>
         <Setting label="Relative" flex={0.5}>
           <div style={{ paddingTop: 8 }}>
             <Switch
-              large
+              large={!mobile}
               checked={isRelative}
               onChange={() =>
                 setPopularityChangesRelative(
@@ -203,12 +240,12 @@ const fetchAllData = (
 const popularityChangesSettingsDiffer = (oldProps, newProps) =>
   !R.equals(oldProps.config, newProps.config);
 
-const defaultColumnProps = {
+const getDefaultColumnProps = mobile => ({
   width: 150,
   flexGrow: 1,
-  style: styles.text,
+  style: getTextStyle(mobile),
   cellRenderer: ({ cellData }) => numeral(cellData).format('0,0'),
-};
+});
 
 class PopularityChanges extends React.Component {
   componentDidMount = () => {
@@ -240,7 +277,9 @@ class PopularityChanges extends React.Component {
     );
 
   getColumns = () => {
+    const { mobile } = this.props;
     const isRelative = this.props.config.relative === RELATIVITY.RELATIVE;
+    const defaultColumnProps = getDefaultColumnProps(mobile);
 
     return [
       <Column
@@ -251,7 +290,7 @@ class PopularityChanges extends React.Component {
         width={100}
         flexGrow={0.5}
       />,
-      SymbolColumn,
+      SymbolColumn({ mobile: this.props.mobile }),
       <Column
         {...defaultColumnProps}
         key={2}
@@ -260,7 +299,7 @@ class PopularityChanges extends React.Component {
         cellRenderer={({ cellData }) => (
           <span
             style={{
-              ...styles.text,
+              ...getTextStyle(mobile),
               color: cellData > 0 ? '#43b249' : '#b24343',
             }}
           >
@@ -292,7 +331,7 @@ class PopularityChanges extends React.Component {
     if (!selectedSymbol) {
       return (
         <div style={styles.placeholder}>
-          Click a row from the tables to view a chart.
+          Click a row from the table to view a chart.
         </div>
       );
     }
@@ -324,15 +363,14 @@ class PopularityChanges extends React.Component {
 
     return (
       <SymbolTable
-        label="Popularity Changes"
         columns={this.getColumns()}
         data={data}
         loadMoreData={this.loadMoreData}
         rowGetter={({ index }) => data[index]}
         onRowClick={this.handleRowClick}
-        style={{ minWidth: 600, maxWidth: 750 }}
+        style={{ minWidth: this.props.mobile ? 200 : 600, maxWidth: 750 }}
         disableHeader={false}
-        height="70vh"
+        height={this.props.mobile ? '50vh' : '70vh'}
       />
     );
   };
@@ -340,12 +378,21 @@ class PopularityChanges extends React.Component {
   render = () => (
     <div style={styles.root}>
       <div>
-        <PopularityChangesConfig config={this.props.config} />
+        <PopularityChangesConfig
+          config={this.props.config}
+          mobile={this.props.mobile}
+        />
         {this.renderSymbolTable()}
       </div>
 
-      <div style={styles.chartWrapper}>
-        <div style={{ width: '100%' }}>{this.renderPopularityChart()}</div>
+      <div
+        style={
+          this.props.mobile ? styles.mobileChartWrapper : styles.chartWrapper
+        }
+      >
+        <div style={{ width: '100%', height: '100%' }}>
+          {this.renderPopularityChart()}
+        </div>
       </div>
     </div>
   );
@@ -379,12 +426,15 @@ const mapStateToProps = (state, { pageSize = 50 }) => {
   };
 };
 
-export default connect(mapStateToProps, {
-  requestLargestPopularityChanges,
-  setPopularityChangesChangeType,
-  setPopularityChangesRelative,
-  setSelectedSymbol,
-  requestPopularityHistory,
-  requestQuoteHistory,
-  requestTotalSymbols,
-})(PopularityChanges);
+export default compose(
+  connect(mapStateToProps, {
+    requestLargestPopularityChanges,
+    setPopularityChangesChangeType,
+    setPopularityChangesRelative,
+    setSelectedSymbol,
+    requestPopularityHistory,
+    requestQuoteHistory,
+    requestTotalSymbols,
+  }),
+  withMobileProp({ maxDeviceWidth: 600 })
+)(PopularityChanges);

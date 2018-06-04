@@ -1,10 +1,12 @@
 import React from 'react';
+import { compose } from 'recompose';
 import { AutoSizer, Column, InfiniteLoader, Table } from 'react-virtualized';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import * as R from 'ramda';
 
 import { emphasis, fontColor } from 'src/style';
+import { withMobileProp } from 'src/components/ResponsiveHelpers';
 
 const styles = {
   root: {
@@ -18,17 +20,13 @@ const styles = {
   },
   header: {
     textAlign: 'center',
-    fontSize: 34,
     fontWeight: 'bold',
   },
-  text: { fontSize: 24 },
   row: {
     display: 'flex',
     flexDirection: 'row',
     flex: 1,
     backgroundColor: '#111',
-    marginTop: 15,
-    marginBottom: 15,
     cursor: 'pointer',
     boxShadow: '2px 2px 4px 1px rgba(0,0,0,0.75)',
   },
@@ -61,9 +59,13 @@ const SymbolTable = ({
   style = {},
   disableHeader = true,
   height = '80vh',
+  fullHeight = false,
+  mobile,
 }) => (
   <div style={R.merge(styles.root, style)} className="symbol-table">
-    <h2 style={styles.header}>{label}</h2>
+    {label && (
+      <h2 style={{ ...styles.header, fontSize: mobile ? 16 : 34 }}>{label}</h2>
+    )}
 
     <div style={{ height, flexDirection: 'row' }}>
       <InfiniteLoader
@@ -80,12 +82,13 @@ const SymbolTable = ({
                 disableHeader={disableHeader}
                 ref={registerChild}
                 headerHeight={30}
+                headerStyle={mobile ? { fontSize: 8 } : undefined}
                 height={height}
                 width={width}
                 rowCount={data.length}
                 rowGetter={rowGetter}
                 rowRenderer={renderRow}
-                rowHeight={34}
+                rowHeight={mobile && !fullHeight ? 22 : 34}
                 onRowsRendered={onRowsRendered}
                 onRowClick={({ rowData }) => onRowClick(rowData)}
               >
@@ -99,21 +102,22 @@ const SymbolTable = ({
   </div>
 );
 
-const renderSymbol = ({ cellData }) => (
+const renderSymbol = ({ cellData, mobile }) => (
   <Link to={`/symbol/${cellData}`}>
-    <span style={{ ...styles.text, color: emphasis }}>{cellData}</span>
+    <span style={{ fontSize: mobile ? 12 : 24, color: emphasis }}>
+      {cellData}
+    </span>
   </Link>
 );
 
-export const SymbolColumn = (
+export const SymbolColumn = ({ mobile, style }) => (
   <Column
     key="symbol"
     label="Symbol"
     dataKey="symbol"
-    cellRenderer={renderSymbol}
+    cellRenderer={props => renderSymbol({ mobile, ...props })}
     width={125}
     flexGrow={1}
-    style={styles.text}
   />
 );
 
@@ -121,4 +125,7 @@ const mapStateToProps = ({ api: { totalSymbols } }) => ({
   totalRowCount: totalSymbols,
 });
 
-export default connect(mapStateToProps)(SymbolTable);
+export default compose(
+  connect(mapStateToProps),
+  withMobileProp({ maxDeviceWidth: 500 })
+)(SymbolTable);
