@@ -356,7 +356,7 @@ class PopularityChanges extends React.Component {
   handleRowClick = ({ symbol }) => this.props.setSelectedSymbol(symbol);
 
   renderSymbolTable = () => {
-    const { data } = this.props;
+    const { data, selectedSymbol } = this.props;
     if (!data) {
       return <Loading />;
     }
@@ -371,6 +371,7 @@ class PopularityChanges extends React.Component {
         style={{ minWidth: this.props.mobile ? 200 : 600, maxWidth: 750 }}
         disableHeader={false}
         height={this.props.mobile ? '50vh' : '70vh'}
+        selectedSymbol={selectedSymbol}
       />
     );
   };

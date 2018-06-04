@@ -227,6 +227,7 @@ class Leaderboard extends Component {
             columns={this.getColumns()}
             height="70vh"
             fullHeight
+            selectedSymbol={this.state.symbol}
             {...symbolTableProps}
           />
         </div>

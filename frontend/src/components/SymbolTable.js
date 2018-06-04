@@ -40,13 +40,22 @@ const renderRow = ({
   onRowClick,
   className,
   rowData,
-}) => (
-  <div key={key} style={style} className={className}>
-    <div style={styles.row} onClick={() => onRowClick({ rowData })}>
-      {columns}
+  selectedSymbol,
+}) => {
+  const hilightStyle =
+    selectedSymbol === rowData.symbol ? { backgroundColor: '#333' } : {};
+
+  return (
+    <div key={key} style={R.merge(hilightStyle, style)} className={className}>
+      <div
+        style={R.merge(styles.row, hilightStyle)}
+        onClick={() => onRowClick({ rowData })}
+      >
+        {columns}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const SymbolTable = ({
   label,
@@ -60,6 +69,7 @@ const SymbolTable = ({
   disableHeader = true,
   height = '80vh',
   fullHeight = false,
+  selectedSymbol,
   mobile,
 }) => (
   <div style={R.merge(styles.root, style)} className="symbol-table">
@@ -87,7 +97,7 @@ const SymbolTable = ({
                 width={width}
                 rowCount={data.length}
                 rowGetter={rowGetter}
-                rowRenderer={renderRow}
+                rowRenderer={props => renderRow({ selectedSymbol, ...props })}
                 rowHeight={mobile && !fullHeight ? 22 : 34}
                 onRowsRendered={onRowsRendered}
                 onRowClick={({ rowData }) => onRowClick(rowData)}
