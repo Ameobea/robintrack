@@ -87,7 +87,7 @@ export const fetchPopularityChanges = apiBaseCaller(
 
 export const fetchSymbolPopularityRanking = apiBaseCaller(
   symbol => `stocks/${symbol}/popularity_ranking`,
-  symbol => parseInt(symbol)
+  symbol => parseInt(symbol, 10)
 );
 
 export const fetchLastNextPopularities = popularityRanking => {

@@ -192,9 +192,7 @@ class FeedbackButton extends Component {
 
   render = () => (
     <Fragment>
-      <div className="feedbackButton" onClick={this.handleClick}>
-        Issues + Feedback
-      </div>
+      <div onClick={this.handleClick}>Issues + Feedback</div>
 
       {this.renderModal()}
     </Fragment>

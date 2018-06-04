@@ -201,7 +201,7 @@ const fetchAllData = (
 };
 
 const popularityChangesSettingsDiffer = (oldProps, newProps) =>
-  R.equals(oldProps.config, newProps.config);
+  !R.equals(oldProps.config, newProps.config);
 
 const defaultColumnProps = {
   width: 150,
@@ -221,7 +221,7 @@ class PopularityChanges extends React.Component {
     }
 
     if (popularityChangesSettingsDiffer(prevProps, this.props)) {
-      requestLargestPopularityChanges({
+      this.props.requestLargestPopularityChanges({
         ...this.props.config,
         startIndex: this.props.config.startIndex || 0,
       });

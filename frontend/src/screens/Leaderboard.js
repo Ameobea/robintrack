@@ -19,6 +19,7 @@ import { fontColor, backgroundColor } from 'src/style';
 import Loading from 'src/components/Loading';
 import PopularityChart from 'src/components/PopularityChart';
 import SymbolTable, { SymbolColumn } from 'src/components/SymbolTable';
+import { ResponsiveStyler } from 'src/components/ResponsiveHelpers';
 
 const styles = {
   root: {
@@ -47,6 +48,12 @@ const styles = {
     paddingTop: 50,
     paddingLeft: 40,
     paddingRight: 40,
+  },
+  mobileChartWrapper: {
+    display: 'flex',
+    flex: 1,
+    justifyContent: 'center',
+    minWidth: '50vw',
   },
   placeholder: {
     fontSize: 24,
@@ -222,9 +229,14 @@ class Leaderboard extends Component {
           />
         </div>
 
-        <div style={styles.chartWrapper}>
+        <ResponsiveStyler
+          styler={matches =>
+            matches ? styles.chartWrapper : styles.mobileChartWrapper
+          }
+          minDeviceWidth={600}
+        >
           <div style={{ width: '100%' }}>{this.renderSymbolChart()}</div>
-        </div>
+        </ResponsiveStyler>
       </div>
     );
   };

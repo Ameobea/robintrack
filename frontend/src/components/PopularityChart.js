@@ -13,6 +13,7 @@ import 'echarts/lib/component/dataZoom';
 import * as R from 'ramda';
 
 import { emphasis, emphasis2 } from 'src/style';
+import { withMobileProp } from 'src/components/ResponsiveHelpers';
 
 const analyzeTimeSeries = series => {
   const values = series.map(arr => arr[1]);
@@ -29,6 +30,7 @@ const getChartOptions = ({
   symbol,
   quoteHistory = [],
   popularityHistory = [],
+  mobile,
 }) => {
   const quoteSeries = quoteHistory.map(
     ({ timestamp, last_trade_price: lastTradePrice }) => [
@@ -61,7 +63,7 @@ const getChartOptions = ({
 
   const xAxisOptions = {
     type: 'time',
-    splitNumber: 20,
+    splitNumber: mobile ? 7 : 20,
     axisLabel: {
       color: 'white',
       showMinLabel: false,
@@ -80,6 +82,7 @@ const getChartOptions = ({
 
   const seriesDefaults = {
     symbol: 'circle',
+    showSymbol: false,
     type: 'line',
     smooth: false,
     animation: false,
@@ -92,7 +95,7 @@ const getChartOptions = ({
       showMaxLabel: false,
       color: 'white',
     },
-    splitNumber: 10,
+    splitNumber: mobile ? 7 : 10,
     splitLine: splitLineOptions,
   };
 
@@ -171,9 +174,15 @@ const PopularityChart = ({
   quoteHistory,
   popularityHistory,
   style = {},
+  mobile,
 }) => (
   <ReactEchartsCore
-    option={getChartOptions({ symbol, quoteHistory, popularityHistory })}
+    option={getChartOptions({
+      symbol,
+      quoteHistory,
+      popularityHistory,
+      mobile,
+    })}
     echarts={echarts}
     notMerge={true}
     lazyUpdate={true}
@@ -182,4 +191,6 @@ const PopularityChart = ({
   />
 );
 
-export default PopularityChart;
+export default withMobileProp({
+  maxDeviceWidth: 600,
+})(PopularityChart);

@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { Link } from 'react-router-dom';
-import { Button } from '@blueprintjs/core';
+import { Button, Menu, Popover, Position } from '@blueprintjs/core';
+import MediaQuery from 'react-responsive';
 import * as R from 'ramda';
 
 import FeedbackButton from 'src/components/FeedbackButton';
@@ -39,22 +40,32 @@ const styles = {
   searchInput: {
     backgroundColor: '#26262d',
   },
+  mobileHeader: {
+    display: 'flex',
+    flexDirection: 'row',
+  },
 };
 
 const HeaderItem = connect(mapStateToProps)(
-  ({ content, url, pathname, style = {}, textStyle = {} }) => {
-    let inner;
-    if (pathname === url || !url) {
-      inner = <span style={R.merge(styles.text, textStyle)}>{content}</span>;
-    } else {
-      inner = (
-        <Link to={url} style={{ fontSize: 26 }}>
-          <span style={{ ...styles.text, color: emphasis }}>{content}</span>
-        </Link>
-      );
-    }
+  ({ content, url, pathname, style = {}, textStyle = {}, onItemSelect }) => {
+    const aggregateStyle = R.mergeAll([
+      styles.text,
+      { color: pathname === url ? fontColor : emphasis },
+      textStyle,
+    ]);
+    const inner = <span style={aggregateStyle}>{content}</span>;
 
-    return <div style={R.merge(styles.headerItem, style)}>{inner}</div>;
+    return (
+      <div style={R.merge(styles.headerItem, style)}>
+        {url && url !== pathname ? (
+          <Link to={url} style={textStyle} onClick={onItemSelect}>
+            {inner}
+          </Link>
+        ) : (
+          inner
+        )}
+      </div>
+    );
   }
 );
 
@@ -96,19 +107,59 @@ const headerItems = [
   { content: 'Popularity Changes', url: '/popularity_changes' },
   {
     content: <FeedbackButton />,
-    style: { paddingLeft: 10, paddingBottom: 20 },
-    textStyle: { fontSize: 20, color: emphasis, cursor: 'pointer' },
+    textStyle: { cursor: 'pointer' },
   },
 ];
 
-const Header = ({ searchContent, setSymbolSearchContent, push }) => (
-  <div style={styles.root}>
-    <div style={{ display: 'flex' }}>
-      {headerItems.map((props, i) => <HeaderItem key={i} {...props} />)}
-    </div>
-
-    <SymbolSearch />
-  </div>
+const MobileNavMenu = ({ onItemSelect }) => (
+  <Menu>
+    {headerItems.map(({ textStyle, ...props }, i) => (
+      <HeaderItem
+        key={i}
+        style={{ padding: 2 }}
+        textStyle={{ ...textStyle, fontSize: 12 }}
+        onItemSelect={onItemSelect}
+        {...props}
+      />
+    ))}
+  </Menu>
 );
+
+class Header extends Component {
+  state = { menuOpen: false };
+
+  render = () => (
+    <Fragment>
+      <MediaQuery maxDeviceWidth={800}>
+        <div style={styles.mobileHeader}>
+          <Popover
+            content={
+              <MobileNavMenu
+                onItemSelect={() => this.setState({ menuOpen: false })}
+              />
+            }
+            position={Position.LEFT_TOP}
+            isOpen={this.state.menuOpen}
+            onInteraction={menuOpen => this.setState({ menuOpen })}
+          >
+            <Button icon="menu" text="" />
+          </Popover>
+
+          <SymbolSearch />
+        </div>
+      </MediaQuery>
+
+      <MediaQuery minDeviceWidth={801}>
+        <div style={styles.root}>
+          <div style={{ display: 'flex' }}>
+            {headerItems.map((props, i) => <HeaderItem key={i} {...props} />)}
+          </div>
+
+          <SymbolSearch />
+        </div>
+      </MediaQuery>
+    </Fragment>
+  );
+}
 
 export default Header;
