@@ -111,7 +111,7 @@ const SymbolSearch = connect(
           type="search"
           placeholder="Search Stock"
           dir="auto"
-          onChange={e => setSymbolSearchContent(e.target.value)}
+          onChange={e => setSymbolSearchContent(e.target.value.trim())}
           size={12}
           value={searchContent}
           style={styles.searchInput}
@@ -145,7 +145,7 @@ const MobileNavMenu = ({ onItemSelect }) => (
       <HeaderItem
         key={i}
         style={{ padding: 2 }}
-        textStyle={{ ...textStyle, fontSize: 16 }}
+        textStyle={{ ...textStyle, fontSize: 20 }}
         onItemSelect={onItemSelect}
         {...props}
       />

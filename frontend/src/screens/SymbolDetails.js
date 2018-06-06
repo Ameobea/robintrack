@@ -149,31 +149,30 @@ const MobileNavigationHeader = ({
   popularityRanking,
   bid,
   ask,
-}) =>
-  console.log(isLoading, nextLeastPopular, nextMostPopular) || (
-    <div style={styles.mobileNavigationHeader}>
-      <ButtonGroup alignText={Alignment.CENTER}>
-        <MobilePagerLink
-          symbol={nextLeastPopular}
-          popularityRanking={popularityRanking - 1}
-          isLoading={isLoading}
-        />
+}) => (
+  <div style={styles.mobileNavigationHeader}>
+    <ButtonGroup alignText={Alignment.CENTER}>
+      <MobilePagerLink
+        symbol={nextLeastPopular}
+        popularityRanking={popularityRanking - 1}
+        isLoading={isLoading}
+      />
 
-        <Button text={symbol} />
+      <Button text={symbol} />
 
-        <MobilePagerLink
-          symbol={nextMostPopular}
-          popularityRanking={popularityRanking + 1}
-          isLoading={isLoading}
-          isRight
-        />
-      </ButtonGroup>
+      <MobilePagerLink
+        symbol={nextMostPopular}
+        popularityRanking={popularityRanking + 1}
+        isLoading={isLoading}
+        isRight
+      />
+    </ButtonGroup>
 
-      <span style={{ paddingTop: 5, fontSize: 16 }}>
-        {bid && ask ? `$${bid} - $${ask}` : 'Loading...'}
-      </span>
-    </div>
-  );
+    <span style={{ paddingTop: 5, fontSize: 16 }}>
+      {bid && ask ? `$${bid} - $${ask}` : 'Loading...'}
+    </span>
+  </div>
+);
 
 const NavigationHeader = withMobileOrDesktop({ maxDeviceWidth: 800 })(
   MobileNavigationHeader,

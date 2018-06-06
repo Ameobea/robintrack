@@ -60,6 +60,7 @@ const styles = {
     fontSize: 24,
     color: fontColor,
     textAlign: 'center',
+    paddingTop: 15,
   },
   configWrapper: {
     display: 'flex',
