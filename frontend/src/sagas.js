@@ -1,4 +1,11 @@
-import { call, select, put, takeEvery, takeLatest } from 'redux-saga/effects';
+import {
+  all,
+  call,
+  select,
+  put,
+  takeEvery,
+  takeLatest,
+} from 'redux-saga/effects';
 import { push } from 'react-router-redux';
 import queryString from 'query-string';
 import * as R from 'ramda';
@@ -16,6 +23,7 @@ import {
   getPopularityRanking,
   getNeighborRankings,
   getTotalSymbols,
+  symbolNotFound,
 } from 'src/selectors/api';
 import { getQueryParams } from 'src/selectors/router';
 
@@ -23,6 +31,18 @@ const retryCount = 3;
 const retryTimeoutMs = 5000;
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
+
+/**
+ * Checks if a given saga needs to be called or not.  The given list of selectors are called in
+ * order, and if any of them return a truthy result, the saga doesn't need to run.
+ *
+ * Returns `true` if one or more of the selectors returned a truthy value and the saga does not
+ * need to run.
+ */
+function* canSkip(...selectors) {
+  const resultArray = yield all(selectors.map(selector => select(selector)));
+  return resultArray.find(R.identity);
+}
 
 /**
  * Generic wrapper that makes a request to and API endpoint and handles errors with the
@@ -35,7 +55,7 @@ function* apiCall(apiFunction, args, retries = 0) {
   try {
     const res = yield call(apiFunction, ...args);
 
-    if (res.status === 200) {
+    if (res.status === 200 || res.status === 404) {
       return yield res.json();
     } else {
       // TODO: show alert to user
@@ -56,12 +76,16 @@ function* apiCall(apiFunction, args, retries = 0) {
 }
 
 function* fetchQuote({ symbol }) {
-  const existingQuote = yield select(getQuote(symbol));
-  if (existingQuote) {
+  if (yield canSkip(getQuote(symbol), symbolNotFound(symbol))) {
     return;
   }
 
   const quote = yield apiCall(Api.fetchQuote, [symbol]);
+
+  if (quote.error) {
+    yield put(apiActions.symbolNotFound(symbol));
+  }
+
   yield put({ type: apiActions.QUOTE_FETCHED, symbol, quote });
 }
 
@@ -105,30 +129,40 @@ function* fetchBottomSymbols({ limit, startIndex, cb }) {
 }
 
 function* fetchPopularityHistory({ symbol }) {
-  const existingPopHistory = yield select(getPopularityHistory(symbol));
-  if (existingPopHistory) {
+  if (yield canSkip(getPopularityHistory(symbol), symbolNotFound(symbol))) {
     return;
   }
 
-  const popHistory = yield apiCall(Api.fetchPopularityHistory, [symbol]);
+  const res = yield apiCall(Api.fetchPopularityHistory, [symbol]);
+
+  if (res.error) {
+    yield put(apiActions.symbolNotFound(symbol));
+    return;
+  }
+
   yield put({
     type: apiActions.POPULARITY_HISTORY_FETCHED,
     symbol,
-    payload: popHistory,
+    payload: res,
   });
 }
 
 function* fetchQuoteHistory({ symbol }) {
-  const existingQuoteHistory = yield select(getQuoteHistory(symbol));
-  if (existingQuoteHistory) {
+  if (yield canSkip(getQuoteHistory(symbol), symbolNotFound(symbol))) {
     return;
   }
 
-  const quoteHistory = yield apiCall(Api.fetchQuoteHistory, [symbol]);
+  const res = yield apiCall(Api.fetchQuoteHistory, [symbol]);
+
+  if (res.error) {
+    yield put(apiActions.symbolNotFound(symbol));
+    return;
+  }
+
   yield put({
     type: apiActions.QUOTE_HISTORY_FETCHED,
     symbol,
-    payload: quoteHistory,
+    payload: res,
   });
 }
 
@@ -154,19 +188,21 @@ function* fetchLargestPopularityChanges({ type, cb, ...props }) {
 }
 
 function* fetchPopularityRanking({ symbol }) {
-  const existingPopularityRanking = yield select(getPopularityRanking(symbol));
-  if (!R.isNil(existingPopularityRanking)) {
+  if (yield canSkip(getPopularityRanking(symbol), symbolNotFound(symbol))) {
     return;
   }
 
-  const { ranking: popularityRanking } = yield apiCall(
-    Api.fetchSymbolPopularityRanking,
-    [symbol]
-  );
+  const res = yield apiCall(Api.fetchSymbolPopularityRanking, [symbol]);
+
+  if (res.error) {
+    yield put(apiActions.symbolNotFound(symbol));
+    return;
+  }
+
   yield put({
     type: apiActions.POPULARITY_RANKING_FETCHED,
     symbol,
-    popularityRanking,
+    popularityRanking: res.ranking,
   });
 }
 
@@ -221,8 +257,7 @@ function* fetchNeighborRankingSymbols({ middleRanking }) {
 }
 
 function* fetchTotalSymbols({ hoursAgo }) {
-  const existingSymbolCount = yield select(getTotalSymbols);
-  if (!R.isNil(existingSymbolCount)) {
+  if (yield canSkip(getTotalSymbols)) {
     return;
   }
 

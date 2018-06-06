@@ -42,3 +42,6 @@ export const getNeighborRankings = middlePopularity => ({
 };
 
 export const getTotalSymbols = R.path(['api', 'totalSymbols']);
+
+export const symbolNotFound = symbol => ({ api: { notFound } }) =>
+  notFound.has(symbol);

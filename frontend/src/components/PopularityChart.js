@@ -3,7 +3,7 @@
  * popularity to the price of an asset over time.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import ReactEchartsCore from 'echarts-for-react/lib/core';
 import echarts from 'echarts/lib/echarts';
 import 'echarts/lib/chart/line';
@@ -14,6 +14,17 @@ import * as R from 'ramda';
 
 import { emphasis, emphasis2 } from 'src/style';
 import { withMobileProp } from 'src/components/ResponsiveHelpers';
+import MobileZoomHandle from 'src/components/MobileZoomHandle';
+
+const styles = {
+  root: {},
+  mobileHint: {
+    textAlign: 'center',
+    fontSize: 10,
+    color: '#666',
+    paddingTop: 5,
+  },
+};
 
 const analyzeTimeSeries = series => {
   const values = series.map(arr => arr[1]);
@@ -91,7 +102,7 @@ const getChartOptions = ({
   const yAxisDefaults = {
     type: 'value',
     ...(mobile
-      ? {}
+      ? { axisLabel: { show: false }, axisTick: { show: false } }
       : {
           axisLabel: {
             showMinLabel: false,
@@ -110,8 +121,8 @@ const getChartOptions = ({
     grid: {
       bottom: 75,
       top: mobile ? 25 : 75,
-      left: mobile ? 0 : 75,
-      right: mobile ? 5 : 75,
+      left: mobile ? 8 : 75,
+      right: mobile ? 13 : 75,
     },
     xAxis: [
       xAxisOptions,
@@ -151,6 +162,7 @@ const getChartOptions = ({
         fillerColor: '#2d2f33',
         bottom: 5,
         textStyle: { color: '#fff' },
+        ...(mobile ? { handleIcon: MobileZoomHandle, handleSize: '80%' } : {}),
       },
     ],
     series: [
@@ -180,14 +192,31 @@ const getChartOptions = ({
 };
 
 const PopularityChart = ({ style, ...props }) => (
-  <ReactEchartsCore
-    option={getChartOptions(props)}
-    echarts={echarts}
-    notMerge={true}
-    lazyUpdate={true}
-    opts={{}}
-    style={{ height: props.mobile ? 300 : 600, style }}
-  />
+  <Fragment>
+    <ReactEchartsCore
+      option={getChartOptions(props)}
+      echarts={echarts}
+      notMerge={true}
+      lazyUpdate={true}
+      opts={{}}
+      style={{
+        height:
+          (props.mobile ? 0.5 : 0.7) *
+          Math.max(
+            document.documentElement.clientHeight,
+            window.innerHeight || 0
+          ),
+        style,
+        ...(props.mobile ? { marginLeft: -15, marginRight: -15 } : {}),
+      }}
+    />
+
+    {props.mobile ? (
+      <center style={styles.mobileHint}>
+        Touch the chart to view price + popularity values
+      </center>
+    ) : null}
+  </Fragment>
 );
 
 export default withMobileProp({

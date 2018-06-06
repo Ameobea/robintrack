@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { Link } from 'react-router-dom';
+import { compose } from 'recompose';
 import { Button, Menu, Popover, Position } from '@blueprintjs/core';
 import MediaQuery from 'react-responsive';
 import * as R from 'ramda';
@@ -9,6 +10,7 @@ import * as R from 'ramda';
 import FeedbackButton from 'src/components/FeedbackButton';
 import { setSymbolSearchContent } from 'src/actions/symbolSearch';
 import { backgroundColor, fontColor, emphasis } from 'src/style';
+import { withMobileProp } from 'src/components/ResponsiveHelpers';
 
 const mapStateToProps = ({
   router: {
@@ -23,15 +25,14 @@ const styles = {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  headerItem: { display: 'flex', padding: 20, alignItems: 'flex-end' },
+  headerItem: { display: 'flex', padding: 15, alignItems: 'flex-end' },
   text: {
-    fontSize: 26,
     color: fontColor,
     fontWeight: 'bold',
   },
   searchWrapper: {
     display: 'flex',
-    flexBasis: 300,
+    flexBasis: 250,
     alignItems: 'flex-end',
     paddingBottom: 20,
     right: 0,
@@ -44,11 +45,23 @@ const styles = {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingTop: 20,
   },
 };
 
-const HeaderItem = connect(mapStateToProps)(
-  ({ content, url, pathname, style = {}, textStyle = {}, onItemSelect }) => {
+const HeaderItem = compose(
+  connect(mapStateToProps),
+  withMobileProp({ maxDeviceWidth: 1200 })
+)(
+  ({
+    content,
+    url,
+    pathname,
+    style = {},
+    textStyle = {},
+    onItemSelect,
+    mobile,
+  }) => {
     const aggregateStyle = R.mergeAll([
       styles.text,
       { color: pathname === url ? fontColor : emphasis },
@@ -57,7 +70,13 @@ const HeaderItem = connect(mapStateToProps)(
     const inner = <span style={aggregateStyle}>{content}</span>;
 
     return (
-      <div style={R.merge(styles.headerItem, style)}>
+      <div
+        style={R.mergeAll([
+          styles.headerItem,
+          mobile ? { fontSize: 16 } : { fontSize: 26 },
+          style,
+        ])}
+      >
         {url && url !== pathname ? (
           <Link to={url} style={textStyle} onClick={onItemSelect}>
             {inner}
@@ -74,10 +93,13 @@ const mapSymbolSearchStateToProps = ({ symbolSearch }) => ({
   searchContent: symbolSearch,
 });
 
-const SymbolSearch = connect(mapSymbolSearchStateToProps, {
-  setSymbolSearchContent,
-  push,
-})(({ searchContent, setSymbolSearchContent, push }) => {
+const SymbolSearch = connect(
+  mapSymbolSearchStateToProps,
+  {
+    setSymbolSearchContent,
+    push,
+  }
+)(({ searchContent, setSymbolSearchContent, push }) => {
   const submitSymbolSearch = () => push(`/symbol/${searchContent}`);
 
   return (
@@ -93,7 +115,12 @@ const SymbolSearch = connect(mapSymbolSearchStateToProps, {
           size={12}
           value={searchContent}
           style={styles.searchInput}
-          onKeyDown={e => e.key === 'Enter' && submitSymbolSearch()}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              submitSymbolSearch();
+              e.target.blur();
+            }
+          }}
           onFocus={e => e.target.select()}
         />
         <Button minimal icon="arrow-right" onClick={submitSymbolSearch} />
@@ -102,7 +129,7 @@ const SymbolSearch = connect(mapSymbolSearchStateToProps, {
   );
 });
 
-const headerItems = [
+export const headerItems = [
   { content: 'Home', url: '/' },
   { content: 'Leaderboard', url: '/leaderboard' },
   { content: 'Popularity Changes', url: '/popularity_changes' },
@@ -131,7 +158,7 @@ class Header extends Component {
 
   render = () => (
     <Fragment>
-      <MediaQuery maxDeviceWidth={800}>
+      <MediaQuery maxDeviceWidth={840}>
         <div style={styles.mobileHeader}>
           <Popover
             content={
@@ -150,7 +177,7 @@ class Header extends Component {
         </div>
       </MediaQuery>
 
-      <MediaQuery minDeviceWidth={801}>
+      <MediaQuery minDeviceWidth={841}>
         <div style={styles.root}>
           <div style={{ display: 'flex' }}>
             {headerItems.map((props, i) => <HeaderItem key={i} {...props} />)}

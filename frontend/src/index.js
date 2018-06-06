@@ -14,6 +14,7 @@ import SymbolDetails from 'src/screens/SymbolDetails';
 import Header from 'src/components/Header';
 import { backgroundColor } from 'src/style';
 import PopularityChanges from 'src/screens/PopularityChanges';
+import Footer from 'src/components/Footer';
 
 const ConnectedSwitch = connect(({ router: { location } }) => ({
   location,
@@ -31,6 +32,8 @@ ReactDOM.render(
           <Route path="/symbol/:symbol" component={SymbolDetails} />
           <Route path="/popularity_changes" component={PopularityChanges} />
         </ConnectedSwitch>
+
+        <Footer />
       </div>
     </ConnectedRouter>
   </Provider>,

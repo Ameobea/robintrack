@@ -46,7 +46,6 @@ const styles = {
     flex: 1,
     justifyContent: 'center',
     minWidth: '50vw',
-    paddingTop: 50,
     paddingLeft: 40,
     paddingRight: 40,
   },
@@ -66,6 +65,7 @@ const styles = {
     display: 'flex',
     alignSelf: 'center',
     flexDirection: 'row',
+    paddingTop: 20,
   },
 };
 
@@ -257,13 +257,16 @@ const mapStateToProps = ({ api, router: { location } }) => ({
 });
 
 export default compose(
-  connect(mapStateToProps, {
-    requestBottomSymbols,
-    requestTopSymbols,
-    requestPopularityHistory,
-    requestQuoteHistory,
-    requestTotalSymbols,
-    push,
-  }),
+  connect(
+    mapStateToProps,
+    {
+      requestBottomSymbols,
+      requestTopSymbols,
+      requestPopularityHistory,
+      requestQuoteHistory,
+      requestTotalSymbols,
+      push,
+    }
+  ),
   withMobileProp({ maxDeviceWidth: 600 })
 )(Leaderboard);

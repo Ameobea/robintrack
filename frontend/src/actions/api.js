@@ -29,6 +29,9 @@ export const NEIGHBOR_RANKING_SYMBOLS_FETCHED =
 export const FETCH_TOTAL_SYMBOLS = 'FETCH_TOTAL_SYMBOLS';
 export const TOTAL_SYMBOLS_FETCHED = 'TOTAL_SYMBOLS_FETCHED';
 
+export const SYMBOL_NOT_FOUND = 'SYMBOL_NOT_FOUND';
+export const symbolNotFound = symbol => ({ type: SYMBOL_NOT_FOUND, symbol });
+
 export const requestQuote = symbol => ({ type: FETCH_QUOTE_REQUESTED, symbol });
 
 export const requestTopSymbols = (limit, startIndex, cb) => ({

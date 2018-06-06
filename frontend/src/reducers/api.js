@@ -10,6 +10,7 @@ import {
   POPULARITY_RANKING_FETCHED,
   NEIGHBOR_RANKING_SYMBOLS_FETCHED,
   TOTAL_SYMBOLS_FETCHED,
+  SYMBOL_NOT_FOUND,
 } from 'src/actions/api';
 import { getPopularityChangesPath } from 'src/selectors/api';
 
@@ -21,6 +22,7 @@ const getInitialState = () => ({
   bottomSymbols: [],
   symbolPopularities: {},
   popularityMapping: [],
+  notFound: new Set(),
 });
 
 export default (state = getInitialState(), action = {}) => {
@@ -99,6 +101,10 @@ export default (state = getInitialState(), action = {}) => {
 
     case TOTAL_SYMBOLS_FETCHED: {
       return { ...state, totalSymbols: action.totalSymbols };
+    }
+
+    case SYMBOL_NOT_FOUND: {
+      return { ...state, notFound: state.notFound.add(action.symbol) };
     }
 
     default: {

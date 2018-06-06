@@ -22,3 +22,14 @@ export const withMobileProp = ({ ...mediaQueryProps }) => Component => ({
     {mobile => <Component mobile={mobile} {...props} />}
   </MediaQuery>
 );
+
+export const withMobileOrDesktop = ({ ...mediaQueryProps }) => (
+  MobileComponent,
+  DesktopComponent
+) => ({ ...props }) => (
+  <MediaQuery {...mediaQueryProps}>
+    {mobile =>
+      mobile ? <MobileComponent {...props} /> : <DesktopComponent {...props} />
+    }
+  </MediaQuery>
+);
