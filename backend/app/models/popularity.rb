@@ -135,4 +135,12 @@ class Popularity
       { "$limit" => limit },
     ].compact)
   end
+
+  def self.bucket_popularity(bucket_count)
+    entries = MongoClient[:popularity].aggregate([
+      { "$match": { timestamp: { "$gte": 2.hours.ago.utc } } },
+      { "$sort": { timestamp: -1 } },
+      { "$group": { _id: "$instrument_id", latest_popularity: { "$first": "$popularity" } } },
+    ])
+  end
 end
