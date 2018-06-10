@@ -59,35 +59,29 @@ class StocksController < ApplicationController
     bucket_count = bin_count_param
     entries = Popularity.bucket_popularity(bucket_count)
 
-    min, max = entries.inject([Float::INFINITY, -1]) { |acc, elem|
-      new_acc = acc
+    minmax_docs = entries.minmax do |a, b|
+      a[:latest_popularity] <=> b[:latest_popularity]
+    end
+    min_popularity, max_popularity = minmax_docs.map { |doc| doc[:latest_popularity] }
 
-      if elem[:latest_popularity] < new_acc[0]
-        new_acc[0] = elem[:latest_popularity]
-      end
-
-      if elem[:latest_popularity] > new_acc[1]
-        new_acc[1] = elem[:latest_popularity]
-      end
-
-      new_acc
-    }
-
-    bucket_size = (max - min) / bucket_count
-    buckets = [0] * bucket_count
-
-    for elem in entries
-      bucket_index = (elem[:latest_popularity] / bucket_size).floor
+    bucket_size = (max_popularity.to_f - min_popularity.to_f) / bucket_count.to_f
+    puts bucket_size
+    binned_entries = entries.group_by do |elem|
+      bucket_index = (elem[:latest_popularity].to_f / bucket_size).floor
       if bucket_index == bucket_count
+        puts elem
         bucket_index -= 1
       end
-      buckets[bucket_index] += 1
+
+      bucket_index
     end
 
+    buckets = (0...bucket_count).map { |i| binned_entries.fetch(i, []).size }
+
     render json: {
-      "min": min,
-      "max": max,
-      "buckets": buckets,
+      min: min_popularity,
+      max: max_popularity,
+      buckets: buckets,
     }
   end
 
