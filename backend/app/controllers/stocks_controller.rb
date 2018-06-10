@@ -65,11 +65,9 @@ class StocksController < ApplicationController
     min_popularity, max_popularity = minmax_docs.map { |doc| doc[:latest_popularity] }
 
     bucket_size = (max_popularity.to_f - min_popularity.to_f) / bucket_count.to_f
-    puts bucket_size
     binned_entries = entries.group_by do |elem|
       bucket_index = (elem[:latest_popularity].to_f / bucket_size).floor
       if bucket_index == bucket_count
-        puts elem
         bucket_index -= 1
       end
 
