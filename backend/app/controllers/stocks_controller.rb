@@ -55,6 +55,42 @@ class StocksController < ApplicationController
     render json: { total_symbols: total_symbols }
   end
 
+  def popularity_bins
+    bucket_count = bin_count_param
+    entries = Popularity.bucket_popularity(bucket_count)
+
+    min, max = entries.inject([Float::INFINITY, -1]) { |acc, elem|
+      new_acc = acc
+
+      if elem[:latest_popularity] < new_acc[0]
+        new_acc[0] = elem[:latest_popularity]
+      end
+
+      if elem[:latest_popularity] > new_acc[1]
+        new_acc[1] = elem[:latest_popularity]
+      end
+
+      new_acc
+    }
+
+    bucket_size = (max - min) / bucket_count
+    buckets = [0] * bucket_count
+
+    for elem in entries
+      bucket_index = (elem[:latest_popularity] / bucket_size).floor
+      if bucket_index == bucket_count
+        bucket_index -= 1
+      end
+      buckets[bucket_index] += 1
+    end
+
+    render json: {
+      "min": min,
+      "max": max,
+      "buckets": buckets,
+    }
+  end
+
   private
 
   def hours_ago_param
@@ -77,6 +113,14 @@ class StocksController < ApplicationController
 
   def limit_param
     params.fetch(:limit, DEFAULT_LIMIT).to_i
+  end
+
+  def bin_count_param
+    bin_count = params[:bin_count].to_i
+    if bin_count < 0
+      raise BadRequest, "Please provide a positive integer for `bin_count`."
+    end
+    bin_count
   end
 
   def format_popularity_entries(entries)
