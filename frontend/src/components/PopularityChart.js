@@ -4,6 +4,8 @@
  */
 
 import React, { Fragment } from 'react';
+import { compose } from 'recompose';
+import { connect } from 'react-redux';
 import ReactEchartsCore from 'echarts-for-react/lib/core';
 import echarts from 'echarts/lib/echarts';
 import 'echarts/lib/chart/line';
@@ -15,6 +17,7 @@ import * as R from 'ramda';
 import { emphasis, emphasis2 } from 'src/style';
 import { withMobileProp } from 'src/components/ResponsiveHelpers';
 import MobileZoomHandle from 'src/components/MobileZoomHandle';
+import { getPopularityHistory } from 'src/selectors/api';
 
 const styles = {
   root: {},
@@ -36,6 +39,82 @@ const analyzeTimeSeries = series => {
 
   return [min, max, first, last, offset];
 };
+
+const splitLineOptions = {
+  lineStyle: { color: '#323232' },
+};
+
+const getXAxisOptions = ({
+  mobile,
+  firstPopularity,
+  lastPopularity,
+  firstQuote,
+  lastQuote,
+}) => ({
+  type: 'time',
+  splitNumber: mobile ? 7 : 20,
+  axisLabel: {
+    color: 'white',
+    showMinLabel: false,
+    showMaxLabel: false,
+    formatter: (value, index) => {
+      // Formatted to be month/day; display year only in the first label
+      const date = new Date(value);
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    },
+  },
+  axisPointer: { snap: false },
+  min: R.minBy(R.head, firstPopularity, firstQuote)[0],
+  max: R.maxBy(R.head, lastPopularity, lastQuote)[0],
+  splitLine: splitLineOptions,
+});
+
+const seriesDefaults = {
+  symbol: 'circle',
+  showSymbol: false,
+  type: 'line',
+  smooth: false,
+  animation: false,
+};
+
+const getYAxisDefaults = mobile => ({
+  type: 'value',
+  ...(mobile
+    ? { axisLabel: { show: false }, axisTick: { show: false } }
+    : {
+        axisLabel: {
+          showMinLabel: false,
+          showMaxLabel: false,
+          color: 'white',
+        },
+      }),
+  splitNumber: mobile ? 7 : 10,
+  splitLine: splitLineOptions,
+});
+
+const getBaseConfigDefaults = mobile => ({
+  backgroundColor: '#1d2126',
+  legend: { show: true, textStyle: { color: '#fff' } },
+  grid: {
+    bottom: 75,
+    top: mobile ? 25 : 75,
+    left: mobile ? 8 : 75,
+    right: mobile ? 13 : 75,
+  },
+  tooltip: { trigger: 'axis' },
+  dataZoom: [
+    {
+      type: 'slider',
+      show: true,
+      xAxisIndex: [0, 1],
+      showDetail: true,
+      fillerColor: '#2d2f33',
+      bottom: 5,
+      textStyle: { color: '#fff' },
+      ...(mobile ? { handleIcon: MobileZoomHandle, handleSize: '80%' } : {}),
+    },
+  ],
+});
 
 const getChartOptions = ({
   symbol,
@@ -68,62 +147,18 @@ const getChartOptions = ({
     popularityOffset,
   ] = analyzeTimeSeries(popularitySeries);
 
-  const splitLineOptions = {
-    lineStyle: { color: '#323232' },
-  };
-
-  const xAxisOptions = {
-    type: 'time',
-    splitNumber: mobile ? 7 : 20,
-    axisLabel: {
-      color: 'white',
-      showMinLabel: false,
-      showMaxLabel: false,
-      formatter: (value, index) => {
-        // Formatted to be month/day; display year only in the first label
-        const date = new Date(value);
-        return `${date.getMonth() + 1}/${date.getDate()}`;
-      },
-    },
-    axisPointer: { snap: false },
-    min: R.minBy(R.head, firstPopularity, firstQuote)[0],
-    max: R.maxBy(R.head, lastPopularity, lastQuote)[0],
-    splitLine: splitLineOptions,
-  };
-
-  const seriesDefaults = {
-    symbol: 'circle',
-    showSymbol: false,
-    type: 'line',
-    smooth: false,
-    animation: false,
-  };
-
-  const yAxisDefaults = {
-    type: 'value',
-    ...(mobile
-      ? { axisLabel: { show: false }, axisTick: { show: false } }
-      : {
-          axisLabel: {
-            showMinLabel: false,
-            showMaxLabel: false,
-            color: 'white',
-          },
-        }),
-    splitNumber: mobile ? 7 : 10,
-    splitLine: splitLineOptions,
-  };
+  const xAxisOptions = getXAxisOptions({
+    mobile,
+    firstPopularity,
+    lastPopularity,
+    firstQuote,
+    lastQuote,
+  });
+  const yAxisDefaults = getYAxisDefaults(mobile);
 
   return {
-    backgroundColor: '#1d2126',
+    ...getBaseConfigDefaults,
     title: { text: `Popularity History for ${symbol}` },
-    legend: { show: true, textStyle: { color: '#fff' } },
-    grid: {
-      bottom: 75,
-      top: mobile ? 25 : 75,
-      left: mobile ? 8 : 75,
-      right: mobile ? 13 : 75,
-    },
     xAxis: [
       xAxisOptions,
       {
@@ -152,19 +187,6 @@ const getChartOptions = ({
         minInterval: 1,
       },
     ],
-    tooltip: { trigger: 'axis' },
-    dataZoom: [
-      {
-        type: 'slider',
-        show: true,
-        xAxisIndex: [0, 1],
-        showDetail: true,
-        fillerColor: '#2d2f33',
-        bottom: 5,
-        textStyle: { color: '#fff' },
-        ...(mobile ? { handleIcon: MobileZoomHandle, handleSize: '80%' } : {}),
-      },
-    ],
     series: [
       {
         ...seriesDefaults,
@@ -191,25 +213,33 @@ const getChartOptions = ({
   };
 };
 
-const PopularityChart = ({ style, ...props }) => (
-  <Fragment>
+const getViewportHeight = () =>
+  Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+
+const BasePopularityChart = ({ mobile, style, options }) => {
+  const viewportHeight = getViewportHeight();
+  const height = (mobile ? 0.5 : 0.7) * viewportHeight;
+  const mergedStyle = {
+    height,
+    ...(mobile ? { marginLeft: -15, marginRight: -15 } : {}),
+    ...style,
+  };
+
+  return (
     <ReactEchartsCore
-      option={getChartOptions(props)}
+      option={options}
       echarts={echarts}
       notMerge={true}
       lazyUpdate={true}
       opts={{}}
-      style={{
-        height:
-          (props.mobile ? 0.5 : 0.7) *
-          Math.max(
-            document.documentElement.clientHeight,
-            window.innerHeight || 0
-          ),
-        style,
-        ...(props.mobile ? { marginLeft: -15, marginRight: -15 } : {}),
-      }}
+      style={mergedStyle}
     />
+  );
+};
+
+const PopularityChart = ({ style, ...props }) => (
+  <Fragment>
+    <BasePopularityChart options={getChartOptions(props)} {...props} />
 
     {props.mobile ? (
       <center style={styles.mobileHint}>
@@ -218,6 +248,42 @@ const PopularityChart = ({ style, ...props }) => (
     ) : null}
   </Fragment>
 );
+
+const createYAxisOptions = series => ({});
+
+const getComparisonChartOptions = ({
+  symbols,
+  popularityHistories = {},
+  mobile,
+}) => {
+  const analyzedSeries = R.keys(symbols).reduce(
+    (acc, symbol) => ({ ...acc, [symbol]: analyzeTimeSeries(symbol) }),
+    {}
+  );
+
+  return {
+    ...getBaseConfigDefaults(mobile),
+    title: { text: 'Popularity Comparison' },
+  };
+};
+
+export const InnerPopularityComparisonChart = ({ style, ...props }) => (
+  <BasePopularityChart options={getComparisonChartOptions(props)} {...props} />
+);
+
+const mapComparisonChartStateToProps = (state, { symbols }) => ({
+  popularityHistories: R.zipObj(
+    symbols,
+    symbols.map(symbol => getPopularityHistory(symbol)(state))
+  ),
+});
+
+export const PopularityComparisonChart = compose(
+  withMobileProp({
+    maxDeviceWidth: 600,
+  }),
+  connect(mapComparisonChartStateToProps)
+)(InnerPopularityComparisonChart);
 
 export default withMobileProp({
   maxDeviceWidth: 600,
