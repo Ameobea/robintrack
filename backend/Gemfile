@@ -13,6 +13,7 @@ gem 'jbuilder', '~> 2.5'
 gem 'bootsnap', '>= 1.1.0', require: false
 
 gem 'mongo', '~> 2.4'
+gem 'redis', '~> 4.0.1'
 
 group :development do
   gem 'web-console', '>= 3.3.0'

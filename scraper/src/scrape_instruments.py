@@ -10,7 +10,7 @@ import pymongo
 from Robinhood import Robinhood
 
 from common import parse_throttle_res
-from db import get_db
+from db import get_db, set_instruments_finished, set_update_started
 
 
 def get_tradable_instrument_ids(instruments: List[Dict[str, str]]) -> List[Tuple[str, str]]:
@@ -37,6 +37,9 @@ def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds
     )
     rabbitmq_channel = rabbitmq_connection.channel()
     rabbitmq_channel.queue_declare(queue="instrument_ids")
+
+    # Lock and flush the existing cache
+    set_update_started()
 
     trader = Robinhood()
     res = trader.get_url("https://api.robinhood.com/instruments/")
@@ -75,6 +78,8 @@ def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds
                 instrument_ids = []
 
         if res.get("detail"):
+            # Request was throttled; wait for a cooldown before continuing
+
             cooldown_seconds = parse_throttle_res(res["detail"])
             print(
                 "Instruments fetch request failed; waiting for {} second cooldown...".format(
@@ -83,12 +88,28 @@ def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds
             )
             sleep(cooldown_seconds)
         elif res.get("next"):
+            # There are more instruments to scrape.  Wait for the standard cooldown and then
+            # continue by fetching the next request url.
+
             sleep(scraper_request_cooldown_seconds)
             res = trader.get_url(res["next"])
         else:
+            # We're done scraping; there are no more instruments in the list.
+
             rabbitmq_channel.basic_publish(
                 exchange="", routing_key="symbols", body=",".join(quotes)
             )
+            rabbitmq_channel.basic_publish(
+                exchange="", routing_key="instrument_ids", body=",".join(instrument_ids)
+            )
+
+            # Publish a finished message over the channels to indicate that there are no more
+            # items to process in this run.
+            rabbitmq_channel.basic_publish(exchange="", routing_key="symbols", body="__DONE")
+            rabbitmq_channel.basic_publish(exchange="", routing_key="instrument_ids", body="__DONE")
+
+            # Mark the instrument scrape as finished
+            set_instruments_finished()
 
             print(
                 "Finished scraping; fetched a total of {} tradable instrument IDs.".format(

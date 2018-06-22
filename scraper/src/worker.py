@@ -16,7 +16,7 @@ from Robinhood import Robinhood
 from Robinhood.exceptions import InvalidTickerSymbol
 
 from common import parse_throttle_res
-from db import get_db
+from db import get_db, set_popularities_finished, set_quotes_finished
 from utils import parse_instrument_url, parse_updated_at, pluck, DESIRED_QUOTE_KEYS
 
 INDEX_COL = get_db()["index"]
@@ -91,6 +91,10 @@ def fetch_popularity(
     sleep,
     worker_request_cooldown_seconds=1.0,
 ):
+    if instrument_ids == "__DONE":
+        set_popularities_finished()
+        return
+
     url = "https://api.robinhood.com/instruments/popularity/?ids={}".format(instrument_ids)
 
     def reduce_popularity(acc: dict, datum: dict) -> dict:
@@ -99,7 +103,9 @@ def fetch_popularity(
         return {**acc, instrument_id: datum["num_open_positions"]}
 
     def call_self():
-        ''' In the case of some kind of error, wait 30 seconds and then re-call ourself to try again. '''
+        """ In the case of some kind of error, wait 30 seconds and then re-call ourself to try
+        again. """
+
         sleep(30)
         fetch_popularity(
             instrument_ids,
@@ -151,6 +157,10 @@ def fetch_quote(
     sleep,
     worker_request_cooldown_seconds=1.0,
 ):
+    if symbols == "__DONE":
+        set_quotes_finished()
+        return
+
     try:
         res = TRADER.quote_data(symbols)
         quotes = res["results"]
