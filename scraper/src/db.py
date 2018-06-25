@@ -108,4 +108,4 @@ def unlock_cache():
     """ Marks the cache as valid, allowing new entries to be inserted and existing values to be
     used to service requests to the API. """
 
-    redis_client.set("CACHE_LOCKED", "0")
+    redis_client.delete("CACHE_LOCKED")

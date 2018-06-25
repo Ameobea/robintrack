@@ -1,19 +1,30 @@
 class PopularitiesController < ApplicationController
+  include ApplicationHelper
+
   DEFAULT_LIMIT = 50
 
   def largest_popularity_changes
-    entries = Popularity.largest_popularity_changes(options_from_params)
-    render json: format_popularity_entries(entries)
+    render json: with_cache(
+      "largest_popularity_changes",
+      Proc.new{|params| Popularity.largest_popularity_changes(params)},
+      Proc.new{|entries| format_popularity_entries(entries)}
+    ).call(options_from_params)
   end
 
   def largest_popularity_decreases
-    entries = Popularity.largest_popularity_decreases(options_from_params)
-    render json: format_popularity_entries(entries)
+    render json: with_cache(
+      "largest_popularity_decreases",
+      Proc.new{|params| Popularity.largest_popularity_decreases(params)},
+      Proc.new{|entries| format_popularity_entries(entries)}
+    ).call(options_from_params)
   end
 
   def largest_popularity_increases
-    entries = Popularity.largest_popularity_increases(options_from_params)
-    render json: format_popularity_entries(entries)
+    render json: with_cache(
+      "largest_popularity_increases",
+      Proc.new{|params| Popularity.largest_popularity_increases(params)},
+      Proc.new{|entries| format_popularity_entries(entries)}
+    ).call(options_from_params)
   end
 
   private
