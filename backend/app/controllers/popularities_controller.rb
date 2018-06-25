@@ -4,30 +4,42 @@ class PopularitiesController < ApplicationController
   DEFAULT_LIMIT = 50
 
   def largest_popularity_changes
-    render json: with_cache(
-      "largest_popularity_changes",
-      Proc.new{|params| Popularity.largest_popularity_changes(params)},
-      Proc.new{|entries| format_popularity_entries(entries)}
-    ).call(options_from_params)
+    hash_name = "largest_popularity_changes"
+    key = hash_hash(options_from_params)
+    render json: get_cache(hash_name, key) || largest_popularity_changes_query(key)
   end
 
   def largest_popularity_decreases
-    render json: with_cache(
-      "largest_popularity_decreases",
-      Proc.new{|params| Popularity.largest_popularity_decreases(params)},
-      Proc.new{|entries| format_popularity_entries(entries)}
-    ).call(options_from_params)
+    hash_name = "largest_popularity_decreases"
+    key = hash_hash(options_from_params)
+    render json: get_cache(hash_name, key) || largest_popularity_decreases_query(key)
   end
 
   def largest_popularity_increases
-    render json: with_cache(
-      "largest_popularity_increases",
-      Proc.new{|params| Popularity.largest_popularity_increases(params)},
-      Proc.new{|entries| format_popularity_entries(entries)}
-    ).call(options_from_params)
+    hash_name = "largest_popularity_increases"
+    key = hash_hash(options_from_params)
+    render json: get_cache(hash_name, key) || largest_popularity_increases_query(key)
   end
 
   private
+
+  def largest_popularity_changes_query(key)
+    options = options_from_params
+    entries = format_popularity_entries(Popularity.largest_popularity_changes(options))
+    put_cache("largest_popularity_changes", key, entries)
+  end
+
+  def largest_popularity_decreases_query(key)
+    options = options_from_params
+    entries = format_popularity_entries(Popularity.largest_popularity_decreases(options))
+    put_cache("largest_popularity_decreases", key, entries)
+  end
+
+  def largest_popularity_increases_query(key)
+    options = options_from_params
+    entries = format_popularity_entries(Popularity.largest_popularity_increases(options))
+    put_cache("largest_popularity_increases", key, entries)
+  end
 
   def options_from_params
     {
