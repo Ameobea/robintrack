@@ -16,7 +16,7 @@ from Robinhood import Robinhood
 from Robinhood.exceptions import InvalidTickerSymbol
 
 from common import parse_throttle_res
-from db import get_db, set_popularities_finished, set_quotes_finished
+from db import get_db, set_popularities_finished, set_quotes_finished, unlock_cache
 from utils import parse_instrument_url, parse_updated_at, pluck, DESIRED_QUOTE_KEYS
 
 INDEX_COL = get_db()["index"]
@@ -210,6 +210,8 @@ WORK_CBS = {
 @click.option("--rabbitmq_port", type=click.INT, default=5672)
 @click.option("--worker_request_cooldown_seconds", type=click.FLOAT, default=1.0)
 def cli(mode: str, rabbitmq_host: str, rabbitmq_port: str, worker_request_cooldown_seconds: float):
+    unlock_cache()
+
     rabbitmq_connection = pika.BlockingConnection(
         pika.ConnectionParameters(host=rabbitmq_host, port=rabbitmq_port)
     )
