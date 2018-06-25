@@ -4,30 +4,17 @@ class StocksController < ApplicationController
   DEFAULT_LIMIT = 50
 
   def most_popular
-    render json: with_cache(
-      "most_popular",
-      Proc.new {|*args, **kwargs| Popularity.most_popular(*args, **kwargs)},
-      Proc.new {|entries| format_popularity_entries entries}
-    ).call(limit_param, start_index_param)
+    key = "#{limit_param}_#{start_index_param}"
+    render json: get_cache("most_popular", key) || most_popular_query(key)
   end
 
   def least_popular
-    render json: with_cache(
-      "least_popular",
-      Proc.new {|*args, **kwargs| Popularity.least_popular(*args, **kwargs)},
-      Proc.new {|entries| format_popularity_entries entries}
-    ).call(limit_param, start_index_param)
+    key = "#{limit_param}_#{start_index_param}"
+    render json: get_cache("least_popular", key) || least_popular_query(key)
   end
 
   def quote
-    render json: with_cache(
-      "quote",
-      Proc.new {|id| Quote.find_by_symbol id},
-      Proc.new {|entry|
-        raise NotFound unless entry
-        { bid: entry["bid_price"].to_f, ask: entry["ask_price"].to_f }
-      }
-    ).call(params[:id])
+    render json: get_cache("quote", params[:id]) || quote_query(id)
   end
 
   def quotes
@@ -39,39 +26,18 @@ class StocksController < ApplicationController
   end
 
   def popularity_history
-    render json: with_cache(
-      "popularity_history",
-      Proc.new {|id|
-        entries = Popularity.get_history_for_symbol(id)
-        raise NotFound unless entries
-        entries
-      },
-      Proc.new {|entries| format_popularity_history(entries)}
-    ).call(params[:id])
+    id = params[:id]
+    render json: get_cache("popularity_history", id) || popularity_history_query(id)
   end
 
   def popularity_ranking
-    render json: with_cache(
-      "popularity_ranking",
-      Proc.new {|id|
-        entry = Popularity.get_ranking(id)
-        raise NotFound unless entry
-        entry
-      },
-      Proc.new {|entry| { symbol: entry["symbol"], ranking: entry["ranking"] }}
-    ).call(params[:id])
+    id = params[:id]
+    render json: get_cache("popularity_ranking", id) || popularity_ranking_query(id)
   end
 
   def quote_history
-    render json: with_cache(
-      "quote_history",
-      Proc.new {|id|
-        entries = Quote.search_by_symbol(id)
-        raise NotFound if entries.none?
-        entries
-      },
-      Proc.new {|entries| format_quote_history(entries)}
-    ).call(params[:id])
+    id = params[:id]
+    render json: get_cache("quote_history", id) || quote_history_query(id)
   end
 
   def total_symbols
@@ -83,34 +49,73 @@ class StocksController < ApplicationController
   end
 
   def popularity_bins
-    render json: with_cache(
-      "popularity_bins",
-      Proc.new {|bucket_count|
-        entries = Popularity.bucket_popularity(bucket_count)
-
-        minmax_docs = entries.minmax do |a, b|
-          a[:latest_popularity] <=> b[:latest_popularity]
-        end
-        min_popularity, max_popularity = minmax_docs.map { |doc| doc[:latest_popularity] }
-
-        bucket_size = (max_popularity.to_f - min_popularity.to_f) / bucket_count.to_f
-        binned_entries = entries.group_by do |elem|
-          bucket_index = (elem[:latest_popularity].to_f / bucket_size).floor
-          if bucket_index == bucket_count
-            bucket_index -= 1
-          end
-
-          bucket_index
-        end
-
-        buckets = (0...bucket_count).map { |i| binned_entries.fetch(i, []).size }
-        { min_popularity: min_popularity, max_popularity: max_popularity, buckets: buckets }
-      },
-      Proc.new {|entry| entry}
-    ).call(bin_count_param)
+    key = bin_count_param
+    render json: get_cache("popularity_bins", key) || popularity_bins_query(key)
   end
 
   private
+
+  def most_popular_query(key)
+    entries = Popularity.most_popular(limit_param, start_index_param)
+    put_cache("most_popular", key, format_popularity_entries(entries))
+  end
+
+  def least_popular_query(key)
+    entries = Popularity.least_popular(limit_param, start_index_param)
+    put_cache("least_popular", key, format_popularity_entries(entries))
+  end
+
+  def quote_query(key)
+    entry = Quote.find_by_symbol id
+    raise NotFound unless entry
+    put_cache("quote", key, { bid: entry["bid_price"].to_f, ask: entry["ask_price"].to_f })
+  end
+
+  def popularity_history_query(key)
+    entries = Popularity.get_history_for_symbol(params[:id])
+    raise NotFound unless entries
+    put_cache("popularity_history", key, format_popularity_history(entries))
+  end
+
+  def popularity_ranking_query(key)
+    entry = Popularity.get_ranking(params[:id])
+    raise NotFound unless entry
+    put_cache("popularity_ranking", key, { symbol: entry["symbol"], ranking: entry["ranking"] })
+  end
+
+  def quote_history_query(key)
+    entries = Quote.search_by_symbol(params[:id])
+    raise NotFound if entries.none?
+    put_cache("quote_history", key, format_quote_history(entries))
+  end
+
+  def popularity_bins_query(key)
+    bucket_count = bin_count_param
+    entries = Popularity.bucket_popularity(bucket_count)
+
+    minmax_docs = entries.minmax do |a, b|
+      a[:latest_popularity] <=> b[:latest_popularity]
+    end
+    min_popularity, max_popularity = minmax_docs.map { |doc| doc[:latest_popularity] }
+
+    bucket_size = (max_popularity.to_f - min_popularity.to_f) / bucket_count.to_f
+    binned_entries = entries.group_by do |elem|
+      bucket_index = (elem[:latest_popularity].to_f / bucket_size).floor
+      if bucket_index == bucket_count
+        bucket_index -= 1
+      end
+
+      bucket_index
+    end
+
+    buckets = (0...bucket_count).map { |i| binned_entries.fetch(i, []).size }
+    formatted = {
+      min_popularity: min_popularity,
+      max_popularity: max_popularity,
+      buckets: buckets,
+    }
+    put_cache("popularity_bins", key, formatted)
+  end
 
   def hours_ago_param
     if params[:hours_ago]
