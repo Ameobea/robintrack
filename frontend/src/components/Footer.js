@@ -21,12 +21,20 @@ const FooterItem = ({ children, flex = 1 }) => (
   <div style={{ ...styles.item, flex }}>{children}</div>
 );
 
+const MadeBy = () => (
+  <FooterItem>
+    <p>
+      {'Robintrack by: '}
+      <br />
+      <a href="https://ameobea.me/">Ameo / Casey Primozic</a> +{' '}
+      <a href="https://github.com/dalexj">Alex J</a>
+    </p>
+  </FooterItem>
+);
+
 const Footer = () => (
   <div style={styles.root}>
-    <FooterItem>
-      Robintrack by <br />
-      <a href="https://ameobea.me/">Ameo / Casey Primozic</a>
-    </FooterItem>
+    <MadeBy />
 
     <FooterItem flex={0.5}>&copy;{new Date().getFullYear()}</FooterItem>
 
