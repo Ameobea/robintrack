@@ -4,42 +4,30 @@ class PopularitiesController < ApplicationController
   DEFAULT_LIMIT = 50
 
   def largest_popularity_changes
-    hash_name = "largest_popularity_changes"
-    key = hash_hash(options_from_params)
-    render json: get_cache(hash_name, key) || largest_popularity_changes_query(key)
+    options = options_from_params
+    res = with_cache("largest_popularity_changes", hash_hash(options)) do
+      format_popularity_entries Popularity.largest_popularity_changes(options)
+    end
+    render json: res
   end
 
   def largest_popularity_decreases
-    hash_name = "largest_popularity_decreases"
-    key = hash_hash(options_from_params)
-    render json: get_cache(hash_name, key) || largest_popularity_decreases_query(key)
+    options = options_from_params
+    res = with_cache("largest_popularity_decreases", hash_hash(options)) do
+      format_popularity_entries Popularity.largest_popularity_decreases(options)
+    end
+    render json: res
   end
 
   def largest_popularity_increases
-    hash_name = "largest_popularity_increases"
-    key = hash_hash(options_from_params)
-    render json: get_cache(hash_name, key) || largest_popularity_increases_query(key)
+    options = options_from_params
+    res = with_cache("largest_popularity_increases", hash_hash(options)) do
+      format_popularity_entries Popularity.largest_popularity_changes(options)
+    end
+    render json: res
   end
 
   private
-
-  def largest_popularity_changes_query(key)
-    options = options_from_params
-    entries = format_popularity_entries(Popularity.largest_popularity_changes(options))
-    put_cache("largest_popularity_changes", key, entries)
-  end
-
-  def largest_popularity_decreases_query(key)
-    options = options_from_params
-    entries = format_popularity_entries(Popularity.largest_popularity_decreases(options))
-    put_cache("largest_popularity_decreases", key, entries)
-  end
-
-  def largest_popularity_increases_query(key)
-    options = options_from_params
-    entries = format_popularity_entries(Popularity.largest_popularity_increases(options))
-    put_cache("largest_popularity_increases", key, entries)
-  end
 
   def options_from_params
     {

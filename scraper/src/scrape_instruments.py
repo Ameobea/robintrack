@@ -10,7 +10,7 @@ import pymongo
 from Robinhood import Robinhood
 
 from common import parse_throttle_res
-from db import get_db, set_instruments_finished, set_update_started, unlock_cache
+from db import get_db, set_instruments_finished, set_update_started, lock_cache
 
 
 def get_tradable_instrument_ids(instruments: List[Dict[str, str]]) -> List[Tuple[str, str]]:
@@ -32,8 +32,6 @@ def get_tradable_instrument_ids(instruments: List[Dict[str, str]]) -> List[Tuple
 @click.option("--rabbitmq_port", type=click.INT, default=5672)
 @click.option("--scraper_request_cooldown_seconds", type=click.FLOAT, default=1.0)
 def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds: float):
-    unlock_cache()
-
     rabbitmq_connection = pika.BlockingConnection(
         pika.ConnectionParameters(host=rabbitmq_host, port=rabbitmq_port)
     )
@@ -41,6 +39,7 @@ def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds
     rabbitmq_channel.queue_declare(queue="instrument_ids")
 
     # Lock and flush the existing cache
+    print('Locking the cache in preparation for update...')
     set_update_started()
 
     trader = Robinhood()
