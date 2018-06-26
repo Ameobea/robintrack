@@ -98,7 +98,7 @@ const getBaseConfigDefaults = mobile => ({
   grid: {
     bottom: 75,
     top: mobile ? 25 : 75,
-    left: mobile ? 8 : 75,
+    left: mobile ? 17 : 75,
     right: mobile ? 13 : 75,
   },
   tooltip: { trigger: 'axis' },
@@ -157,7 +157,7 @@ const getChartOptions = ({
   const yAxisDefaults = getYAxisDefaults(mobile);
 
   return {
-    ...getBaseConfigDefaults,
+    ...getBaseConfigDefaults(mobile),
     title: { text: `Popularity History for ${symbol}` },
     xAxis: [
       xAxisOptions,

@@ -51,8 +51,8 @@ class StocksController < ApplicationController
   def popularity_ranking
     id = params[:id]
     res = with_cache(__method__.to_s, id) do
-      entries = Popularity.get_ranking id
-      raise NotFound unless entries
+      entry = Popularity.get_ranking id
+      raise NotFound unless entry
       { symbol: entry["symbol"], ranking: entry["ranking"] }
     end
     render json: res

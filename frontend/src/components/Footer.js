@@ -6,7 +6,6 @@ const styles = {
     flexDirection: 'row',
     marginTop: 25,
     paddingTop: 10,
-    paddingBottom: 10,
     fontSize: 12,
     borderTop: '1px solid rgb(87, 86, 86)',
   },

@@ -226,6 +226,7 @@ class SymbolDetails extends Component {
       popularityHistory[symbol],
       quoteHistory[symbol],
       props.nextMostPopular,
+      props.nextLeastPopular,
     ]);
 
     const bid = R.path([symbol, 'bid'], quotes);
