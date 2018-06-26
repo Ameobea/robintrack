@@ -2,7 +2,7 @@
 
 from os import environ
 
-from pymongo import Database, MongoClient
+from pymongo import MongoClient
 import redis
 
 MONGO_USER = environ.get("MONGO_USER") or ""
@@ -26,25 +26,27 @@ mongo_client = MongoClient(mongo_url)
 redis_client = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=0)
 
 
-# Each of these hashes corresponds to a given API endpoint.  When the cache is invalided, they are
-# all cleared to avoid any old data being persisted.
-CACHE_HASHES = []
+def get_db():
+    """ Returns an instance of the MongoDB database for this project. """
+
+    return mongo_client["robinhood"]
 
 
 def set_update_started():
     """ Marks all data scraping operations as in-progress, invalidates the cache, and marks it as
     invalid until all data scrapes are completed. """
 
-    redis_client.set("INSTRUMENTS_FINISHED", "0")
-    redis_client.set("POPULARITIES_FINISHED", "0")
-    redis_client.set("QUOTES_FINISHED", "0")
+    redis_client.delete("INSTRUMENTS_FINISHED")
+    redis_client.delete("POPULARITIES_FINISHED")
+    redis_client.delete("QUOTES_FINISHED")
 
     lock_cache()
+    flush_cache()
 
 
 def check_if_all_finished():
     """ Checks if the instrument, popularity, and quote scrapes are all finished.  If they are,
-    then unlock and re-enable the cache. """
+    then flush, unlock, and re-enable the cache. """
 
     all_finished = (
         redis_client.get("INSTRUMENTS_FINISHED")
@@ -53,6 +55,8 @@ def check_if_all_finished():
     )
 
     if all_finished:
+        print("All updates finished! Flushing + unlocking cache...")
+        flush_cache()
         unlock_cache()
 
 
@@ -83,17 +87,11 @@ def set_quotes_finished():
     check_if_all_finished()
 
 
-def get_db():
-    """ Returns an instance of the MongoDB database for this project. """
-
-    return mongo_client["robinhood"]
-
-
 def flush_cache():
     """ Removes all cache hashes, removing all existing cache entries. """
 
-    for hash_name in CACHE_HASHES:
-        redis_client.delete(hash_name)
+    print("Flushing cache...")
+    redis_client.flushdb()
 
 
 def lock_cache():
@@ -102,6 +100,7 @@ def lock_cache():
     cache. """
 
     redis_client.set("CACHE_LOCKED", "1")
+    print("Cache locked.")
 
 
 def unlock_cache():
@@ -109,3 +108,4 @@ def unlock_cache():
     used to service requests to the API. """
 
     redis_client.delete("CACHE_LOCKED")
+    print("Cache unlocked.")

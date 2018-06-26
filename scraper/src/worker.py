@@ -92,6 +92,7 @@ def fetch_popularity(
     worker_request_cooldown_seconds=1.0,
 ):
     if instrument_ids == "__DONE":
+        print('Received DONE message for popularity fetching; marking as complete in Redis...')
         set_popularities_finished()
         return
 
@@ -158,6 +159,7 @@ def fetch_quote(
     worker_request_cooldown_seconds=1.0,
 ):
     if symbols == "__DONE":
+        print('Received DONE message for quote fetching; marking as complete in Redis...')
         set_quotes_finished()
         return
 
@@ -210,6 +212,7 @@ WORK_CBS = {
 @click.option("--rabbitmq_port", type=click.INT, default=5672)
 @click.option("--worker_request_cooldown_seconds", type=click.FLOAT, default=1.0)
 def cli(mode: str, rabbitmq_host: str, rabbitmq_port: str, worker_request_cooldown_seconds: float):
+    print('Unlocking cache...')
     unlock_cache()
 
     rabbitmq_connection = pika.BlockingConnection(
