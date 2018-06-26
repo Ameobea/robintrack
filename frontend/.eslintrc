@@ -51,6 +51,7 @@
   },
   "plugins": ["react"],
   "globals": {
-    "process": true
+    "process": true,
+    "ga": true
   }
 }

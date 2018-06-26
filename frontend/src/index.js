@@ -15,6 +15,7 @@ import Header from 'src/components/Header';
 import { backgroundColor } from 'src/style';
 import PopularityChanges from 'src/screens/PopularityChanges';
 import Footer from 'src/components/Footer';
+import PageTracker from 'src/components/PageTracker';
 
 const ConnectedSwitch = connect(({ router: { location } }) => ({
   location,
@@ -24,6 +25,7 @@ ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
       <div style={{ height: '100%', backgroundColor }} className="pt-dark">
+        <PageTracker />
         <Header />
 
         <ConnectedSwitch>
