@@ -205,7 +205,11 @@ class SymbolDetails extends Component {
 
   componentDidMount = () => this.requestData(this.props);
 
-  componentDidUpdate = () => this.requestData(this.props);
+  componentDidUpdate = oldProps => {
+    if (oldProps.symbol !== this.props.symbol) {
+      this.requestData(this.props);
+    }
+  };
 
   render = () => {
     const {
