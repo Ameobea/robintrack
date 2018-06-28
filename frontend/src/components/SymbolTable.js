@@ -82,6 +82,7 @@ const SymbolTable = ({
   fullHeight = false,
   selectedSymbol,
   mobile,
+  minBatchSize = 25,
 }) => (
   <div style={R.merge(styles.root, style)} className="symbol-table">
     {label && (
@@ -93,7 +94,7 @@ const SymbolTable = ({
         isRowLoaded={({ index }) => !!data[index]}
         loadMoreRows={loadMoreData}
         rowCount={totalRowCount}
-        minimumBatchSize={25}
+        minimumBatchSize={minBatchSize}
         threshold={25}
       >
         {({ onRowsRendered, registerChild }) => (

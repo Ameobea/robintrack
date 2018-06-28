@@ -229,6 +229,7 @@ class Leaderboard extends Component {
             height="70vh"
             fullHeight
             selectedSymbol={this.state.symbol}
+            minBatchSize={50}
             {...symbolTableProps}
           />
         </div>

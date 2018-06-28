@@ -72,8 +72,8 @@ const Info = () => (
       things that you can do with the data that this site provides is figure out
       who people are reacting to moves in the market. Depending on if people are
       buying the dip, getting onboard during a rise in price because they think
-      it's going to go higher, or taking profits, this data lets you see each of
-      those different siuations and plan your own trading accordingly.
+      it&quot;s going to go higher, or taking profits, this data lets you see
+      each of those different siuations and plan your own trading accordingly.
     </p>
 
     <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>

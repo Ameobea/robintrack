@@ -41,7 +41,6 @@ def set_update_started():
     redis_client.delete("QUOTES_FINISHED")
 
     lock_cache()
-    flush_cache()
 
 
 def check_if_all_finished():

@@ -12,6 +12,7 @@ import {
   requestQuote,
   fetchPopularityRanking,
   fetchNeighborRankingSymbols,
+  requestTotalSymbols,
 } from 'src/actions/api';
 import PopularityChart from 'src/components/PopularityChart';
 import { withMobileOrDesktop } from 'src/components/ResponsiveHelpers';
@@ -195,7 +196,9 @@ class SymbolDetails extends Component {
     fetchPopularityRanking,
     fetchNeighborRankingSymbols,
     popularityRanking,
+    requestTotalSymbols,
   }) => {
+    requestTotalSymbols();
     requestQuote(symbol);
     requestPopularityHistory(symbol);
     requestQuoteHistory(symbol);
@@ -208,6 +211,11 @@ class SymbolDetails extends Component {
   componentDidUpdate = oldProps => {
     if (oldProps.symbol !== this.props.symbol) {
       this.requestData(this.props);
+    }
+
+    const popularityRanking = this.props.popularityRanking;
+    if (!oldProps.popularityRanking && !!popularityRanking) {
+      this.props.fetchNeighborRankingSymbols(popularityRanking);
     }
   };
 
@@ -229,9 +237,10 @@ class SymbolDetails extends Component {
       quotes[symbol],
       popularityHistory[symbol],
       quoteHistory[symbol],
-      props.nextMostPopular,
-      props.nextLeastPopular,
+      !!props.nextMostPopular || props.popularityRanking === props.totalSymbols,
+      !!props.nextLeastPopular || props.popularityRanking === 1,
     ]);
+    console.log(props);
 
     const bid = R.path([symbol, 'bid'], quotes);
     const ask = R.path([symbol, 'ask'], quotes);
@@ -265,6 +274,7 @@ const mapStateToProps = (
       popularityMapping,
       symbolPopularities,
       notFound,
+      totalSymbols,
     },
   },
   {
@@ -281,6 +291,7 @@ const mapStateToProps = (
     popularityHistory,
     quoteHistory,
     popularityRanking,
+    totalSymbols,
     nextLeastPopular: R.prop(
       'symbol',
       popularityMapping[popularityRanking - 1]
@@ -298,5 +309,6 @@ export default connect(
     requestQuoteHistory,
     fetchPopularityRanking,
     fetchNeighborRankingSymbols,
+    requestTotalSymbols,
   }
 )(SymbolDetails);

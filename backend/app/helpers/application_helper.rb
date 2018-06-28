@@ -8,10 +8,6 @@ module ApplicationHelper
   end
 
   def get_cache(hash_name, key)
-    if cache_locked?
-      return nil
-    end
-
     $redis.hget hash_name, key
   end
 
@@ -26,12 +22,13 @@ module ApplicationHelper
   # will be called.  Its return value will be inserted into the cache and returned from this
   # function for returning to the user.
   def with_cache(hash_name, key)
-    if cache_locked?
-      return yield
-    end
-
     cached = get_cache hash_name, key
     return cached if cached
-    put_cache hash_name, key, yield
+
+    if cache_locked?
+      return yield
+    else
+      return put_cache hash_name, key, yield
+    end
   end
 end
