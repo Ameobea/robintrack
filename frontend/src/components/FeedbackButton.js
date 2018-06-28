@@ -145,7 +145,7 @@ class FeedbackButton extends Component {
         <h1>Send Issues or Feedback</h1>
         <span style={{ paddingBottom: 15 }}>
           {`If you've found a problem with the site, have an idea for a new
-             feature, or have any other feedback you'd like to send in, feel free
+             feature, or have any other feedback you would like to submit, feel free
              to use the form below to send it to me directly.`}
         </span>
 

@@ -59,8 +59,8 @@ const Info = () => (
   <Fragment>
     <h2 style={{ paddingTop: 10 }}>What can it do?</h2>
     <p>
-      Retail traders (individual traders who don&quot;t work for a financial
-      instituation like a bank or hedge fund) generally suck at trading. In the
+      Retail traders (individual traders who don&#39;t work for a financial
+      institution like a bank or hedge fund) generally suck at trading. In the
       Foreign Exchange markets, some people use the percentage of retail traders
       who are long or short a given currency pair as a contrarian indicator
       (meaning that if most people are short, the pair is likely to rise and
@@ -68,12 +68,12 @@ const Info = () => (
     </p>
 
     <p>
-      For the stock market, it&quot;s a bit different. One of the most useful
-      things that you can do with the data that this site provides is figure out
-      who people are reacting to moves in the market. Depending on if people are
-      buying the dip, getting onboard during a rise in price because they think
-      it&quot;s going to go higher, or taking profits, this data lets you see
-      each of those different siuations and plan your own trading accordingly.
+      For the stock market, it&#39;s a bit different. One of the most useful
+      things that you can do with the data that this site provides is to figure
+      out how people are reacting to moves in the market. Depending on if people
+      are buying the dip, getting onboard during a pump because they think
+      it&#39;s going to go higher, or taking profits, this data lets you observe
+      each of those different situations and plan your own trading accordingly.
     </p>
 
     <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
@@ -116,7 +116,7 @@ const Info = () => (
     <p>
       Every hour, the price and popularity for every stock on Robinhood is
       downloaded from the Robinhood API and stored. By combining all of these
-      data points together, it&quot;s possible to view trends and analyze the
+      data points together, it&#39;s possible to view trends and analyze the
       ways in which they both change with respect to each other and over time.
     </p>
 
@@ -128,8 +128,8 @@ const Info = () => (
         display: 'block',
       }}
     >
-      This site is for informational purposes only. It is not intended to be
-      investment advice. However, if you do end up loading up on OTM weekly
+      This site is for informational purposes only. It is not intended to serve
+      as investment advice. However, if you do end up loading up on OTM weekly
       options because of something you saw on the site, please put me in the
       screenshot of your losses when you post to /r/WSB &lt;3
     </span>
