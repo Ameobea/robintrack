@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'recompose';
 import { Switch } from '@blueprintjs/core';
@@ -24,11 +24,12 @@ import {
 } from 'src/actions/popularityChanges';
 import { getPopularityChanges } from 'src/selectors/api';
 import Loading from 'src/components/Loading';
-import PopularityChart from 'src/components/PopularityChart';
 import { fontColor } from 'src/style';
 import { CHANGE_TYPE, RELATIVITY } from 'src/actions/popularityChanges';
 import { getPopularityChangesConfig } from 'src/selectors/popularityChanges';
 import { withMobileProp } from 'src/components/ResponsiveHelpers';
+
+const PopularityChart = React.lazy(() => import('src/components/PopularityChart'));
 
 const getTextStyle = mobile => ({ fontSize: mobile ? 12 : 24 });
 
@@ -133,13 +134,16 @@ const mapLabelsToOptions = labels =>
     </option>
   ));
 
-const PopularityChangesConfig = connect(undefined, {
-  setSelectedSymbol,
-  setPopularityChangesRelative,
-  setPopularityChangesHoursAgo,
-  setPopularityChangesMinPopularity,
-  setPopularityChangesChangeType,
-})(
+const PopularityChangesConfig = connect(
+  undefined,
+  {
+    setSelectedSymbol,
+    setPopularityChangesRelative,
+    setPopularityChangesHoursAgo,
+    setPopularityChangesMinPopularity,
+    setPopularityChangesChangeType,
+  }
+)(
   ({
     config: { relative, hoursAgo, minPopularity, changeType },
     mobile,
@@ -170,9 +174,7 @@ const PopularityChangesConfig = connect(undefined, {
           <div className="pt-select">
             <select
               value={hoursAgo}
-              onChange={e =>
-                setPopularityChangesHoursAgo(parseInt(e.target.value, 10))
-              }
+              onChange={e => setPopularityChangesHoursAgo(parseInt(e.target.value, 10))}
             >
               {mapLabelsToOptions(lookbackOptionLabels)}
             </select>
@@ -207,27 +209,18 @@ const PopularityChangesConfig = connect(undefined, {
   }
 );
 
-const fetchSymbolData = (
-  symbol,
-  { requestPopularityHistory, requestQuoteHistory }
-) => {
+const fetchSymbolData = (symbol, { requestPopularityHistory, requestQuoteHistory }) => {
   requestPopularityHistory(symbol);
   requestQuoteHistory(symbol);
 };
 
-export const fetchPopularityChangesData = ({
-  config,
-  requestLargestPopularityChanges,
-}) =>
+export const fetchPopularityChangesData = ({ config, requestLargestPopularityChanges }) =>
   requestLargestPopularityChanges({
     ...config,
     startIndex: config.startIndex || 0,
   });
 
-const fetchAllData = (
-  { requestTotalSymbols, totalSymbols, selectedSymbol, ...props },
-  cb
-) => {
+const fetchAllData = ({ requestTotalSymbols, totalSymbols, selectedSymbol, ...props }, cb) => {
   fetchPopularityChangesData(props);
 
   R.isNil(totalSymbols) && requestTotalSymbols();
@@ -268,10 +261,7 @@ class PopularityChanges extends React.Component {
   loadMoreData = ({ startIndex, stopIndex }) =>
     new Promise((fulfill, reject) =>
       fetchPopularityChangesData(
-        R.mergeDeepLeft(
-          { config: { startIndex, limit: stopIndex - startIndex } },
-          this.props
-        ),
+        R.mergeDeepLeft({ config: { startIndex, limit: stopIndex - startIndex } }, this.props),
         fulfill
       )
     );
@@ -282,14 +272,7 @@ class PopularityChanges extends React.Component {
     const defaultColumnProps = getDefaultColumnProps(mobile);
 
     return [
-      <Column
-        {...defaultColumnProps}
-        key={0}
-        label="#"
-        dataKey="i"
-        width={100}
-        flexGrow={0.5}
-      />,
+      <Column {...defaultColumnProps} key={0} label="#" dataKey="i" width={100} flexGrow={0.5} />,
       SymbolColumn({ mobile: this.props.mobile }),
       <Column
         {...defaultColumnProps}
@@ -311,29 +294,15 @@ class PopularityChanges extends React.Component {
         flexGrow={1.2}
         width={200}
       />,
-      <Column
-        {...defaultColumnProps}
-        key={3}
-        label="Start"
-        dataKey="start_popularity"
-      />,
-      <Column
-        {...defaultColumnProps}
-        key={4}
-        label="End"
-        dataKey="end_popularity"
-      />,
+      <Column {...defaultColumnProps} key={3} label="Start" dataKey="start_popularity" />,
+      <Column {...defaultColumnProps} key={4} label="End" dataKey="end_popularity" />,
     ];
   };
 
   renderPopularityChart = () => {
     const { selectedSymbol, popularityHistory, quoteHistory } = this.props;
     if (!selectedSymbol) {
-      return (
-        <div style={styles.placeholder}>
-          Click a row from the table to view a chart.
-        </div>
-      );
+      return <div style={styles.placeholder}>Click a row from the table to view a chart.</div>;
     }
 
     return (
@@ -344,11 +313,13 @@ class PopularityChanges extends React.Component {
           </h1>
         </center>
 
-        <PopularityChart
-          symbol={selectedSymbol}
-          popularityHistory={popularityHistory[selectedSymbol]}
-          quoteHistory={quoteHistory[selectedSymbol]}
-        />
+        <Suspense fallback={<Loading />}>
+          <PopularityChart
+            symbol={selectedSymbol}
+            popularityHistory={popularityHistory[selectedSymbol]}
+            quoteHistory={quoteHistory[selectedSymbol]}
+          />
+        </Suspense>
       </div>
     );
   };
@@ -379,21 +350,12 @@ class PopularityChanges extends React.Component {
   render = () => (
     <div style={styles.root}>
       <div>
-        <PopularityChangesConfig
-          config={this.props.config}
-          mobile={this.props.mobile}
-        />
+        <PopularityChangesConfig config={this.props.config} mobile={this.props.mobile} />
         {this.renderSymbolTable()}
       </div>
 
-      <div
-        style={
-          this.props.mobile ? styles.mobileChartWrapper : styles.chartWrapper
-        }
-      >
-        <div style={{ width: '100%', height: '100%' }}>
-          {this.renderPopularityChart()}
-        </div>
+      <div style={this.props.mobile ? styles.mobileChartWrapper : styles.chartWrapper}>
+        <div style={{ width: '100%', height: '100%' }}>{this.renderPopularityChart()}</div>
       </div>
     </div>
   );
@@ -416,26 +378,24 @@ const mapStateToProps = (state, { pageSize = 50 }) => {
     selectedSymbol: config.symbol,
     data: data ? data.map((datum, i) => ({ ...datum, i: i + 1 })) : null,
     ...R.pick(
-      [
-        'largestPopularityChanges',
-        'popularityHistory',
-        'quoteHistory',
-        'totalSymbols',
-      ],
+      ['largestPopularityChanges', 'popularityHistory', 'quoteHistory', 'totalSymbols'],
       state.api
     ),
   };
 };
 
 export default compose(
-  connect(mapStateToProps, {
-    requestLargestPopularityChanges,
-    setPopularityChangesChangeType,
-    setPopularityChangesRelative,
-    setSelectedSymbol,
-    requestPopularityHistory,
-    requestQuoteHistory,
-    requestTotalSymbols,
-  }),
+  connect(
+    mapStateToProps,
+    {
+      requestLargestPopularityChanges,
+      setPopularityChangesChangeType,
+      setPopularityChangesRelative,
+      setSelectedSymbol,
+      requestPopularityHistory,
+      requestQuoteHistory,
+      requestTotalSymbols,
+    }
+  ),
   withMobileProp({ maxDeviceWidth: 600 })
 )(PopularityChanges);

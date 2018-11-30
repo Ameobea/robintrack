@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Suspense } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'recompose';
 import * as R from 'ramda';
@@ -18,9 +18,10 @@ import {
 } from 'src/actions/api';
 import { fontColor, backgroundColor } from 'src/style';
 import Loading from 'src/components/Loading';
-import PopularityChart from 'src/components/PopularityChart';
 import SymbolTable, { SymbolColumn } from 'src/components/SymbolTable';
 import { withMobileProp } from 'src/components/ResponsiveHelpers';
+
+const PopularityChart = React.lazy(() => import('src/components/PopularityChart'));
 
 const styles = {
   root: {
@@ -95,14 +96,10 @@ class Leaderboard extends Component {
   };
 
   fetchMoreTopSymbols = ({ startIndex, stopIndex }) =>
-    new Promise((f, r) =>
-      this.props.requestTopSymbols(stopIndex - startIndex, startIndex, f)
-    );
+    new Promise((f, r) => this.props.requestTopSymbols(stopIndex - startIndex, startIndex, f));
 
   fetchMoreBottomSymbols = ({ startIndex, stopIndex }) =>
-    new Promise((f, r) =>
-      this.props.requestBottomSymbols(stopIndex - startIndex, startIndex, f)
-    );
+    new Promise((f, r) => this.props.requestBottomSymbols(stopIndex - startIndex, startIndex, f));
 
   updateSymbolChart = ({ symbol }) => {
     this.setState({ symbol });
@@ -116,11 +113,7 @@ class Leaderboard extends Component {
     const quoteHistoryForSymbol = this.props.quoteHistory[symbol];
 
     if (!symbol) {
-      return (
-        <div style={styles.placeholder}>
-          Click a row from the table to view a chart.
-        </div>
-      );
+      return <div style={styles.placeholder}>Click a row from the table to view a chart.</div>;
     }
 
     return (
@@ -131,25 +124,20 @@ class Leaderboard extends Component {
           </h1>
         </center>
 
-        <PopularityChart
-          symbol={symbol}
-          popularityHistory={popularityHistoryForSymbol}
-          quoteHistory={quoteHistoryForSymbol}
-          style={{ height: this.props.mobile ? '50vh' : '68vh' }}
-        />
+        <Suspense fallback={<Loading />}>
+          <PopularityChart
+            symbol={symbol}
+            popularityHistory={popularityHistoryForSymbol}
+            quoteHistory={quoteHistoryForSymbol}
+            style={{ height: this.props.mobile ? '50vh' : '68vh' }}
+          />
+        </Suspense>
       </div>
     );
   };
 
   getColumns = () => [
-    <Column
-      key={1}
-      label="#"
-      dataKey="i"
-      width={100}
-      flexGrow={0.5}
-      style={styles.text}
-    />,
+    <Column key={1} label="#" dataKey="i" width={100} flexGrow={0.5} style={styles.text} />,
     SymbolColumn({ mobile: false }),
     <Column
       key={3}
@@ -200,8 +188,7 @@ class Leaderboard extends Component {
       },
     };
 
-    const symbolTableProps =
-      symbolTablePropMap[show] || symbolTablePropMap['top'];
+    const symbolTableProps = symbolTablePropMap[show] || symbolTablePropMap['top'];
 
     return (
       <div style={styles.root}>
@@ -234,11 +221,7 @@ class Leaderboard extends Component {
           />
         </div>
 
-        <div
-          style={
-            this.props.mobile ? styles.mobileChartWrapper : styles.chartWrapper
-          }
-        >
+        <div style={this.props.mobile ? styles.mobileChartWrapper : styles.chartWrapper}>
           <div style={{ width: '100%' }}>{this.renderSymbolChart()}</div>
         </div>
       </div>
@@ -251,10 +234,7 @@ Leaderboard.defaultProps = {
 };
 
 const mapStateToProps = ({ api, router: { location } }) => ({
-  ...R.pick(
-    ['bottomSymbols', 'topSymbols', 'popularityHistory', 'quoteHistory'],
-    api
-  ),
+  ...R.pick(['bottomSymbols', 'topSymbols', 'popularityHistory', 'quoteHistory'], api),
   location,
 });
 

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Suspense } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { ButtonGroup, Button, Alignment } from '@blueprintjs/core';
@@ -14,8 +14,10 @@ import {
   fetchNeighborRankingSymbols,
   requestTotalSymbols,
 } from 'src/actions/api';
-import PopularityChart from 'src/components/PopularityChart';
+import Loading from 'src/components/Loading';
 import { withMobileOrDesktop } from 'src/components/ResponsiveHelpers';
+
+const PopularityChart = React.lazy(() => import('src/components/PopularityChart'));
 
 const styles = {
   root: {
@@ -47,12 +49,7 @@ const NavigationHeaderItem = ({ style = {}, children }) => (
   <div style={R.merge(styles.navigationHeaderItem, style)}>{children}</div>
 );
 
-const DesktopPagerLink = ({
-  symbol,
-  popularityRanking,
-  isLoading,
-  isRight = false,
-}) => {
+const DesktopPagerLink = ({ symbol, popularityRanking, isLoading, isRight = false }) => {
   let content;
   if (!symbol || popularityRanking <= 0) {
     if (isLoading) {
@@ -70,9 +67,7 @@ const DesktopPagerLink = ({
   }
 
   return (
-    <NavigationHeaderItem
-      style={{ justifyContent: isRight ? 'flex-end' : 'flex-start' }}
-    >
+    <NavigationHeaderItem style={{ justifyContent: isRight ? 'flex-end' : 'flex-start' }}>
       {content}
     </NavigationHeaderItem>
   );
@@ -86,19 +81,12 @@ const Title = ({ popularityRanking, symbol, bid, ask }) => (
       {popularityRanking ? `#${popularityRanking}: ` : null}
       <u>{symbol}</u>
       <br />
-      {!!bid && !!ask
-        ? `${formatPrice(bid)} - ${formatPrice(ask)}`
-        : 'Loading...'}
+      {!!bid && !!ask ? `${formatPrice(bid)} - ${formatPrice(ask)}` : 'Loading...'}
     </center>
   </h1>
 );
 
-const DesktopNavigationHeader = ({
-  nextLeastPopular,
-  nextMostPopular,
-  isLoading,
-  ...props
-}) => (
+const DesktopNavigationHeader = ({ nextLeastPopular, nextMostPopular, isLoading, ...props }) => (
   <div style={styles.navigationHeader}>
     <DesktopPagerLink
       symbol={nextLeastPopular}
@@ -128,13 +116,7 @@ const MobilePagerLink = connect(
   return (
     <Button
       disabled={popularityRanking === 0}
-      text={
-        popularityRanking === 0 ? (
-          ''
-        ) : (
-          <div style={{ fontSize: 12 }}>{text}</div>
-        )
-      }
+      text={popularityRanking === 0 ? '' : <div style={{ fontSize: 12 }}>{text}</div>}
       icon={!isRight ? 'chevron-left' : undefined}
       rightIcon={isRight ? 'chevron-right' : undefined}
       onClick={() => !isLoading && push(`/symbol/${symbol}`)}
@@ -220,14 +202,7 @@ class SymbolDetails extends Component {
   };
 
   render = () => {
-    const {
-      symbol,
-      popularityHistory,
-      quoteHistory,
-      quotes,
-      notFound,
-      ...props
-    } = this.props;
+    const { symbol, popularityHistory, quoteHistory, quotes, notFound, ...props } = this.props;
 
     if (notFound) {
       return <SymbolNotFound symbol={symbol} />;
@@ -240,26 +215,21 @@ class SymbolDetails extends Component {
       !!props.nextMostPopular || props.popularityRanking === props.totalSymbols,
       !!props.nextLeastPopular || props.popularityRanking === 1,
     ]);
-    console.log(props);
 
     const bid = R.path([symbol, 'bid'], quotes);
     const ask = R.path([symbol, 'ask'], quotes);
 
     return (
       <div style={styles.root}>
-        <NavigationHeader
-          symbol={symbol}
-          bid={bid}
-          ask={ask}
-          isLoading={isLoading}
-          {...props}
-        />
+        <NavigationHeader symbol={symbol} bid={bid} ask={ask} isLoading={isLoading} {...props} />
 
-        <PopularityChart
-          symbol={symbol}
-          quoteHistory={quoteHistory[symbol]}
-          popularityHistory={popularityHistory[symbol]}
-        />
+        <Suspense fallback={<Loading />}>
+          <PopularityChart
+            symbol={symbol}
+            quoteHistory={quoteHistory[symbol]}
+            popularityHistory={popularityHistory[symbol]}
+          />
+        </Suspense>
       </div>
     );
   };
@@ -292,10 +262,7 @@ const mapStateToProps = (
     quoteHistory,
     popularityRanking,
     totalSymbols,
-    nextLeastPopular: R.prop(
-      'symbol',
-      popularityMapping[popularityRanking - 1]
-    ),
+    nextLeastPopular: R.prop('symbol', popularityMapping[popularityRanking - 1]),
     nextMostPopular: R.prop('symbol', popularityMapping[popularityRanking + 1]),
     notFound: notFound.has(symbol),
   };

@@ -23,10 +23,9 @@ const About = () => (
   <Fragment>
     <h2>What is it Robintrack?</h2>
     <p>
-      Robintrack keeps track of how many{' '}
-      <a href="https://robinhood.com/">Robinhood</a> users hold a particular
-      stock over time. It generates charts showing the relationship between
-      price and popularity, and compiles some lists using the data.
+      Robintrack keeps track of how many <a href="https://robinhood.com/">Robinhood</a> users hold a
+      particular stock over time. It generates charts showing the relationship between price and
+      popularity, and compiles some lists using the data.
     </p>
   </Fragment>
 );
@@ -44,11 +43,7 @@ const ExampleImage = withMobileProp({ maxDeviceWidth: 600 })(
       }}
     >
       <Link to={url}>
-        <img
-          src={src}
-          alt={alt}
-          style={{ minWidth: 250, maxWidth: mobile ? '90vw' : 400 }}
-        />
+        <img src={src} alt={alt} style={{ minWidth: 250, maxWidth: mobile ? '90vw' : 400 }} />
       </Link>
       <center>{caption}</center>
     </div>
@@ -59,26 +54,23 @@ const Info = () => (
   <Fragment>
     <h2 style={{ paddingTop: 10 }}>What can it do?</h2>
     <p>
-      Retail traders (individual traders who don&#39;t work for a financial
-      institution like a bank or hedge fund) generally suck at trading. In the
-      Foreign Exchange markets, some people use the percentage of retail traders
-      who are long or short a given currency pair as a contrarian indicator
-      (meaning that if most people are short, the pair is likely to rise and
-      vice versa).
+      Retail traders (individual traders who don&#39;t work for a financial institution like a bank
+      or hedge fund) generally suck at trading. In the Foreign Exchange markets, some people use the
+      percentage of retail traders who are long or short a given currency pair as a contrarian
+      indicator (meaning that if most people are short, the pair is likely to rise and vice versa).
     </p>
 
     <p>
-      For the stock market, it&#39;s a bit different. One of the most useful
-      things that you can do with the data that this site provides is to figure
-      out how people are reacting to moves in the market. Depending on if people
-      are buying the dip, getting onboard during a pump because they think
-      it&#39;s going to go higher, or taking profits, this data lets you observe
-      each of those different situations and plan your own trading accordingly.
+      For the stock market, it&#39;s a bit different. One of the most useful things that you can do
+      with the data that this site provides is to figure out how people are reacting to moves in the
+      market. Depending on if people are buying the dip, getting onboard during a pump because they
+      think it&#39;s going to go higher, or taking profits, this data lets you observe each of those
+      different situations and plan your own trading accordingly.
     </p>
 
     <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
       <ExampleImage
-        src="/images/buying_the_dip.png"
+        src="/images/buying_the_dip.jpg"
         alt="A chart showing the price vs popularity of Starbucks stock ($SBUX) while traders buy the dip during a drop in price."
         url="/symbol/SBUX"
         caption={
@@ -89,7 +81,7 @@ const Info = () => (
         }
       />
       <ExampleImage
-        src="/images/taking_profits.png"
+        src="/images/taking_profits.jpg"
         alt="A chart showing the price vs popularity of AMD stock ($AMD) while traders take profits during a rise in price."
         url="/symbol/AMD"
         caption={
@@ -100,7 +92,7 @@ const Info = () => (
         }
       />
       <ExampleImage
-        src="/images/fomo.png"
+        src="/images/fomo.jpg"
         alt="A chart showing the price vs popularity of iQIYI inc. stock ($IQ) while traders greed out and keep buying more and more as the price continues to rise."
         url="/symbol/IQ"
         caption={
@@ -114,10 +106,10 @@ const Info = () => (
 
     <h2>How it works</h2>
     <p>
-      Every hour, the price and popularity for every stock on Robinhood is
-      downloaded from the Robinhood API and stored. By combining all of these
-      data points together, it&#39;s possible to view trends and analyze the
-      ways in which they both change with respect to each other and over time.
+      Every hour, the price and popularity for every stock on Robinhood is downloaded from the
+      Robinhood API and stored. By combining all of these data points together, it&#39;s possible to
+      view trends and analyze the ways in which they both change with respect to each other and over
+      time.
     </p>
 
     <span
@@ -128,10 +120,9 @@ const Info = () => (
         display: 'block',
       }}
     >
-      This site is for informational purposes only. It is not intended to serve
-      as investment advice. However, if you do end up loading up on OTM weekly
-      options because of something you saw on the site, please put me in the
-      screenshot of your losses when you post to /r/WSB &lt;3
+      This site is for informational purposes only. It is not intended to serve as investment
+      advice. However, if you do end up loading up on OTM weekly options because of something you
+      saw on the site, please put me in the screenshot of your losses when you post to /r/WSB &lt;3
     </span>
   </Fragment>
 );
