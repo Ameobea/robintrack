@@ -1,4 +1,5 @@
-FROM python:3.7.2
+# This must be 3.6 because the `pika` library uses the `async` keyword which breaks 3.7*
+FROM python:3.6
 
 ADD . /app
 WORKDIR /app
