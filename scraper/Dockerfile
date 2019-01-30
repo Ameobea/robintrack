@@ -1,8 +1,9 @@
-FROM python:3.6.0
+FROM python:3.7.2
 
 ADD . /app
 WORKDIR /app
 
 RUN pip install -r requirements.txt
 
-CMD ["./scrape.sh"]
+CMD ["./run_worker.sh"]
+

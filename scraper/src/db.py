@@ -22,7 +22,6 @@ mongo_url = "mongodb://{}{}{}{}{}:{}/".format(
 )
 mongo_client = MongoClient(mongo_url)
 
-
 redis_client = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=0)
 
 

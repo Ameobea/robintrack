@@ -32,14 +32,16 @@ def get_tradable_instrument_ids(instruments: List[Dict[str, str]]) -> List[Tuple
 @click.option("--rabbitmq_port", type=click.INT, default=5672)
 @click.option("--scraper_request_cooldown_seconds", type=click.FLOAT, default=1.0)
 def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds: float):
+    print("init rabbitmq connection")
     rabbitmq_connection = pika.BlockingConnection(
         pika.ConnectionParameters(host=rabbitmq_host, port=rabbitmq_port)
     )
     rabbitmq_channel = rabbitmq_connection.channel()
     rabbitmq_channel.queue_declare(queue="instrument_ids")
+    print("rabbitmq connection init'd")
 
     # Lock and flush the existing cache
-    print('Locking the cache in preparation for update...')
+    print("Locking the cache in preparation for update...")
     set_update_started()
 
     trader = Robinhood()

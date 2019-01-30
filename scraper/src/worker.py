@@ -5,6 +5,7 @@ import datetime
 from functools import reduce
 from json.decoder import JSONDecodeError
 from pprint import pprint
+from os import environ
 
 import click
 import pika
@@ -12,7 +13,7 @@ import pymongo
 from pymongo.errors import BulkWriteError
 import requests
 
-from Robinhood import Robinhood
+from Robinhood import Robinhood, endpoints
 from Robinhood.exceptions import InvalidTickerSymbol
 
 from common import parse_throttle_res
@@ -92,7 +93,7 @@ def fetch_popularity(
     worker_request_cooldown_seconds=1.0,
 ):
     if instrument_ids == "__DONE":
-        print('Received DONE message for popularity fetching; marking as complete in Redis...')
+        print("Received DONE message for popularity fetching; marking as complete in Redis...")
         set_popularities_finished()
         return
 
@@ -159,12 +160,14 @@ def fetch_quote(
     worker_request_cooldown_seconds=1.0,
 ):
     if symbols == "__DONE":
-        print('Received DONE message for quote fetching; marking as complete in Redis...')
+        print("Received DONE message for quote fetching; marking as complete in Redis...")
         set_quotes_finished()
         return
 
     try:
-        res = TRADER.quote_data(symbols)
+        url = f"{endpoints.quotes()}?symbols={symbols}"
+        res = requests.get(url, headers=TRADER.headers, timeout=15)
+        res = res.json()
         quotes = res["results"]
         store_quotes(quotes, collection)
 
@@ -212,13 +215,28 @@ WORK_CBS = {
 @click.option("--rabbitmq_port", type=click.INT, default=5672)
 @click.option("--worker_request_cooldown_seconds", type=click.FLOAT, default=1.0)
 def cli(mode: str, rabbitmq_host: str, rabbitmq_port: str, worker_request_cooldown_seconds: float):
-    print('Unlocking cache...')
+    if mode == "quote":
+        robinhood_username = environ.get("ROBINHOOD_USERNAME")
+        robinhood_password = environ.get("ROBINHOOD_PASSWORD")
+        if robinhood_username is None or robinhood_password is None:
+            print(
+                (
+                    "Error: `ROBINHOOD_USERNAME` and `ROBINHOOD_PASSWORD` environment variables"
+                    " must be provided in `quote` mode."
+                )
+            )
+            exit(1)
+        TRADER.login(robinhood_username, robinhood_password)
+
+    print("Unlocking cache...")
     unlock_cache()
 
+    print("init rabbitmq connection")
     rabbitmq_connection = pika.BlockingConnection(
         pika.ConnectionParameters(host=rabbitmq_host, port=rabbitmq_port)
     )
     rabbitmq_channel = rabbitmq_connection.channel()
+    print("rabbitmq connection init'd")
 
     (work_cb, collection_name, channel_name) = WORK_CBS[mode]
     db = get_db()
