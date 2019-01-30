@@ -5,6 +5,8 @@ from os import environ
 from pymongo import MongoClient
 import redis
 
+from popularity_ranking import populate_popularity_rankings
+
 MONGO_USER = environ.get("MONGO_USER") or ""
 MONGO_PASSWORD = environ.get("MONGO_PASSWORD") or ""
 MONGO_HOST = environ.get("MONGO_HOST") or "localhost"
@@ -55,6 +57,7 @@ def check_if_all_finished():
     if all_finished:
         print("All updates finished! Flushing + unlocking cache...")
         flush_cache()
+        populate_popularity_rankings()
         unlock_cache()
 
 

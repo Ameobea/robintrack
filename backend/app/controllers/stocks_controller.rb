@@ -4,19 +4,38 @@ class StocksController < ApplicationController
   DEFAULT_LIMIT = 50
 
   def most_popular
-    key = "#{limit_param}_#{start_index_param}"
-    res = with_cache(__method__.to_s, key) do
-      entries = Popularity.most_popular limit_param, start_index_param
-      format_popularity_entries entries
+    # Try to use the cache, falling back to mongo query if it's not available
+    end_index = start_index_param + limit_param
+    cached_res = $redis.lrange "popularity_list", start_index_param, end_index
+
+    res = nil
+    if cached_res
+      res = cached_res.map{ |datum| JSON.parse datum }
+    else
+      key = "#{limit_param}_#{start_index_param}"
+      res = with_cache(__method__.to_s, key) do
+        entries = Popularity.most_popular limit_param, start_index_param
+        format_popularity_entries entries
+      end
     end
     render json: res
   end
 
   def least_popular
-    key = "#{limit_param}_#{start_index_param}"
-    res = with_cache(__method__.to_s, key) do
-      entries = Popularity.least_popular limit_param, start_index_param
-      format_popularity_entries entries
+    # Try to use the cache, falling back to mongo query if it's not available
+    start_index = -start_index_param - limit_param
+    end_index = [start_index + limit_param, 0].min
+    cached_res = $redis.lrange "popularity_list", start_index, end_index
+
+    res = nil
+    if cached_res
+      res = cached_res.map{ |datum| JSON.parse datum }.reverse
+    else
+      key = "#{limit_param}_#{start_index_param}"
+      res = with_cache(__method__.to_s, key) do
+        entries = Popularity.least_popular limit_param, start_index_param
+        format_popularity_entries entries
+      end
     end
     render json: res
   end
@@ -50,11 +69,21 @@ class StocksController < ApplicationController
 
   def popularity_ranking
     id = params[:id]
-    res = with_cache(__method__.to_s, id) do
-      entry = Popularity.get_ranking id
-      raise NotFound unless entry
-      { symbol: entry["symbol"], ranking: entry["ranking"] }
+    # First attempt to use the pre-built popularity rankings cache
+    cached_popularity = get_cache("popularity_rankings", id)
+    res = nil
+
+    if cached_popularity
+      res = {"symbol": id, "popularity": cached_popularity.to_i, "cached": true}
+    else
+      # If the popularity rankings cache is not available, fall back to database query
+      res = with_cache(__method__.to_s, id) do
+        entry = Popularity.get_ranking id
+        raise NotFound unless entry
+        { symbol: entry["symbol"], ranking: entry["ranking"] }
+      end
     end
+
     render json: res
   end
 
