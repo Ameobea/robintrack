@@ -7,10 +7,8 @@ from typing import List
 
 from pymongo.cursor import Cursor
 
-from db import redis_client, get_db
 
-
-def compute_popularity_rankings() -> Cursor:
+def compute_popularity_rankings(get_db) -> Cursor:
     """ Returns a list of all symbols ordered by current popularity, ordered most to least
     popular. """
 
@@ -35,7 +33,7 @@ def compute_popularity_rankings() -> Cursor:
     )
 
 
-def set_popularity_rankings(rankings: Cursor):
+def set_popularity_rankings(redis_client, rankings: Cursor):
     """ Sets the popularity rankings for each symbol into Redis. """
 
     rankings_map = {}
@@ -64,8 +62,8 @@ def set_popularity_rankings(rankings: Cursor):
     print("Finished computing popularity caches")
 
 
-def populate_popularity_rankings():
+def populate_popularity_rankings(redis_client, get_db):
     """ Compute the popularity rankings cache and set it into Redis. """
 
-    rankings = compute_popularity_rankings()
-    set_popularity_rankings(rankings)
+    rankings = compute_popularity_rankings(get_db)
+    set_popularity_rankings(redis_client, rankings)

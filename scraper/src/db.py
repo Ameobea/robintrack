@@ -57,7 +57,7 @@ def check_if_all_finished():
     if all_finished:
         print("All updates finished! Flushing + unlocking cache...")
         flush_cache()
-        populate_popularity_rankings()
+        populate_popularity_rankings(redis_client, get_db)
         unlock_cache()
 
 
