@@ -196,7 +196,7 @@ class SymbolDetails extends Component {
     }
 
     const popularityRanking = this.props.popularityRanking;
-    if (!oldProps.popularityRanking && !!popularityRanking) {
+    if (!oldProps.popularityRanking && popularityRanking !== undefined) {
       this.props.fetchNeighborRankingSymbols(popularityRanking);
     }
   };
@@ -208,12 +208,12 @@ class SymbolDetails extends Component {
       return <SymbolNotFound symbol={symbol} />;
     }
 
-    const isLoading = R.any(R.not, [
+    const isLoading = R.any(R.isNil, [
       quotes[symbol],
       popularityHistory[symbol],
       quoteHistory[symbol],
-      !!props.nextMostPopular || props.popularityRanking === props.totalSymbols,
-      !!props.nextLeastPopular || props.popularityRanking === 1,
+      props.nextMostPopular !== undefined || props.popularityRanking === props.totalSymbols,
+      props.nextLeastPopular !== undefined || props.popularityRanking === 1,
     ]);
 
     const bid = R.path([symbol, 'bid'], quotes);

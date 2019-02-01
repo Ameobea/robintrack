@@ -70,11 +70,11 @@ class StocksController < ApplicationController
   def popularity_ranking
     id = params[:id]
     # First attempt to use the pre-built popularity rankings cache
-    cached_popularity = get_cache("popularity_rankings", id)
+    cached_popularity_ranking = get_cache("popularity_rankings", id)
     res = nil
 
-    if cached_popularity
-      res = {"symbol": id, "popularity": cached_popularity.to_i, "cached": true}
+    if cached_popularity_ranking
+      res = {"symbol": id, "ranking": cached_popularity_ranking.to_i, "cached": true}
     else
       # If the popularity rankings cache is not available, fall back to database query
       res = with_cache(__method__.to_s, id) do

@@ -44,12 +44,11 @@ def set_popularity_rankings(redis_client, rankings: Cursor):
         symbol = entry.get("symbol")
         if symbol is None:
             continue
+        popularity = entry.get("latest_popularity", 0)
 
         ranking += 1
         rankings_map[symbol] = ranking
-        rankings_list.append(
-            json.dumps({"symbol": symbol, "popularity": entry.get("latest_popularity", 0)})
-        )
+        rankings_list.append(json.dumps({"symbol": symbol, "popularity": popularity}))
 
     print("Setting popularity rankings hash...")
     # Populate the popularity mapping hash used to map symbol to ranking
