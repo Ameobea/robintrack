@@ -11,20 +11,13 @@ from Robinhood import Robinhood
 
 from common import parse_throttle_res
 from db import get_db, set_instruments_finished, set_update_started, lock_cache
+from utils import omit
 
 
-def get_tradable_instrument_ids(instruments: List[Dict[str, str]]) -> List[Tuple[str, str]]:
-    """ Returns the instrument IDs and symbols of all tradable instruments in the provided list
-    of instruments. """
-    tradable_instruments: Iterable[Dict[str, str]] = filter(
-        lambda instrument: instrument.get("tradability") == "tradable", instruments
-    )
+def get_tradable_instruments(instruments: List[Dict[str, object]]) -> Iterable[Dict[str, object]]:
+    """ Filters the provided list of instruments to only include those that are tradeable """
 
-    tuples: Iterable[Tuple[str, str]] = map(
-        lambda instrument: (instrument["id"], instrument["symbol"]), tradable_instruments
-    )
-
-    return list(tuples)
+    return filter(lambda instrument: instrument.get("tradability") == "tradable", instruments)
 
 
 @click.command()
@@ -48,20 +41,22 @@ def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds
     res = trader.get_url("https://api.robinhood.com/instruments/")
 
     db = get_db()
-    index_col = db["index"]
-    index_col.create_index("instrument_id", unique=True)
+    index_coll = db["index"]
+    index_coll.create_index("instrument_id", unique=True)
 
     total_ids = 0
     quotes = []
     instrument_ids = []
     while True:
         fetched_instruments: List[Dict[str, str]] = res["results"]
-        tradable_instrument_ids = get_tradable_instrument_ids(fetched_instruments)
-        total_ids += len(tradable_instrument_ids)
+        tradable_instruments = get_tradable_instruments(fetched_instruments)
+        total_ids += len(tradable_instruments)
 
-        for instrument_id, symbol in tradable_instrument_ids:
+        for instrument_datum in tradable_instrument_ids:
             try:
-                index_col.insert_one({"instrument_id": instrument_id, "symbol": symbol})
+                index_coll.insert_one(
+                    {**omit("id", instrument_datum), "instrument_id": instrument_datum["id"]}
+                )
             except pymongo.errors.DuplicateKeyError:
                 pass
 

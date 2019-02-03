@@ -15,7 +15,6 @@ DESIRED_QUOTE_KEYS = [
 
 
 def pluck(keys: List[str], dictionary: dict) -> dict:
-
     def pluck_inner(acc: dict, pair) -> dict:
         (key, value) = pair
         return {**acc, key: value} if key in keys else acc
@@ -35,3 +34,9 @@ INSTRUMENT_ID_RGX = r"https://api.robinhood.com/instruments/(.+?)/"
 
 def parse_instrument_url(instrument_url: str) -> str:
     return instrument_url.split("instruments/")[1][:-1]
+
+
+def omit(k, d: dict) -> dict:
+    new_d = {**d}
+    new_d.__delitem__(k)
+    return new_d
