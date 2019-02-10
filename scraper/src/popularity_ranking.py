@@ -3,9 +3,26 @@ retrieval, avoiding the expensive popularity ranking queries every time. """
 
 from datetime import datetime, timedelta
 import json
-from typing import List
 
 from pymongo.cursor import Cursor
+
+
+def get_popularity_ranking_query():
+    two_hours_ago = datetime.now() - timedelta(hours=2)
+    return [
+        {"$match": {"timestamp": {"$gte": two_hours_ago}}},
+        {"$group": {"_id": "$instrument_id", "latest_popularity": {"$first": "$popularity"}}},
+        {
+            "$lookup": {
+                "from": "index",
+                "localField": "_id",
+                "foreignField": "instrument_id",
+                "as": "indexes",
+            }
+        },
+        {"$addFields": {"symbol": {"$arrayElemAt": ["$indexes.symbol", 0]}}},
+        {"$sort": {"latest_popularity": -1, "symbol": 1}},
+    ]
 
 
 def compute_popularity_rankings(get_db) -> Cursor:
@@ -13,24 +30,9 @@ def compute_popularity_rankings(get_db) -> Cursor:
     popular. """
 
     db = get_db()
-    two_hours_ago = datetime.now() - timedelta(hours=2)
+
     print("Performing popularity aggregation query")
-    return db["popularity"].aggregate(
-        [
-            {"$match": {"timestamp": {"$gte": two_hours_ago}}},
-            {"$group": {"_id": "$instrument_id", "latest_popularity": {"$first": "$popularity"}}},
-            {
-                "$lookup": {
-                    "from": "index",
-                    "localField": "_id",
-                    "foreignField": "instrument_id",
-                    "as": "indexes",
-                }
-            },
-            {"$addFields": {"symbol": {"$arrayElemAt": ["$indexes.symbol", 0]}}},
-            {"$sort": {"latest_popularity": -1, "symbol": 1}},
-        ]
-    )
+    return db["popularity"].aggregate(get_popularity_ranking_query())
 
 
 def set_popularity_rankings(redis_client, rankings: Cursor):
