@@ -22,7 +22,7 @@ class PopularitiesController < ApplicationController
   def largest_popularity_increases
     options = options_from_params
     res = with_cache("largest_popularity_increases", hash_hash(options)) do
-      format_popularity_entries Popularity.largest_popularity_changes(options)
+      format_popularity_entries Popularity.largest_popularity_increases(options)
     end
     render json: res
   end

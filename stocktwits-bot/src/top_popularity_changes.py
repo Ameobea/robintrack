@@ -8,20 +8,20 @@ import requests
 
 from stocktwits_api import post_twit
 
+API_URL_BASE = "https://robintrack.net/api"
+
 
 TOP_PERCENT_POPULARITY_CHANGES_URL = (
-    "https://robintrack.net/api/largest_popularity_changes?hours_ago=24"
-    "&limit=10&percentage=true&min_popularity=200&start_index=0"
+    f"{API_URL_BASE}/largest_popularity_changes?hours_ago=24"
+    "&limit=10&percentage=true&min_popularity=200"
 )
 
 TOP_ABSOLUTE_POPULARITY_INCREASES_URL = (
-    "https://robintrack.net/api/largest_popularity_changes?hours_ago=24"
-    "&limit=10&percentage=false&start_index=0"
+    f"{API_URL_BASE}/largest_popularity_increases?hours_ago=24&limit=10&percentage=false"
 )
 
 TOP_ABSOLUTE_POPULARITY_DECREASES_URL = (
-    "https://robintrack.net/api/largest_popularity_decreases?hours_ago=24"
-    "&limit=10&percentage=false&start_index=0"
+    f"{API_URL_BASE}/largest_popularity_decreases?hours_ago=24&limit=10&percentage=false"
 )
 
 
