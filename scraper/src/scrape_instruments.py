@@ -87,7 +87,11 @@ def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds
                 )
 
                 rabbitmq_channel.basic_publish(
-                    exchange="", routing_key="instrument_ids", body=",".join(instrument_data)
+                    exchange="",
+                    routing_key="instrument_ids",
+                    body=",".join(
+                        [instrument_datum["id"] for instrument_datum in instrument_data]
+                    ),
                 )
 
                 quotes = []
