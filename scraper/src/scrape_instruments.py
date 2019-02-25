@@ -43,6 +43,16 @@ def try_update_instrument(index_coll, instrument_datum: dict):
             print(f"Handled symbol conflict; re-trying update for instrument {instrument_id}")
 
 
+def publish_quotes_and_instrument_ids(
+    rabbitmq_channel, quotes: List[str], instrument_ids: List[str]
+):
+    rabbitmq_channel.basic_publish(exchange="", routing_key="symbols", body=",".join(quotes))
+
+    rabbitmq_channel.basic_publish(
+        exchange="", routing_key="instrument_ids", body=",".join(instrument_ids)
+    )
+
+
 @click.command()
 @click.option("--rabbitmq_host", type=click.STRING, default="localhost")
 @click.option("--rabbitmq_port", type=click.INT, default=5672)
@@ -69,7 +79,7 @@ def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds
 
     total_ids = 0
     quotes = []
-    instrument_data = []
+    instrument_ids = []
     while True:
         fetched_instruments: List[Dict[str, str]] = res["results"]
         tradable_instruments = get_tradable_instruments(fetched_instruments)
@@ -78,24 +88,14 @@ def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds
             total_ids += 1
             try_update_instrument(index_coll, instrument_datum)
 
-            instrument_data.append(instrument_datum)
+            instrument_ids.append(instrument_datum["id"])
             quotes.append(instrument_datum["symbol"])
 
             if len(quotes) == 20:
-                rabbitmq_channel.basic_publish(
-                    exchange="", routing_key="symbols", body=",".join(quotes)
-                )
-
-                rabbitmq_channel.basic_publish(
-                    exchange="",
-                    routing_key="instrument_ids",
-                    body=",".join(
-                        [instrument_datum["id"] for instrument_datum in instrument_data]
-                    ),
-                )
+                publish_quotes_and_instrument_ids(rabbitmq_channel, quotes, instrument_ids)
 
                 quotes = []
-                instrument_data = []
+                instrument_ids = []
 
         if res.get("detail"):
             # Request was throttled; wait for a cooldown before continuing
@@ -115,13 +115,7 @@ def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds
             res = trader.get_url(res["next"])
         else:
             # We're done scraping; there are no more instruments in the list.
-
-            rabbitmq_channel.basic_publish(
-                exchange="", routing_key="symbols", body=",".join(quotes)
-            )
-            rabbitmq_channel.basic_publish(
-                exchange="", routing_key="instrument_ids", body=",".join(instrument_data)
-            )
+            publish_quotes_and_instrument_ids(rabbitmq_channel, quotes, instrument_ids)
 
             # Publish a finished message over the channels to indicate that there are no more
             # items to process in this run.
