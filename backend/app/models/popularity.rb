@@ -12,7 +12,7 @@ class Popularity
 
   def self.total_symbols(hours_ago = nil)
     MongoClient[:popularity].aggregate([
-      hours_ago && { "$match" => { timestamp: { "$gte": hours_ago.hours.ago.utc } } },
+      hours_ago && { "$match" => { timestamp: { "$gte": hours_ago.hours.ago } } },
       { "$group" => { _id: "$instrument_id" } },
       { "$count" => "total_symbols" },
     ].compact).first
@@ -20,7 +20,7 @@ class Popularity
 
   def self.sort_by_popularity(sort_direction, limit, start_index)
     MongoClient[:popularity].aggregate([
-      { "$match" => { timestamp: { "$gte": 2.hour.ago.utc } } },
+      { "$match" => { timestamp: { "$gte": 2.hour.ago } } },
       { "$sort" => { timestamp: -1 } },
       { "$group" => { _id: "$instrument_id", latest_popularity: { "$first" => "$popularity" } } },
       { "$lookup" => {
@@ -38,7 +38,7 @@ class Popularity
 
   def self.get_ranking(symbol)
     MongoClient[:popularity].aggregate([
-      { "$match" => { timestamp: { "$gte": 2.hour.ago.utc } } },
+      { "$match" => { timestamp: { "$gte": 2.hour.ago } } },
       { "$sort" => { timestamp: -1 } },
       { "$group" => { _id: "$instrument_id", latest_popularity: { "$first" => "$popularity" } } },
       { "$lookup" => {
@@ -112,7 +112,7 @@ class Popularity
     end
 
     MongoClient[:popularity].aggregate([
-      { "$match" => { timestamp: { "$gte" => hours_ago.hour.ago.utc } } },
+      { "$match" => { timestamp: { "$gte" => hours_ago.hour.ago } } },
       { "$sort" => { timestamp: -1 } },
       { "$group" => {
         _id: "$instrument_id",
@@ -138,7 +138,7 @@ class Popularity
 
   def self.bucket_popularity(bucket_count)
     entries = MongoClient[:popularity].aggregate([
-      { "$match": { timestamp: { "$gte": 2.hours.ago.utc } } },
+      { "$match": { timestamp: { "$gte": 2.hours.ago } } },
       { "$sort": { timestamp: -1 } },
       { "$group": { _id: "$instrument_id", latest_popularity: { "$first": "$popularity" } } },
     ])

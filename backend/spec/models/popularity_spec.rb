@@ -11,15 +11,15 @@ RSpec.describe Popularity do
 
     MongoClient[:popularity].insert_many([
       # same popularity to test sorting by symbol
-      { timestamp: 20.minutes.ago.utc, instrument_id: "goog_id", popularity: 893 },
-      { timestamp: 20.minutes.ago.utc, instrument_id: "aapl_id", popularity: 893 },
-      { timestamp: 20.minutes.ago.utc, instrument_id: "spy_id", popularity: 8 },
-      { timestamp: 20.minutes.ago.utc, instrument_id: "amd_id", popularity: 25 },
+      { timestamp: 20.minutes.ago, instrument_id: "goog_id", popularity: 893 },
+      { timestamp: 20.minutes.ago, instrument_id: "aapl_id", popularity: 893 },
+      { timestamp: 20.minutes.ago, instrument_id: "spy_id", popularity: 8 },
+      { timestamp: 20.minutes.ago, instrument_id: "amd_id", popularity: 25 },
 
-      { timestamp: 90.minutes.ago.utc, instrument_id: "goog_id", popularity: 20 },
-      { timestamp: 90.minutes.ago.utc, instrument_id: "aapl_id", popularity: 20 },
-      { timestamp: 90.minutes.ago.utc, instrument_id: "spy_id", popularity: 20 },
-      { timestamp: 90.minutes.ago.utc, instrument_id: "amd_id", popularity: 20 },
+      { timestamp: 90.minutes.ago, instrument_id: "goog_id", popularity: 20 },
+      { timestamp: 90.minutes.ago, instrument_id: "aapl_id", popularity: 20 },
+      { timestamp: 90.minutes.ago, instrument_id: "spy_id", popularity: 20 },
+      { timestamp: 90.minutes.ago, instrument_id: "amd_id", popularity: 20 },
     ])
   end
 
