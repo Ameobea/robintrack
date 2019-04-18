@@ -1,5 +1,6 @@
 """ Robintrack Stocktwits Bot """
 
+import click
 import os
 
 from top_popularity_changes import run_top_popularity_changes
@@ -22,10 +23,12 @@ def get_mode_function() -> str:
     return mode_function
 
 
-def main():
+@click.command()
+@click.option("--dry-run", default=False, is_flag=True)
+def cli(dry_run: bool):
     mode_function = get_mode_function()
-    mode_function()
+    mode_function(dry_run)
 
 
 if __name__ == "__main__":
-    main()
+    cli()

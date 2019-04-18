@@ -49,26 +49,29 @@ def create_absolute_change_twit_content(change: dict, i: int) -> str:
     )
 
 
-def post_twits_from_changes(changes: Iterable[dict], map_change_to_twit_msg_content: Callable):
+def post_twits_from_changes(
+    changes: Iterable[dict], map_change_to_twit_msg_content: Callable, dry_run: bool
+):
     for i, change in enumerate(changes):
         if change["symbol"] is None:
             continue
 
         msg = map_change_to_twit_msg_content(change, i)
-        post_twit(msg)
+        if not dry_run:
+            post_twit(msg)
         print(msg, len(msg))
         sleep(3)
 
 
-def run_top_popularity_changes():
+def run_top_popularity_changes(dry_run: bool):
     # Fetch the top popularity changes by percent from Robintrack
     top_percent_changes = requests.get(TOP_PERCENT_POPULARITY_CHANGES_URL).json()
-    post_twits_from_changes(top_percent_changes, create_percent_change_twit_content)
+    post_twits_from_changes(top_percent_changes, create_percent_change_twit_content, dry_run)
 
     # Fetch the top popularity increases by absolute diff from Robintrack
     top_absolute_increases = requests.get(TOP_ABSOLUTE_POPULARITY_INCREASES_URL).json()
-    post_twits_from_changes(top_absolute_increases, create_absolute_change_twit_content)
+    post_twits_from_changes(top_absolute_increases, create_absolute_change_twit_content, dry_run)
 
     # Fetch the top popularity decreases by absolute diff from Robintrack
     top_absolute_decreases = requests.get(TOP_ABSOLUTE_POPULARITY_DECREASES_URL).json()
-    post_twits_from_changes(top_absolute_decreases, create_absolute_change_twit_content)
+    post_twits_from_changes(top_absolute_decreases, create_absolute_change_twit_content, dry_run)

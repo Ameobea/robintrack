@@ -3,6 +3,7 @@
 import urllib
 import os
 from typing import Callable
+from time import sleep
 
 import requests
 
@@ -11,6 +12,9 @@ if not STOCKTWITS_ACCESS_TOKEN:
     print("Error: The `STOCKTWITS_ACCESS_TOKEN` environment variable must be supplied.")
 
 STOCKTWITS_BASE_URL = "https://api.stocktwits.com/api/2"
+
+TWIT_POST_RETRY_ATTEMPTS = 3
+TWIT_POST_RETRY_DELAY_SECONDS = 3
 
 
 def map_method_name_to_requests_function(method_name: str) -> Callable:
@@ -34,7 +38,17 @@ def stocktwits_request(method: str, path: str, *args, headers={}, **kwargs) -> o
     return res.json()
 
 
-def post_twit(content: str):
+def post_twit(content: str, attempts=0):
     print(f"Posting twit: {content}")
     escaped_content = urllib.parse.quote_plus(content)
-    stocktwits_request("POST", "/messages/create.json", data=f"body={escaped_content}")
+
+    try:
+        stocktwits_request("POST", "/messages/create.json", data=f"body={escaped_content}")
+    except:
+        if attempts == TWIT_POST_RETRY_ATTEMPTS:
+            print("Max attempts to post twit failed; moving on.")
+            return
+
+        print("Error posting twit; retrying in 3 seconds...")
+        sleep(TWIT_POST_RETRY_DELAY_SECONDS)
+        post_twit(content, attempts + 1)
