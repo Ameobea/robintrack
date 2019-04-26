@@ -6,7 +6,7 @@ const styles = {
     flexDirection: 'row',
     marginTop: 25,
     paddingTop: 10,
-    fontSize: 12,
+    fontSize: 13,
     borderTop: '1px solid rgb(87, 86, 86)',
   },
   item: {
@@ -27,6 +27,9 @@ const MadeBy = () => (
       <br />
       <a href="https://ameobea.me/">Ameo / Casey Primozic</a> +{' '}
       <a href="https://github.com/dalexj">Alex J</a>
+      <br />
+      {'Logo by '}
+      <a href="https://facebook.com/profile.php?id=100008303284884">Michael Sharon</a>
     </p>
   </FooterItem>
 );

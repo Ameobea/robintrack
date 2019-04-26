@@ -44,8 +44,7 @@ const renderRow = ({
   mobile,
   fullHeight,
 }) => {
-  const hilightStyle =
-    selectedSymbol === rowData.symbol ? { backgroundColor: '#333' } : {};
+  const hilightStyle = selectedSymbol === rowData.symbol ? { backgroundColor: '#333' } : {};
 
   return (
     <div key={key} style={style} className={className}>
@@ -85,9 +84,7 @@ const SymbolTable = ({
   minBatchSize = 25,
 }) => (
   <div style={R.merge(styles.root, style)} className="symbol-table">
-    {label && (
-      <h2 style={{ ...styles.header, fontSize: mobile ? 16 : 34 }}>{label}</h2>
-    )}
+    {label && <h2 style={{ ...styles.header, fontSize: mobile ? 16 : 34 }}>{label}</h2>}
 
     <div style={{ height, flexDirection: 'row' }}>
       <InfiniteLoader
@@ -109,9 +106,7 @@ const SymbolTable = ({
                 width={width}
                 rowCount={data.length}
                 rowGetter={rowGetter}
-                rowRenderer={props =>
-                  renderRow({ selectedSymbol, mobile, fullHeight, ...props })
-                }
+                rowRenderer={props => renderRow({ selectedSymbol, mobile, fullHeight, ...props })}
                 rowHeight={mobile && !fullHeight ? 30 : 34}
                 onRowsRendered={onRowsRendered}
                 onRowClick={({ rowData }) => onRowClick(rowData)}
@@ -128,9 +123,7 @@ const SymbolTable = ({
 
 const renderSymbol = ({ cellData, mobile }) => (
   <Link to={`/symbol/${cellData}`}>
-    <span style={{ fontSize: mobile ? 12 : 24, color: emphasis }}>
-      {cellData}
-    </span>
+    <span style={{ fontSize: mobile ? 12 : 24, color: emphasis }}>{cellData}</span>
   </Link>
 );
 
@@ -142,7 +135,7 @@ export const SymbolColumn = ({ mobile, style }) => (
     cellRenderer={props => renderSymbol({ mobile, ...props })}
     width={125}
     flexGrow={1}
-    style={{ fontSize: mobile ? 12 : 24 }}
+    style={{ fontSize: mobile ? 14 : 24 }}
   />
 );
 

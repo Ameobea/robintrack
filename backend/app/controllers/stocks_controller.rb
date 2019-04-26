@@ -43,9 +43,18 @@ class StocksController < ApplicationController
   def quote
     res = with_cache(__method__.to_s, params[:id]) do
       entry = Quote.find_by_symbol params[:id]
-      raise NotFound unless entry
-      { bid: entry["bid_price"].to_f, ask: entry["ask_price"].to_f }
+      metadata = Index.get_symbol_metadata(params[:id])
+
+      raise NotFound unless entry && metadata
+
+      {
+        bid: entry["bid_price"].to_f,
+        ask: entry["ask_price"].to_f,
+        simple_name: metadata["simple_name"],
+        name: metadata["name"]
+      }
     end
+
     render json: res
   end
 

@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { Link } from 'react-router-dom';
@@ -19,7 +19,7 @@ const mapStateToProps = ({
 }) => ({ pathname });
 
 const styles = {
-  root: {
+  desktopHeader: {
     backgroundColor,
     display: 'flex',
     flexDirection: 'row',
@@ -52,42 +52,28 @@ const styles = {
 const HeaderItem = compose(
   connect(mapStateToProps),
   withMobileProp({ maxDeviceWidth: 1200 })
-)(
-  ({
-    content,
-    url,
-    pathname,
-    style = {},
-    textStyle = {},
-    onItemSelect,
-    mobile,
-  }) => {
-    const aggregateStyle = R.mergeAll([
-      styles.text,
-      { color: pathname === url ? fontColor : emphasis },
-      textStyle,
-    ]);
-    const inner = <span style={aggregateStyle}>{content}</span>;
+)(({ content, url, pathname, style = {}, textStyle = {}, onItemSelect, mobile }) => {
+  const aggregateStyle = R.mergeAll([
+    styles.text,
+    { color: pathname === url ? fontColor : emphasis },
+    textStyle,
+  ]);
+  const inner = <span style={aggregateStyle}>{content}</span>;
 
-    return (
-      <div
-        style={R.mergeAll([
-          styles.headerItem,
-          mobile ? { fontSize: 16 } : { fontSize: 26 },
-          style,
-        ])}
-      >
-        {url && url !== pathname ? (
-          <Link to={url} style={textStyle} onClick={onItemSelect}>
-            {inner}
-          </Link>
-        ) : (
-          inner
-        )}
-      </div>
-    );
-  }
-);
+  return (
+    <div
+      style={R.mergeAll([styles.headerItem, mobile ? { fontSize: 16 } : { fontSize: 26 }, style])}
+    >
+      {url && url !== pathname ? (
+        <Link to={url} style={textStyle} onClick={onItemSelect}>
+          {inner}
+        </Link>
+      ) : (
+        inner
+      )}
+    </div>
+  );
+});
 
 const mapSymbolSearchStateToProps = ({ symbolSearch }) => ({
   searchContent: symbolSearch,
@@ -99,11 +85,11 @@ const SymbolSearch = connect(
     setSymbolSearchContent,
     push,
   }
-)(({ searchContent, setSymbolSearchContent, push }) => {
+)(({ logoShown = true, searchContent, setSymbolSearchContent, push }) => {
   const submitSymbolSearch = () => push(`/symbol/${searchContent}`);
 
   return (
-    <div style={styles.searchWrapper}>
+    <div style={{ ...styles.searchWrapper, alignItems: logoShown ? 'center' : 'flex-end' }}>
       <div className="pt-input-group">
         <span className="pt-icon pt-icon-search" />
         <input
@@ -112,7 +98,7 @@ const SymbolSearch = connect(
           placeholder="Search Stock"
           dir="auto"
           onChange={e => setSymbolSearchContent(e.target.value.trim())}
-          size={12}
+          size={14}
           value={searchContent}
           style={styles.searchInput}
           onKeyDown={e => {
@@ -153,41 +139,68 @@ const MobileNavMenu = ({ onItemSelect }) => (
   </Menu>
 );
 
-class Header extends Component {
-  state = { menuOpen: false };
+const MobileHeader = ({ showLogo }) => {
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  render = () => (
-    <Fragment>
-      <MediaQuery maxDeviceWidth={840}>
-        <div style={styles.mobileHeader}>
-          <Popover
-            content={
-              <MobileNavMenu
-                onItemSelect={() => this.setState({ menuOpen: false })}
-              />
-            }
-            position={Position.LEFT_TOP}
-            isOpen={this.state.menuOpen}
-            onInteraction={menuOpen => this.setState({ menuOpen })}
-          >
-            <Button icon="menu" text="" />
-          </Popover>
+  return (
+    <nav style={styles.mobileHeader}>
+      {showLogo ? (
+        <Link to="/">
+          <img
+            src="/images/robintrack_logo.svg"
+            style={{ height: 70, width: 70, marginRight: 10, marginTop: -15 }}
+          />
+        </Link>
+      ) : null}
+      <Popover
+        content={<MobileNavMenu onItemSelect={() => setMenuOpen(false)} />}
+        position={Position.LEFT_TOP}
+        isOpen={menuOpen}
+        onInteraction={isOpen => setMenuOpen(isOpen)}
+      >
+        <Button icon="menu" text="" />
+      </Popover>
 
-          <SymbolSearch />
-        </div>
-      </MediaQuery>
-
-      <MediaQuery minDeviceWidth={841}>
-        <div style={styles.root}>
-          <div style={{ display: 'flex' }}>
-            {headerItems.map((props, i) => <HeaderItem key={i} {...props} />)}
-          </div>
-
-          <SymbolSearch />
-        </div>
-      </MediaQuery>
-    </Fragment>
+      <SymbolSearch />
+    </nav>
   );
-}
+};
+
+const DesktopHeader = ({ showLogo }) => (
+  <nav style={styles.desktopHeader}>
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      {showLogo ? (
+        <Link to="/">
+          <img
+            src="/images/robintrack_logo.svg"
+            style={{ height: 115, width: 115, marginRight: 15 }}
+          />
+        </Link>
+      ) : null}
+
+      {headerItems.map((props, i) => (
+        <HeaderItem key={i} {...props} />
+      ))}
+    </div>
+
+    <SymbolSearch logoShown={showLogo} />
+  </nav>
+);
+
+const HeaderInner = ({ showLogo }) => (
+  <Fragment>
+    <MediaQuery maxDeviceWidth={840}>
+      <MobileHeader showLogo={showLogo} />
+    </MediaQuery>
+
+    <MediaQuery minDeviceWidth={841}>
+      <DesktopHeader showLogo={showLogo} />
+    </MediaQuery>
+  </Fragment>
+);
+
+const Header = connect(({ router: { location: { pathname } } }) => ({
+  showLogo: pathname !== '/',
+}))(HeaderInner);
 
 export default Header;

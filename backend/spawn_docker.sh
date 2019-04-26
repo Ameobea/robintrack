@@ -6,9 +6,10 @@
 
 docker stop robintrack-backend
 docker rm robintrack-backend
-docker run -d --name robintrack-backend --net host \
-  -e "REDIS_HOST=localhost" \
-  -e "MONGO_HOST=localhost" \
-  -e "MONGO_PORT=27017" \
-  -e "SECRET_KEY_BASE=$SECRET_KEY_BASE" \
+docker run -d --name robintrack-backend \
+  -p 4000:4000 \
+  -e "REDIS_HOST=${REDIS_HOST:-localhost}" \
+  -e "MONGO_HOST=${MONGO_HOST:-localhost}" \
+  -e "MONGO_PORT=${MONGO_PORT:-27017}" \
+  -e "SECRET_KEY_BASE=${SECRET_KEY_BASE}" \
   robintrack-backend

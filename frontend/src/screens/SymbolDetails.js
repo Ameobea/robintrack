@@ -75,11 +75,13 @@ const DesktopPagerLink = ({ symbol, popularityRanking, isLoading, isRight = fals
 
 const formatPrice = price => numeral(price).format('$0.00');
 
-const Title = ({ popularityRanking, symbol, bid, ask }) => (
+const Title = ({ popularityRanking, symbol, bid, ask, name, fullName }) => (
   <h1>
     <center>
       {popularityRanking ? `#${popularityRanking}: ` : null}
       <u>{symbol}</u>
+      {' - '}
+      <span title={fullName}>{name}</span>
       <br />
       {!!bid && !!ask ? `${formatPrice(bid)} - ${formatPrice(ask)}` : 'Loading...'}
     </center>
@@ -132,16 +134,17 @@ const MobileNavigationHeader = ({
   popularityRanking,
   bid,
   ask,
+  name,
+  fullName,
 }) => (
   <div style={styles.mobileNavigationHeader}>
-    <ButtonGroup alignText={Alignment.CENTER}>
+    <h2>{name ? `${symbol} - ${name}` : symbol}</h2>
+    <ButtonGroup alignText={Alignment.CENTER} style={{ paddingBottom: 10 }}>
       <MobilePagerLink
         symbol={nextLeastPopular}
         popularityRanking={popularityRanking - 1}
         isLoading={isLoading}
       />
-
-      <Button text={symbol} />
 
       <MobilePagerLink
         symbol={nextMostPopular}
@@ -216,12 +219,19 @@ class SymbolDetails extends Component {
       props.nextLeastPopular !== undefined || props.popularityRanking === 1,
     ]);
 
-    const bid = R.path([symbol, 'bid'], quotes);
-    const ask = R.path([symbol, 'ask'], quotes);
+    const { bid, ask, name: fullName, simple_name: name } = quotes[symbol] || {};
 
     return (
       <div style={styles.root}>
-        <NavigationHeader symbol={symbol} bid={bid} ask={ask} isLoading={isLoading} {...props} />
+        <NavigationHeader
+          symbol={symbol}
+          bid={bid}
+          ask={ask}
+          name={name}
+          fullName={fullName}
+          isLoading={isLoading}
+          {...props}
+        />
 
         <Suspense fallback={<Loading />}>
           <PopularityChart

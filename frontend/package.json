@@ -7,6 +7,7 @@
     "echarts": "^4.1.0",
     "echarts-for-react": "^2.0.8",
     "history": "^4.7.2",
+    "node-sass": "^4.11.0",
     "numeral": "^2.0.6",
     "prop-types": "^15.6.1",
     "query-string": "5",
@@ -18,7 +19,7 @@
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
     "react-router-redux": "^5.0.0-alpha.9",
-    "react-scripts": "1.1.4",
+    "react-scripts": "3.0",
     "react-transition-group": "^2.3.1",
     "react-virtualized": "^9.18.5",
     "recompose": "^0.27.0",
@@ -35,5 +36,17 @@
     "eslint-plugin-react": "^7.7.0"
   },
   "proxy": "http://localhost:4000",
-  "homepage": "https://robintrack.net"
+  "homepage": "https://robintrack.net",
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
 }

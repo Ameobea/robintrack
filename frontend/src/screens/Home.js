@@ -1,47 +1,64 @@
 import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import * as R from 'ramda';
 
 import { backgroundColor } from 'src/style';
-import { headerItems } from 'src/components/Header';
 import { withMobileProp } from 'src/components/ResponsiveHelpers';
 
-const QuickLinks = () => (
-  <Fragment>
-    <h2 style={{ paddingTop: 20 }}>Quick Links</h2>
-    {headerItems.filter(R.prop('url')).map(({ content, url }, i) => (
-      <li key={i} style={{ marginLeft: 25 }}>
-        <Link to={url} style={{ fontSize: 24 }}>
-          {content}
-        </Link>
-      </li>
-    ))}
-  </Fragment>
-);
+const styles = {
+  disclaimer: {
+    fontStyle: 'italic',
+  },
+  logo: {
+    height: 300,
+    width: 300,
+    display: 'inline',
+  },
+  quickLinks: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  exampleImage: {
+    display: 'flex',
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    paddingBottom: 15,
+  },
+};
 
-const About = () => (
-  <Fragment>
+const About = withMobileProp({ maxDeviceWidth: 600 })(({ mobile }) => (
+  <div
+    style={{
+      display: 'flex',
+      flexDirection: 'column',
+      minWidth: !mobile ? 475 : undefined,
+      flex: 1,
+      paddingTop: 15,
+      marginLeft: !mobile ? 20 : undefined,
+      marginRight: !mobile ? 20 : undefined,
+    }}
+  >
     <h2>What is it Robintrack?</h2>
     <p>
       Robintrack keeps track of how many <a href="https://robinhood.com/">Robinhood</a> users hold a
       particular stock over time. It generates charts showing the relationship between price and
       popularity, and compiles some lists using the data.
     </p>
-  </Fragment>
-);
+
+    <h2 style={{ paddingTop: 10 }}>What can it do?</h2>
+    <p>
+      One of the most useful things that you can do with the data that this site provides is to
+      figure out how people are reacting to moves in the market. Depending on if people are buying
+      the dip, getting onboard during a pump because they think it&#39;s going to go higher, or
+      taking profits, this data lets you observe each of those different situations and plan your
+      own trading accordingly.
+    </p>
+  </div>
+));
 
 const ExampleImage = withMobileProp({ maxDeviceWidth: 600 })(
   ({ src, alt, caption, url, mobile }) => (
-    <div
-      style={{
-        display: 'flex',
-        flex: 1,
-        flexDirection: 'column',
-        alignItems: 'center',
-        minWidth: mobile ? 250 : 400,
-        paddingBottom: 15,
-      }}
-    >
+    <div style={{ ...styles.exampleImage, minWidth: mobile ? 250 : 400 }}>
       <Link to={url}>
         <img src={src} alt={alt} style={{ minWidth: 250, maxWidth: mobile ? '90vw' : 400 }} />
       </Link>
@@ -51,24 +68,8 @@ const ExampleImage = withMobileProp({ maxDeviceWidth: 600 })(
 );
 
 const Info = () => (
-  <Fragment>
-    <h2 style={{ paddingTop: 10 }}>What can it do?</h2>
-    <p>
-      Retail traders (individual traders who don&#39;t work for a financial institution like a bank
-      or hedge fund) generally suck at trading. In the Foreign Exchange markets, some people use the
-      percentage of retail traders who are long or short a given currency pair as a contrarian
-      indicator (meaning that if most people are short, the pair is likely to rise and vice versa).
-    </p>
-
-    <p>
-      For the stock market, it&#39;s a bit different. One of the most useful things that you can do
-      with the data that this site provides is to figure out how people are reacting to moves in the
-      market. Depending on if people are buying the dip, getting onboard during a pump because they
-      think it&#39;s going to go higher, or taking profits, this data lets you observe each of those
-      different situations and plan your own trading accordingly.
-    </p>
-
-    <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
+  <div style={{ marginTop: 10, paddingBottom: 10 }}>
+    <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', marginBottom: 20 }}>
       <ExampleImage
         src="/images/buying_the_dip.jpg"
         alt="A chart showing the price vs popularity of Starbucks stock ($SBUX) while traders buy the dip during a drop in price."
@@ -112,30 +113,28 @@ const Info = () => (
       time.
     </p>
 
-    <span
-      style={{
-        fontSize: 10,
-        color: '#888',
-        fontStyle: 'italic',
-        display: 'block',
-      }}
-    >
+    <span style={styles.disclaimer}>
       This site is for informational purposes only. It is not intended to serve as investment
-      advice. However, if you do end up loading up on OTM weekly options because of something you
-      saw on the site, please put me in the screenshot of your losses when you post to /r/WSB &lt;3
+      advice.
     </span>
-  </Fragment>
+  </div>
 );
 
 const Home = () => (
-  <div style={{ backgroundColor }}>
-    <center>
-      <h1>Robintrack</h1>
-    </center>
-    <hr />
+  <div style={{ backgroundColor, display: 'flex', flexDirection: 'column', fontSize: 16.5 }}>
+    <div
+      style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}
+    >
+      <img
+        src="/images/robintrack_logo.svg"
+        style={styles.logo}
+        alt="Image showing the Robintrack logo, a cute robin with a crescent moon eye and feet above the word Robintrack"
+      />
 
-    <About />
-    <QuickLinks />
+      <hr />
+
+      <About />
+    </div>
     <Info />
   </div>
 );

@@ -19,6 +19,8 @@ const Leaderboard = React.lazy(() => import('src/screens/Leaderboard'));
 const SymbolDetails = React.lazy(() => import('src/screens/SymbolDetails'));
 const PopularityChanges = React.lazy(() => import('src/screens/PopularityChanges'));
 
+const RenderComponent = Comp => ({ ...props }) => <Comp {...props} />;
+
 const ConnectedSwitch = connect(({ router: { location } }) => ({
   location,
 }))(Switch);
@@ -26,21 +28,21 @@ const ConnectedSwitch = connect(({ router: { location } }) => ({
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-      <Suspense fallback={<Loading />}>
-        <div style={{ height: '100%', backgroundColor }} className="pt-dark">
-          <PageTracker />
-          <Header />
+      <div style={{ height: '100%', backgroundColor }} className="pt-dark">
+        <PageTracker />
+        <Header />
 
+        <Suspense fallback={<Loading />}>
           <ConnectedSwitch>
-            <Route exact path="/" component={Home} />
-            <Route path="/leaderboard" component={Leaderboard} />
-            <Route path="/symbol/:symbol" component={SymbolDetails} />
-            <Route path="/popularity_changes" component={PopularityChanges} />
+            <Route exact path="/" component={RenderComponent(Home)} />
+            <Route path="/leaderboard" component={RenderComponent(Leaderboard)} />
+            <Route path="/symbol/:symbol" component={RenderComponent(SymbolDetails)} />
+            <Route path="/popularity_changes" component={RenderComponent(PopularityChanges)} />
           </ConnectedSwitch>
+        </Suspense>
 
-          <Footer />
-        </div>
-      </Suspense>
+        <Footer />
+      </div>
     </ConnectedRouter>
   </Provider>,
   document.getElementById('root')

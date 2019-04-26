@@ -31,7 +31,7 @@ import { withMobileProp } from 'src/components/ResponsiveHelpers';
 
 const PopularityChart = React.lazy(() => import('src/components/PopularityChart'));
 
-const getTextStyle = mobile => ({ fontSize: mobile ? 12 : 24 });
+const getTextStyle = mobile => ({ fontSize: mobile ? 14 : 24 });
 
 const styles = {
   root: {
@@ -73,11 +73,11 @@ const styles = {
   mobileConfig: {
     flex: 1,
     minWidth: '90vw',
-    justifyContent: 'flexStart',
     flexWrap: 'wrap',
     paddingLeft: 0,
     paddingRight: 0,
     paddingTop: 20,
+    justifyContent: 'space-around',
   },
   setting: { display: 'flex', flex: 1 },
   mobileSetting: {
@@ -100,7 +100,8 @@ const Setting = withMobileProp({ maxDeviceWidth: 600 })(
         ...styles.setting,
         ...(mobile ? styles.mobileSetting : {}),
         flex,
-        flexBasis: mobile ? '40vw' : undefined,
+        minWidth: mobile ? '40vw' : undefined,
+        maxWidth: mobile ? '40vw' : undefined,
         ...style,
       }}
     >

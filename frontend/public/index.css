@@ -9,7 +9,7 @@ body {
 }
 
 #root {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: 'PT Sans', sans-serif;
   padding: 0px 20px 15px 10px;
 }
 
@@ -21,7 +21,7 @@ h4 {
 }
 
 a {
-  color: #ff3399 !important;
+  color: #f39 !important;
 }
 
 a:visited {

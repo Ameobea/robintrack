@@ -1,0 +1,5 @@
+spawn_docker:
+	./spawn_docker.sh
+
+build_docker:
+	docker build -t robintrack-backend .

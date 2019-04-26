@@ -1,11 +1,13 @@
 import { applyMiddleware, createStore, combineReducers, compose } from 'redux';
-import createHistory from 'history/createBrowserHistory';
 import { routerMiddleware, routerReducer } from 'react-router-redux';
 import createSagaMiddleware from 'redux-saga';
 
 import rootSaga from 'src/sagas';
 import apiReducer from 'src/reducers/api';
 import symbolSearchReducer from 'src/reducers/symbolSearch';
+
+// eslint-disable-next-line no-undef
+const createHistory = require('history').createBrowserHistory;
 
 const reducers = {
   router: routerReducer,
