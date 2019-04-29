@@ -6,3 +6,6 @@ build_docker:
 
 ssh_tunnel:
   ssh -L 27017:ameo.design:27017 -L 6379:ameo.design:6379 root@ameo.design
+
+start_server:
+  ./bin/rails s -p 4000
