@@ -11,6 +11,7 @@ import FeedbackButton from 'src/components/FeedbackButton';
 import { setSymbolSearchContent } from 'src/actions/symbolSearch';
 import { backgroundColor, fontColor, emphasis } from 'src/style';
 import { withMobileProp } from 'src/components/ResponsiveHelpers';
+import { ROBINTRACK_LOGO_ALT } from 'src/constants';
 
 const mapStateToProps = ({
   router: {
@@ -149,6 +150,7 @@ const MobileHeader = ({ showLogo }) => {
           <img
             src="/images/robintrack_logo.svg"
             style={{ height: 70, width: 70, marginRight: 10, marginTop: -15 }}
+            alt={ROBINTRACK_LOGO_ALT}
           />
         </Link>
       ) : null}
@@ -174,6 +176,7 @@ const DesktopHeader = ({ showLogo }) => (
           <img
             src="/images/robintrack_logo.svg"
             style={{ height: 115, width: 115, marginRight: 15 }}
+            alt={ROBINTRACK_LOGO_ALT}
           />
         </Link>
       ) : null}

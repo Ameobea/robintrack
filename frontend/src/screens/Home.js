@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { backgroundColor } from 'src/style';
 import { withMobileProp } from 'src/components/ResponsiveHelpers';
+import { ROBINTRACK_LOGO_ALT } from 'src/constants';
 
 const styles = {
   disclaimer: {
@@ -125,11 +126,7 @@ const Home = () => (
     <div
       style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}
     >
-      <img
-        src="/images/robintrack_logo.svg"
-        style={styles.logo}
-        alt="Image showing the Robintrack logo, a cute robin with a crescent moon eye and feet above the word Robintrack"
-      />
+      <img src="/images/robintrack_logo.svg" style={styles.logo} alt={ROBINTRACK_LOGO_ALT} />
 
       <hr />
 

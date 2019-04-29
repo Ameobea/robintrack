@@ -73,7 +73,7 @@ const DesktopPagerLink = ({ symbol, popularityRanking, isLoading, isRight = fals
   );
 };
 
-const formatPrice = price => numeral(price).format('$0.00');
+const formatPrice = price => numeral(price).format('$1,000.00');
 
 const Title = ({ popularityRanking, symbol, bid, ask, name, fullName }) => (
   <h1>
@@ -96,7 +96,7 @@ const DesktopNavigationHeader = ({ nextLeastPopular, nextMostPopular, isLoading,
       isLoading={isLoading}
     />
 
-    <NavigationHeaderItem>
+    <NavigationHeaderItem style={{ flex: 3 }}>
       <Title {...props} />
     </NavigationHeaderItem>
 

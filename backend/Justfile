@@ -3,3 +3,6 @@ spawn_docker:
 
 build_docker:
 	docker build -t robintrack-backend .
+
+ssh_tunnel:
+  ssh -L 27017:ameo.design:27017 -L 6379:ameo.design:6379 root@ameo.design

@@ -4,8 +4,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { compose } from 'recompose';
-import { connect } from 'react-redux';
 import ReactEchartsCore from 'echarts-for-react/lib/core';
 import echarts from 'echarts/lib/echarts';
 import 'echarts/lib/chart/line';
@@ -17,7 +15,6 @@ import * as R from 'ramda';
 import { emphasis, emphasis2 } from 'src/style';
 import { withMobileProp } from 'src/components/ResponsiveHelpers';
 import MobileZoomHandle from 'src/components/MobileZoomHandle';
-import { getPopularityHistory } from 'src/selectors/api';
 
 const styles = {
   root: {},
@@ -28,13 +25,45 @@ const styles = {
     paddingTop: 5,
   },
 };
+const MS_PER_DAY = 86400000;
 
-const analyzeTimeSeries = series => {
-  const values = series.map(arr => arr[1]);
+/**
+ * Computes stats about the provided time series used to calculate its display parameters.  Mainly,
+ * the goal is to clamp the axes to minize space above and below the series.
+ *
+ * @param {[][]} series
+ * @param {number} zoomStart A number representing the starting point of the currently zoomed
+ *  region as a percent from 0 to 100.
+ * @param {number} zoomEnd A number representing the ending point of the currently zoomed region as
+ *  a percent from 0 to 100.
+ */
+const analyzeTimeSeries = (series, zoomStart, zoomEnd) => {
   const first = series[0] || [new Date('3000-04-20'), 0];
   const last = R.last(series) || [new Date('1900-04-20'), 0];
-  const min = values.reduce(R.min, first[1]);
-  const max = values.reduce(R.max, first[1]);
+
+  // We limit the series to only include data points that are active in the currently displayed
+  // zoom region
+  const timeRangeMs = last[0] - first[0];
+  const windowPadding = Math.abs(MS_PER_DAY / timeRangeMs) * 100;
+
+  const zoomStartDate = new Date(
+    first[0].getTime() + (Math.max(zoomStart - windowPadding, 0) * timeRangeMs) / 100
+  );
+  const zoomEndDate = new Date(
+    first[0].getTime() + (Math.min(zoomEnd + windowPadding, 100) * timeRangeMs) / 100
+  );
+  console.log({ series, zoomStartDate, zoomEndDate, zoomStart, zoomEnd, timeRangeMs });
+
+  const values = (series.length > 0
+    ? series.filter(([date]) => date >= zoomStartDate && date <= zoomEndDate)
+    : series
+  ).map(arr => arr[1]);
+
+  const min = values.reduce(R.min, values[0] || 0);
+  const max = values.reduce(R.max, values[0] || 0);
+
+  console.log({ min, max, series, values });
+
   const offset = 0.05 * (max - min);
 
   return [min, max, first, last, offset];
@@ -44,13 +73,7 @@ const splitLineOptions = {
   lineStyle: { color: '#323232' },
 };
 
-const getXAxisOptions = ({
-  mobile,
-  firstPopularity,
-  lastPopularity,
-  firstQuote,
-  lastQuote,
-}) => ({
+const getXAxisOptions = ({ mobile, firstPopularity, lastPopularity, firstQuote, lastQuote }) => ({
   type: 'time',
   splitNumber: mobile ? 7 : 20,
   axisLabel: {
@@ -111,41 +134,43 @@ const getBaseConfigDefaults = mobile => ({
       fillerColor: '#2d2f33',
       bottom: 5,
       textStyle: { color: '#fff' },
+      filterMode: 'none',
+      realtime: false,
       ...(mobile ? { handleIcon: MobileZoomHandle, handleSize: '80%' } : {}),
     },
   ],
+  animation: true,
 });
 
 const getChartOptions = ({
   symbol,
   quoteHistory = [],
   popularityHistory = [],
+  zoomStart,
+  zoomEnd,
   mobile,
 }) => {
-  const quoteSeries = quoteHistory.map(
-    ({ timestamp, last_trade_price: lastTradePrice }) => [
-      new Date(timestamp),
-      lastTradePrice,
-    ]
-  );
-  const popularitySeries = popularityHistory.map(
-    ({ timestamp, popularity }) => [new Date(timestamp), popularity]
-  );
+  const quoteSeries = quoteHistory.map(({ timestamp, last_trade_price: lastTradePrice }) => [
+    new Date(timestamp),
+    lastTradePrice,
+  ]);
+  const popularitySeries = popularityHistory.map(({ timestamp, popularity }) => [
+    new Date(timestamp),
+    popularity,
+  ]);
 
-  const [
-    minQuote,
-    maxQuote,
-    firstQuote,
-    lastQuote,
-    quoteOffset,
-  ] = analyzeTimeSeries(quoteSeries);
+  const [minQuote, maxQuote, firstQuote, lastQuote, quoteOffset] = analyzeTimeSeries(
+    quoteSeries,
+    zoomStart,
+    zoomEnd
+  );
   const [
     minPopularity,
     maxPopularity,
     firstPopularity,
     lastPopularity,
     popularityOffset,
-  ] = analyzeTimeSeries(popularitySeries);
+  ] = analyzeTimeSeries(popularitySeries, zoomStart, zoomEnd);
 
   const xAxisOptions = getXAxisOptions({
     mobile,
@@ -191,10 +216,7 @@ const getChartOptions = ({
       {
         ...seriesDefaults,
         name: 'Price',
-        data: quoteSeries.map(([timestamp, quote]) => [
-          timestamp,
-          parseFloat(quote.toFixed(3)),
-        ]),
+        data: quoteSeries.map(([timestamp, quote]) => [timestamp, parseFloat(quote.toFixed(3))]),
         yAxisIndex: 0,
         xAxisIndex: 0,
         lineStyle: { color: emphasis },
@@ -216,7 +238,7 @@ const getChartOptions = ({
 const getViewportHeight = () =>
   Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
-const BasePopularityChart = ({ mobile, style, options }) => {
+const BasePopularityChart = ({ mobile, style, options, ...props }) => {
   const viewportHeight = getViewportHeight();
   const height = (mobile ? 0.5 : 0.7) * viewportHeight;
   const mergedStyle = {
@@ -230,61 +252,31 @@ const BasePopularityChart = ({ mobile, style, options }) => {
       option={options}
       echarts={echarts}
       notMerge={true}
-      lazyUpdate={true}
+      lazyUpdate={false}
       opts={{}}
       style={mergedStyle}
+      {...props}
     />
   );
 };
 
-const PopularityChart = ({ style, ...props }) => (
-  <Fragment>
-    <BasePopularityChart options={getChartOptions(props)} {...props} />
+const PopularityChart = ({ style, ...props }) => {
+  const handleDataZoom = ({ start, end }, instance) =>
+    instance.setOption(getChartOptions({ ...props, zoomStart: start, zoomEnd: end }));
 
-    {props.mobile ? (
-      <center style={styles.mobileHint}>
-        Touch the chart to view price + popularity values
-      </center>
-    ) : null}
-  </Fragment>
-);
+  return (
+    <Fragment>
+      <BasePopularityChart
+        options={getChartOptions({ ...props, zoomStart: 0, zoomEnd: 100 })}
+        onEvents={{ datazoom: handleDataZoom }}
+        {...props}
+      />
 
-const createYAxisOptions = series => ({});
-
-const getComparisonChartOptions = ({
-  symbols,
-  popularityHistories = {},
-  mobile,
-}) => {
-  const analyzedSeries = R.keys(symbols).reduce(
-    (acc, symbol) => ({ ...acc, [symbol]: analyzeTimeSeries(symbol) }),
-    {}
+      {props.mobile ? (
+        <center style={styles.mobileHint}>Touch the chart to view price + popularity values</center>
+      ) : null}
+    </Fragment>
   );
-
-  return {
-    ...getBaseConfigDefaults(mobile),
-    title: { text: 'Popularity Comparison' },
-  };
 };
 
-export const InnerPopularityComparisonChart = ({ style, ...props }) => (
-  <BasePopularityChart options={getComparisonChartOptions(props)} {...props} />
-);
-
-const mapComparisonChartStateToProps = (state, { symbols }) => ({
-  popularityHistories: R.zipObj(
-    symbols,
-    symbols.map(symbol => getPopularityHistory(symbol)(state))
-  ),
-});
-
-export const PopularityComparisonChart = compose(
-  withMobileProp({
-    maxDeviceWidth: 600,
-  }),
-  connect(mapComparisonChartStateToProps)
-)(InnerPopularityComparisonChart);
-
-export default withMobileProp({
-  maxDeviceWidth: 600,
-})(PopularityChart);
+export default withMobileProp({ maxDeviceWidth: 600 })(PopularityChart);

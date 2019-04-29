@@ -84,7 +84,7 @@ const SymbolTable = ({
   minBatchSize = 25,
 }) => (
   <div style={R.merge(styles.root, style)} className="symbol-table">
-    {label && <h2 style={{ ...styles.header, fontSize: mobile ? 16 : 34 }}>{label}</h2>}
+    {label ? <h2 style={{ ...styles.header, fontSize: mobile ? 16 : 34 }}>{label}</h2> : null}
 
     <div style={{ height, flexDirection: 'row' }}>
       <InfiniteLoader
@@ -121,7 +121,7 @@ const SymbolTable = ({
   </div>
 );
 
-const renderSymbol = ({ cellData, mobile }) => (
+const Symbol = ({ cellData, mobile }) => (
   <Link to={`/symbol/${cellData}`}>
     <span style={{ fontSize: mobile ? 12 : 24, color: emphasis }}>{cellData}</span>
   </Link>
@@ -132,7 +132,7 @@ export const SymbolColumn = ({ mobile, style }) => (
     key="symbol"
     label="Symbol"
     dataKey="symbol"
-    cellRenderer={props => renderSymbol({ mobile, ...props })}
+    cellRenderer={({ ...props }) => <Symbol mobile={mobile} {...props} />}
     width={125}
     flexGrow={1}
     style={{ fontSize: mobile ? 14 : 24 }}
