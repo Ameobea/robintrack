@@ -17,6 +17,6 @@ until python src/worker.py \
 	--mode $1 \
 	--rabbitmq_host=$RABBITMQ_HOST \
 	--rabbitmq_port=$RABBITMQ_PORT; do
-	echo "Popularities scraper exited with code $?.  Restarting..."
-	sleep 1
+	echo "Popularities scraper exited with code $?.  Restarting in 10 seconds..."
+	sleep 10
 done
