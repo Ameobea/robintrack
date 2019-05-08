@@ -1,7 +1,8 @@
 """ Defines a worker that subscribes to instrument IDs sent over RabbitMQ and either fetches
 quotes, popularity, or stores the ID in a database. """
 
-import datetime
+
+import datetime, hmac, base64, struct, hashlib, time
 from functools import reduce
 from json.decoder import JSONDecodeError
 from pprint import pprint
@@ -218,7 +219,9 @@ def cli(mode: str, rabbitmq_host: str, rabbitmq_port: str, worker_request_cooldo
     if mode == "quote":
         robinhood_username = environ.get("ROBINHOOD_USERNAME")
         robinhood_password = environ.get("ROBINHOOD_PASSWORD")
-        if robinhood_username is None or robinhood_password is None:
+        mfa_secret = environ.get('MFA_SECRET')
+
+        if robinhood_username is None or robinhood_password is None or mfa_secret is None:
             print(
                 (
                     "Error: `ROBINHOOD_USERNAME` and `ROBINHOOD_PASSWORD` environment variables"
@@ -226,7 +229,8 @@ def cli(mode: str, rabbitmq_host: str, rabbitmq_port: str, worker_request_cooldo
                 )
             )
             exit(1)
-        TRADER.login(robinhood_username, robinhood_password)
+
+        TRADER.login(robinhood_username, robinhood_password, qr_code=mfa_secret)
 
     print("Unlocking cache...")
     unlock_cache()
