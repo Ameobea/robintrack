@@ -10,6 +10,7 @@ Rails.application.routes.draw do
     member do
       get :quote
       get :popularity_history
+      get :popularity_history_csv
       get :popularity_ranking
       get :quote_history
     end

@@ -76,6 +76,16 @@ class StocksController < ApplicationController
     render json: res
   end
 
+  def popularity_history_csv
+    id = params[:id]
+    res = with_cache(__method__.to_s, id) do
+      entries = Popularity.get_history_for_symbol id
+      raise NotFound unless entries
+      format_popularity_history_csv entries
+    end
+    send_data res, :type => "text/csv", :filename => "#{id}_popularity.csv"
+  end
+
   def popularity_ranking
     id = params[:id]
     # First attempt to use the pre-built popularity rankings cache
@@ -191,6 +201,15 @@ class StocksController < ApplicationController
   def format_popularity_history(entries)
     entries.map do |entry|
       { popularity: entry["popularity"], timestamp: entry["timestamp"].iso8601 }
+    end
+  end
+
+  def format_popularity_history_csv(entries)
+    entries.reduce("date,popularity\n") do |acc, entry|
+      timestamp = entry["timestamp"]
+      popularity = entry["popularity"]
+
+      acc + "#{timestamp},#{popularity}\n"
     end
   end
 
