@@ -29,7 +29,7 @@ module ApplicationHelper
     if cache_locked?
       return yield
     else
-      return put_cache hash_name, key, json, yield
+      return put_cache hash_name, key, yield, json
     end
   end
 end
