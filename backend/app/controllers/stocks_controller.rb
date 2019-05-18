@@ -78,7 +78,7 @@ class StocksController < ApplicationController
 
   def popularity_history_csv
     id = params[:id]
-    res = with_cache(__method__.to_s, id) do
+    res = with_cache(__method__.to_s, id, json: false) do
       entries = Popularity.get_history_for_symbol id
       raise NotFound unless entries
       format_popularity_history_csv entries
@@ -205,11 +205,11 @@ class StocksController < ApplicationController
   end
 
   def format_popularity_history_csv(entries)
-    entries.reduce("date,popularity\n") do |acc, entry|
+    entries.reduce("timestamp,popularity\n") do |acc, entry|
       timestamp = entry["timestamp"]
       popularity = entry["popularity"]
 
-      acc + "#{timestamp},#{popularity}\n"
+      acc + "\"#{timestamp}\",#{popularity}\n"
     end
   end
 

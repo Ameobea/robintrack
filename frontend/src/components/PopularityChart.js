@@ -10,11 +10,18 @@ import 'echarts/lib/chart/line';
 import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/legend';
 import 'echarts/lib/component/dataZoom';
+import 'echarts/lib/component/toolbox';
+import { IconSvgPaths20 } from '@blueprintjs/icons/lib/esm/generated/iconSvgPaths';
 import * as R from 'ramda';
 
 import { emphasis, emphasis2 } from 'src/style';
 import { withMobileProp } from 'src/components/ResponsiveHelpers';
 import MobileZoomHandle from 'src/components/MobileZoomHandle';
+
+const getCSVDownloadURLForCurrentPage = () => {
+  const symbol = window.location.href.split('symbol/')[1];
+  return `/stocks/${symbol}/popularity_history_csv`;
+};
 
 const styles = {
   root: {},
@@ -52,7 +59,6 @@ const analyzeTimeSeries = (series, zoomStart, zoomEnd) => {
   const zoomEndDate = new Date(
     first[0].getTime() + (Math.min(zoomEnd + windowPadding, 100) * timeRangeMs) / 100
   );
-  console.log({ series, zoomStartDate, zoomEndDate, zoomStart, zoomEnd, timeRangeMs });
 
   const values = (series.length > 0
     ? series.filter(([date]) => date >= zoomStartDate && date <= zoomEndDate)
@@ -61,8 +67,6 @@ const analyzeTimeSeries = (series, zoomStart, zoomEnd) => {
 
   const min = values.reduce(R.min, values[0] || 0);
   const max = values.reduce(R.max, values[0] || 0);
-
-  console.log({ min, max, series, values });
 
   const offset = 0.05 * (max - min);
 
@@ -115,6 +119,43 @@ const getYAxisDefaults = mobile => ({
   splitLine: splitLineOptions,
 });
 
+const toolboxConfig = {
+  show: true,
+  top: 8,
+  left: 20,
+  itemGap: 30,
+  itemSize: 24,
+  iconStyle: {
+    emphasis: {
+      color: 'white',
+      borderColor: 'white',
+    },
+  },
+  feature: {
+    saveAsImage: {
+      show: true,
+      title: 'Save image',
+      icon: `path://${IconSvgPaths20['step-chart'][0]}`,
+      iconStyle: {
+        color: 'white',
+        borderColor: '#00000000',
+      },
+    },
+    myDataDownload: {
+      show: true,
+      title: 'Download Popularity Data',
+      icon: `path://${IconSvgPaths20.saved[0]}`,
+      iconStyle: {
+        color: 'white',
+        borderColor: '#00000000',
+      },
+      onclick: function() {
+        window.open(getCSVDownloadURLForCurrentPage(), 'blank');
+      },
+    },
+  },
+};
+
 const getBaseConfigDefaults = mobile => ({
   backgroundColor: '#1d2126',
   legend: { show: true, textStyle: { color: '#fff' } },
@@ -140,6 +181,7 @@ const getBaseConfigDefaults = mobile => ({
     },
   ],
   animation: true,
+  toolbox: mobile ? undefined : toolboxConfig,
 });
 
 const getChartOptions = ({

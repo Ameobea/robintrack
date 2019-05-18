@@ -12,7 +12,8 @@ module ApplicationHelper
   end
 
   # Inserts an item into the cache with a given hash name and key, returning whatever was inserted.
-  def put_cache(hash_name, key, val)
+  def put_cache(hash_name, key, val, json)
+    val = (json ? JSON.dump(val) : val)
     $redis.hset hash_name, key, JSON.dump(val)
     val
   end
@@ -21,14 +22,14 @@ module ApplicationHelper
   # from it with the given `key`.  If no value exists, the inner function provided to the block
   # will be called.  Its return value will be inserted into the cache and returned from this
   # function for returning to the user.
-  def with_cache(hash_name, key)
+  def with_cache(hash_name, key, json: true)
     cached = get_cache hash_name, key
     return cached if cached
 
     if cache_locked?
       return yield
     else
-      return put_cache hash_name, key, yield
+      return put_cache hash_name, key, json, yield
     end
   end
 end
