@@ -17,11 +17,7 @@ import * as R from 'ramda';
 import { emphasis, emphasis2 } from 'src/style';
 import { withMobileProp } from 'src/components/ResponsiveHelpers';
 import MobileZoomHandle from 'src/components/MobileZoomHandle';
-
-const getCSVDownloadURLForCurrentPage = () => {
-  const symbol = window.location.href.split('symbol/')[1];
-  return `/stocks/${symbol}/popularity_history_csv`;
-};
+import { buildCSVDownloadURL } from 'src/api';
 
 const styles = {
   root: {},
@@ -119,7 +115,7 @@ const getYAxisDefaults = mobile => ({
   splitLine: splitLineOptions,
 });
 
-const toolboxConfig = {
+const buildToolboxConfig = symbol => ({
   show: true,
   top: 8,
   left: 20,
@@ -150,11 +146,11 @@ const toolboxConfig = {
         borderColor: '#00000000',
       },
       onclick: function() {
-        window.open(getCSVDownloadURLForCurrentPage(), 'blank');
+        window.open(buildCSVDownloadURL(symbol), 'blank');
       },
     },
   },
-};
+});
 
 const getBaseConfigDefaults = mobile => ({
   backgroundColor: '#1d2126',
@@ -181,7 +177,6 @@ const getBaseConfigDefaults = mobile => ({
     },
   ],
   animation: true,
-  toolbox: mobile ? undefined : toolboxConfig,
 });
 
 const getChartOptions = ({
@@ -274,6 +269,7 @@ const getChartOptions = ({
         itemStyle: { color: emphasis2, borderColor: '#fff' },
       },
     ],
+    toolbox: mobile ? undefined : buildToolboxConfig(symbol),
   };
 };
 

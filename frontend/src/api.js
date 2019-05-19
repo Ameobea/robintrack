@@ -7,9 +7,7 @@ import * as R from 'ramda';
 const apiPrefix = process.env.REACT_APP_API_PREFIX || '';
 const isMock = process.env.REACT_APP_MOCK_API;
 
-const apiBaseCaller = (mapArgsToUrlSuffix, mapArgsToMockResponse) => (
-  ...args
-) =>
+const apiBaseCaller = (mapArgsToUrlSuffix, mapArgsToMockResponse) => (...args) =>
   isMock && mapArgsToMockResponse
     ? Promise.resolve({
         status: 200,
@@ -23,8 +21,7 @@ export const fetchQuote = apiBaseCaller(
 );
 
 export const fetchTopSymbols = apiBaseCaller(
-  (limit = 25, startIndex = 0) =>
-    `most_popular?limit=${limit}&start_index=${startIndex}`,
+  (limit = 25, startIndex = 0) => `most_popular?limit=${limit}&start_index=${startIndex}`,
   (limit = 25, startIndex = 0) =>
     R.times(R.identity, limit)
       .map(i => i + startIndex)
@@ -32,8 +29,7 @@ export const fetchTopSymbols = apiBaseCaller(
 );
 
 export const fetchBottomSymbols = apiBaseCaller(
-  (limit = 25, startIndex = 0) =>
-    `least_popular?limit=${limit}&start_index=${startIndex}`,
+  (limit = 25, startIndex = 0) => `least_popular?limit=${limit}&start_index=${startIndex}`,
   (limit = 25, startIndex = 0) =>
     R.times(R.identity, limit)
       .map(i => i + startIndex)
@@ -77,9 +73,7 @@ export const fetchPopularityChanges = apiBaseCaller(
       ['min_popularity', minPopularity],
       ['start_index', startIndex],
     ];
-    const paramsString = params
-      .map(([key, value]) => `${key}=${value}`)
-      .join('&');
+    const paramsString = params.map(([key, value]) => `${key}=${value}`).join('&');
 
     return `largest_popularity_${suffix}?${paramsString}`;
   }
@@ -102,3 +96,5 @@ export const fetchSymbolCount = apiBaseCaller(
   (hoursAgo = 2) => `total_symbols?hours_ago=${hoursAgo}`,
   () => ({ total_symbols: 10000 })
 );
+
+export const buildCSVDownloadURL = symbol => `${apiPrefix}/stocks/${symbol}/popularity_history_csv`;

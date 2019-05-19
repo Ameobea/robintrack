@@ -14,7 +14,7 @@ module ApplicationHelper
   # Inserts an item into the cache with a given hash name and key, returning whatever was inserted.
   def put_cache(hash_name, key, val, json)
     val = (json ? JSON.dump(val) : val)
-    $redis.hset hash_name, key, JSON.dump(val)
+    $redis.hset hash_name, key, val
     val
   end
 
