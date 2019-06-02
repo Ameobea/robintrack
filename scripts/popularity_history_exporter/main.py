@@ -27,12 +27,7 @@ def main(output_directory: str):
 
     aggregation_res = db["popularity"].aggregate(
         [
-            {
-                "$match": {
-                    "timestamp": {"$gte": (datetime.datetime.today() - datetime.timedelta(days=1))}
-                }
-            },
-            {"$sort": {"timestamp": -1}},
+            {"$sort": {"timestamp": 1}},
             {
                 "$group": {
                     "_id": "$instrument_id",
@@ -54,10 +49,9 @@ def main(output_directory: str):
         ],
         allowDiskUse=True,
     )
-    popularity_history_by_symbol_id = list(aggregation_res)
 
     written_count = 0
-    for datum in popularity_history_by_symbol_id:
+    for datum in aggregation_res:
         symbol = datum.get("symbol")
         if symbol is None:
             continue

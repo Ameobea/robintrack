@@ -7,6 +7,7 @@
 docker stop robintrack-backend
 docker rm robintrack-backend
 docker run -d --name robintrack-backend \
+  --net host \
   -p 4000:4000 \
   -e "REDIS_HOST=${REDIS_HOST:-localhost}" \
   -e "MONGO_HOST=${MONGO_HOST:-localhost}" \
