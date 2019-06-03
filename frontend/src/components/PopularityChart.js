@@ -3,7 +3,7 @@
  * popularity to the price of an asset over time.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import ReactEchartsCore from 'echarts-for-react/lib/core';
 import echarts from 'echarts/lib/echarts';
 import 'echarts/lib/chart/line';
@@ -303,7 +303,7 @@ const PopularityChart = ({ style, ...props }) => {
     instance.setOption(getChartOptions({ ...props, zoomStart: start, zoomEnd: end }));
 
   return (
-    <Fragment>
+    <>
       <BasePopularityChart
         options={getChartOptions({ ...props, zoomStart: 0, zoomEnd: 100 })}
         onEvents={{ datazoom: handleDataZoom }}
@@ -313,7 +313,7 @@ const PopularityChart = ({ style, ...props }) => {
       {props.mobile ? (
         <center style={styles.mobileHint}>Touch the chart to view price + popularity values</center>
       ) : null}
-    </Fragment>
+    </>
   );
 };
 

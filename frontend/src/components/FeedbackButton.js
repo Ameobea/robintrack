@@ -3,7 +3,7 @@
  * information to the API endpoint on the backend.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import {
   Button,
   Callout,
@@ -21,8 +21,7 @@ const buttonStyle = {
   marginRight: 5,
 };
 
-const DEFAULT_ERR_MSG =
-  'There was an error submitting your feedback! Maybe try again later :/';
+const DEFAULT_ERR_MSG = 'There was an error submitting your feedback! Maybe try again later :/';
 
 class FeedbackButton extends Component {
   state = {
@@ -191,11 +190,11 @@ class FeedbackButton extends Component {
   };
 
   render = () => (
-    <Fragment>
+    <>
       <div onClick={this.handleClick}>Issues + Feedback</div>
 
       {this.renderModal()}
-    </Fragment>
+    </>
   );
 }
 

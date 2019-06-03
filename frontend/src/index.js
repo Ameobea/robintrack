@@ -18,6 +18,7 @@ const Home = React.lazy(() => import('src/screens/Home'));
 const Leaderboard = React.lazy(() => import('src/screens/Leaderboard'));
 const SymbolDetails = React.lazy(() => import('src/screens/SymbolDetails'));
 const PopularityChanges = React.lazy(() => import('src/screens/PopularityChanges'));
+const DataDownload = React.lazy(() => import('src/screens/DataDownload'));
 
 const RenderComponent = Comp => ({ ...props }) => <Comp {...props} />;
 
@@ -38,6 +39,7 @@ ReactDOM.render(
             <Route path="/leaderboard" component={RenderComponent(Leaderboard)} />
             <Route path="/symbol/:symbol" component={RenderComponent(SymbolDetails)} />
             <Route path="/popularity_changes" component={RenderComponent(PopularityChanges)} />
+            <Route path="/data-download" component={RenderComponent(DataDownload)} />
           </ConnectedSwitch>
         </Suspense>
 

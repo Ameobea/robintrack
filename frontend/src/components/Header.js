@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { Link } from 'react-router-dom';
@@ -124,6 +124,7 @@ export const headerItems = [
     content: <FeedbackButton />,
     textStyle: { cursor: 'pointer' },
   },
+  { content: 'Data Download', url: '/data-download' },
 ];
 
 const MobileNavMenu = ({ onItemSelect }) => (
@@ -191,7 +192,7 @@ const DesktopHeader = ({ showLogo }) => (
 );
 
 const HeaderInner = ({ showLogo }) => (
-  <Fragment>
+  <>
     <MediaQuery maxDeviceWidth={840}>
       <MobileHeader showLogo={showLogo} />
     </MediaQuery>
@@ -199,7 +200,7 @@ const HeaderInner = ({ showLogo }) => (
     <MediaQuery minDeviceWidth={841}>
       <DesktopHeader showLogo={showLogo} />
     </MediaQuery>
-  </Fragment>
+  </>
 );
 
 const Header = connect(({ router: { location: { pathname } } }) => ({

@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { backgroundColor } from 'src/style';
@@ -76,10 +76,10 @@ const Info = () => (
         alt="A chart showing the price vs popularity of Starbucks stock ($SBUX) while traders buy the dip during a drop in price."
         url="/symbol/SBUX"
         caption={
-          <Fragment>
+          <>
             {'Traders buying the dip in '}
             <Link to="/symbol/SBUX">SBUX</Link>
-          </Fragment>
+          </>
         }
       />
       <ExampleImage
@@ -87,10 +87,10 @@ const Info = () => (
         alt="A chart showing the price vs popularity of AMD stock ($AMD) while traders take profits during a rise in price."
         url="/symbol/AMD"
         caption={
-          <Fragment>
+          <>
             {'Traders taking profits during a run-up in '}
             <Link to="/symbol/AMD">AMD</Link>
-          </Fragment>
+          </>
         }
       />
       <ExampleImage
@@ -98,10 +98,10 @@ const Info = () => (
         alt="A chart showing the price vs popularity of iQIYI inc. stock ($IQ) while traders greed out and keep buying more and more as the price continues to rise."
         url="/symbol/IQ"
         caption={
-          <Fragment>
+          <>
             {'Traders going full FOMO on '}
             <Link to="/symbol/IQ">IQ</Link>
-          </Fragment>
+          </>
         }
       />
     </div>
