@@ -36,6 +36,10 @@ def parse_instrument_url(instrument_url: str) -> str:
     return instrument_url.split("instruments/")[1][:-1]
 
 
+def build_instrument_url(instrument_id: str) -> str:
+    return f"https://api.robinhood.com/instruments/{instrument_id}/"
+
+
 def omit(k, d: dict) -> dict:
     new_d = {**d}
     new_d.__delitem__(k)

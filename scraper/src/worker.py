@@ -19,7 +19,14 @@ from Robinhood.exceptions import InvalidTickerSymbol
 
 from common import parse_throttle_res
 from db import get_db, set_popularities_finished, set_quotes_finished, unlock_cache
-from utils import parse_instrument_url, parse_updated_at, pluck, DESIRED_QUOTE_KEYS
+from utils import (
+    parse_instrument_url,
+    build_instrument_url,
+    parse_updated_at,
+    pluck,
+    DESIRED_QUOTE_KEYS,
+    omit,
+)
 
 INDEX_COL = get_db()["index"]
 
@@ -85,6 +92,24 @@ def store_quotes(quotes: list, collection: pymongo.collection.Collection):
             if "duplicate key" not in err["errmsg"]:
                 print("ERROR: Unhandled exception occured during batch write:")
                 pprint(err)
+
+
+def store_fundamentals(data, collection: pymongo.collection.Collection):
+    if not data:
+        return
+
+    for datum in data:
+        if not datum:
+            continue
+
+        print(datum)
+        instrument_id = parse_instrument_url(datum["instrument"])
+        doc = {**omit("instrument", datum), "instrument_id": instrument_id}
+
+        try:
+            collection.replace_one({"instrument_id": instrument_id}, doc, True)
+        except Exception as e:
+            print(f"Error storing fundamentals: {e}")
 
 
 def fetch_popularity(
@@ -204,28 +229,83 @@ def fetch_quote(
         )
 
 
+def fetch_fundamentals(
+    instrument_ids: str,
+    collection: pymongo.collection.Collection,
+    sleep,
+    worker_request_cooldown_seconds=1.0,
+):
+    if instrument_ids == "__DONE":
+        print("Received DONE message for fundamentals fetching.")
+        return
+
+    try:
+        instrument_urls = ",".join(list(map(build_instrument_url, instrument_ids.split(","))))
+        url = f"https://api.robinhood.com/fundamentals/?instruments={instrument_urls}"
+        res = requests.get(url, headers=TRADER.headers, timeout=15)
+        res = res.json()
+        fundamentals = res["results"]
+        store_fundamentals(fundamentals, collection)
+
+        sleep(worker_request_cooldown_seconds)
+    except KeyError:  # Likely a ratelimit issue; cooldown.
+        if not res.get("detail"):
+            print("ERROR: Unexpected response received from fundamentals request: {}".format(res))
+            sleep(120)
+            return
+
+        cooldown_seconds = parse_throttle_res(res["detail"])
+        print(
+            "Fundamentals fetch request failed; waiting for {} second cooldown...".format(
+                cooldown_seconds
+            )
+        )
+        sleep(cooldown_seconds)
+
+        fetch_fundamentals(
+            instrument_ids,
+            collection,
+            sleep,
+            worker_request_cooldown_seconds=worker_request_cooldown_seconds,
+        )
+    except InvalidTickerSymbol:
+        print("Error while fetching instrument ids: {}".format(instrument_ids))
+    except requests.exceptions.ReadTimeout:
+        print("Read timeout while fetching quotes... Sleeping 30 seconds and re-trying.")
+        sleep(30)
+        fetch_fundamentals(
+            instrument_ids,
+            collection,
+            sleep,
+            worker_request_cooldown_seconds=worker_request_cooldown_seconds,
+        )
+
+
 WORK_CBS = {
     "popularity": (fetch_popularity, "popularity", "instrument_ids"),
     "quote": (fetch_quote, "quotes", "symbols"),
+    "fundamentals": (fetch_fundamentals, "fundamentals", "fundamentals_instrument_ids"),
 }
 
 
 @click.command()
-@click.option("--mode", type=click.Choice(["quote", "popularity"]), default="popularity")
+@click.option(
+    "--mode", type=click.Choice(["quote", "popularity", "fundamentals"]), default="popularity"
+)
 @click.option("--rabbitmq_host", default="localhost")
 @click.option("--rabbitmq_port", type=click.INT, default=5672)
 @click.option("--worker_request_cooldown_seconds", type=click.FLOAT, default=1.0)
 def cli(mode: str, rabbitmq_host: str, rabbitmq_port: str, worker_request_cooldown_seconds: float):
-    if mode == "quote":
+    if mode in ["quote", "fundamentals"]:
         robinhood_username = environ.get("ROBINHOOD_USERNAME")
         robinhood_password = environ.get("ROBINHOOD_PASSWORD")
-        mfa_secret = environ.get('MFA_SECRET')
+        mfa_secret = environ.get("MFA_SECRET")
 
         if robinhood_username is None or robinhood_password is None or mfa_secret is None:
             print(
                 (
-                    "Error: `ROBINHOOD_USERNAME` and `ROBINHOOD_PASSWORD` environment variables"
-                    " must be provided in `quote` mode."
+                    "Error: `ROBINHOOD_USERNAME`, `ROBINHOOD_PASSWORD`, and `MFA_SECRET` environment "
+                    "variables must be provided in this mode."
                 )
             )
             exit(1)

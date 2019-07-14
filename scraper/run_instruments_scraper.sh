@@ -8,4 +8,4 @@ export RABBITMQ_HOST=${RABBITMQ_HOST:-localhost}
 export RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
 export PYTHONPATH="${PWD}/../"
 
-python src/scrape_instruments.py
+python src/scrape_instruments.py "$@"

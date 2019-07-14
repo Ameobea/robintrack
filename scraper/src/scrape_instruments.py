@@ -43,8 +43,8 @@ def try_update_instrument(index_coll, instrument_datum: dict):
             print(f"Handled symbol conflict; re-trying update for instrument {instrument_id}")
 
 
-def publish_quotes_and_instrument_ids(
-    rabbitmq_channel, quotes: List[str], instrument_ids: List[str]
+def publish_all(
+    rabbitmq_channel, quotes: List[str], instrument_ids: List[str], scrape_fundamentals: bool
 ):
     rabbitmq_channel.basic_publish(exchange="", routing_key="symbols", body=",".join(quotes))
 
@@ -52,12 +52,23 @@ def publish_quotes_and_instrument_ids(
         exchange="", routing_key="instrument_ids", body=",".join(instrument_ids)
     )
 
+    if scrape_fundamentals:
+        rabbitmq_channel.basic_publish(
+            exchange="", routing_key="fundamentals_instrument_ids", body=",".join(instrument_ids)
+        )
+
 
 @click.command()
 @click.option("--rabbitmq_host", type=click.STRING, default="localhost")
 @click.option("--rabbitmq_port", type=click.INT, default=5672)
 @click.option("--scraper_request_cooldown_seconds", type=click.FLOAT, default=1.0)
-def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds: float):
+@click.option("--scrape-fundamentals", is_flag=True, default=False)
+def cli(
+    rabbitmq_host: str,
+    rabbitmq_port: int,
+    scraper_request_cooldown_seconds: float,
+    scrape_fundamentals: bool,
+):
     print("init rabbitmq connection")
     rabbitmq_connection = pika.BlockingConnection(
         pika.ConnectionParameters(host=rabbitmq_host, port=rabbitmq_port)
@@ -92,7 +103,7 @@ def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds
             quotes.append(instrument_datum["symbol"])
 
             if len(quotes) == 20:
-                publish_quotes_and_instrument_ids(rabbitmq_channel, quotes, instrument_ids)
+                publish_all(rabbitmq_channel, quotes, instrument_ids, scrape_fundamentals)
 
                 quotes = []
                 instrument_ids = []
@@ -115,7 +126,7 @@ def cli(rabbitmq_host: str, rabbitmq_port: int, scraper_request_cooldown_seconds
             res = trader.get_url(res["next"])
         else:
             # We're done scraping; there are no more instruments in the list.
-            publish_quotes_and_instrument_ids(rabbitmq_channel, quotes, instrument_ids)
+            publish_all(rabbitmq_channel, quotes, instrument_ids, scrape_fundamentals)
 
             # Publish a finished message over the channels to indicate that there are no more
             # items to process in this run.
