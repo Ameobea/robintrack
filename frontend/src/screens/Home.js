@@ -121,12 +121,30 @@ const Info = () => (
   </div>
 );
 
-const Home = () => (
+const Home = ({ mobile }) => (
   <div style={{ backgroundColor, display: 'flex', flexDirection: 'column', fontSize: 16.5 }}>
     <div
-      style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+      }}
     >
-      <img src="/images/robintrack_logo.svg" style={styles.logo} alt={ROBINTRACK_LOGO_ALT} />
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        {mobile ? (
+          <a
+            href="http://nerdetf.com/?utm_source=robintrack&utm_medium=cpm&utm_campaign=banners"
+            // eslint-disable-next-line react/jsx-no-target-blank
+            target="_blank"
+            style={{ height: 250, width: 300, marginLeft: 'auto', marginRight: 'auto' }}
+          >
+            <img src="/images/nerd_mobile.gif" />
+          </a>
+        ) : null}
+
+        <img src="/images/robintrack_logo.svg" style={styles.logo} alt={ROBINTRACK_LOGO_ALT} />
+      </div>
 
       <hr />
 
@@ -136,4 +154,4 @@ const Home = () => (
   </div>
 );
 
-export default Home;
+export default withMobileProp({ maxDeviceWidth: 500 })(Home);

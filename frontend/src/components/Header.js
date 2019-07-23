@@ -23,10 +23,13 @@ const styles = {
   desktopHeader: {
     backgroundColor,
     display: 'flex',
-    flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  headerItem: { display: 'flex', padding: 15, alignItems: 'flex-end' },
+  headerItem: {
+    display: 'flex',
+    padding: 15,
+    alignItems: 'flex-end',
+  },
   text: {
     color: fontColor,
     fontWeight: 'bold',
@@ -145,50 +148,86 @@ const MobileHeader = ({ showLogo }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <nav style={styles.mobileHeader}>
-      {showLogo ? (
-        <Link to="/">
-          <img
-            src="/images/robintrack_logo.svg"
-            style={{ height: 70, width: 70, marginRight: 10, marginTop: -15 }}
-            alt={ROBINTRACK_LOGO_ALT}
-          />
-        </Link>
-      ) : null}
-      <Popover
-        content={<MobileNavMenu onItemSelect={() => setMenuOpen(false)} />}
-        position={Position.LEFT_TOP}
-        isOpen={menuOpen}
-        onInteraction={isOpen => setMenuOpen(isOpen)}
-      >
-        <Button icon="menu" text="" />
-      </Popover>
+    <div>
+      <nav style={styles.mobileHeader}>
+        {showLogo ? (
+          <Link to="/">
+            <img
+              src="/images/robintrack_logo.svg"
+              style={{ height: 70, width: 70, marginRight: 10, marginTop: -15 }}
+              alt={ROBINTRACK_LOGO_ALT}
+            />
+          </Link>
+        ) : null}
+        <Popover
+          content={<MobileNavMenu onItemSelect={() => setMenuOpen(false)} />}
+          position={Position.LEFT_TOP}
+          isOpen={menuOpen}
+          onInteraction={isOpen => setMenuOpen(isOpen)}
+        >
+          <Button icon="menu" text="" />
+        </Popover>
 
-      <SymbolSearch />
-    </nav>
+        <SymbolSearch />
+      </nav>
+
+      {showLogo ? (
+        <a
+          href="http://nerdetf.com/?utm_source=robintrack&utm_medium=cpm&utm_campaign=banners"
+          target="__blank"
+          style={{
+            width: 300,
+            height: 250,
+            paddingTop: 10,
+            paddingBottom: 20,
+            marginRight: 'auto',
+            marginLeft: 'auto',
+            display: 'flex',
+          }}
+        >
+          <img src="/images/nerd_mobile.gif" />
+        </a>
+      ) : null}
+    </div>
   );
 };
 
 const DesktopHeader = ({ showLogo }) => (
-  <nav style={styles.desktopHeader}>
-    <div style={{ display: 'flex', alignItems: 'center' }}>
-      {showLogo ? (
-        <Link to="/">
-          <img
-            src="/images/robintrack_logo.svg"
-            style={{ height: 115, width: 115, marginRight: 15 }}
-            alt={ROBINTRACK_LOGO_ALT}
-          />
-        </Link>
-      ) : null}
+  <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <a
+      href="http://nerdetf.com/?utm_source=robintrack&utm_medium=cpm&utm_campaign=banners"
+      target="__blank"
+      style={{
+        width: 970,
+        height: 250,
+        maxWidth: '100vw',
+        paddingBottom: 20,
+        marginLeft: 'auto',
+        marginRight: 'auto',
+      }}
+    >
+      <img src="/images/nerd_desktop.gif" />
+    </a>
+    <nav style={styles.desktopHeader}>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {showLogo ? (
+          <Link to="/">
+            <img
+              src="/images/robintrack_logo.svg"
+              style={{ height: 115, width: 115, marginRight: 15 }}
+              alt={ROBINTRACK_LOGO_ALT}
+            />
+          </Link>
+        ) : null}
 
-      {headerItems.map((props, i) => (
-        <HeaderItem key={i} {...props} />
-      ))}
-    </div>
+        {headerItems.map((props, i) => (
+          <HeaderItem key={i} {...props} />
+        ))}
+      </div>
 
-    <SymbolSearch logoShown={showLogo} />
-  </nav>
+      <SymbolSearch logoShown={showLogo} />
+    </nav>
+  </div>
 );
 
 const HeaderInner = ({ showLogo }) => (
