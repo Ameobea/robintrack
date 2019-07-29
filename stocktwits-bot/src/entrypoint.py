@@ -1,7 +1,9 @@
 """ Robintrack Stocktwits Bot """
 
-import click
 import os
+
+import click
+
 
 from top_popularity_changes import run_top_popularity_changes
 
@@ -31,4 +33,4 @@ def cli(dry_run: bool):
 
 
 if __name__ == "__main__":
-    cli()
+    cli()  # pylint: disable=no-value-for-parameter
