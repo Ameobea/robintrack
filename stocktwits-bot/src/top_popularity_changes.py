@@ -24,8 +24,12 @@ TOP_ABSOLUTE_POPULARITY_DECREASES_URL = (
     f"{API_URL_BASE}/largest_popularity_decreases?hours_ago=24&limit=10&percentage=false"
 )
 
+TWIT_POST_DELAY = 30
 
-def create_percent_change_twit_content(changes: Iterable[dict], *_args) -> str:
+
+def create_percent_change_twit_content(
+    changes: Iterable[dict], indices_to_tag: Iterable[int]
+) -> str:
     i = -1
     lines = []
     for change in changes:
@@ -36,11 +40,11 @@ def create_percent_change_twit_content(changes: Iterable[dict], *_args) -> str:
         symbol = change["symbol"]
         change_percent = change["popularity_difference"]
         change_diff = change["end_popularity"] - change["start_popularity"]
-        change_symbol = '+' if change_diff >= 0 else ''
+        change_symbol = "+" if change_diff >= 0 else ""
 
         lines.append(
             (
-                f"#{i+1}. ${symbol}: "
+                f"#{i+1}. {'$' if i in indices_to_tag else ''}{symbol}: "
                 f"{change_symbol}{int(change_percent)}% ({change_symbol}{change_diff})"
             )
         )
@@ -55,7 +59,9 @@ def create_percent_change_twit_content(changes: Iterable[dict], *_args) -> str:
     return header + body + footer
 
 
-def create_absolute_change_twit_content(changes: Iterable[dict]) -> str:
+def create_absolute_change_twit_content(
+    changes: Iterable[dict], indices_to_tag: Iterable[int]
+) -> str:
     i = -1
     lines = []
     for change in changes:
@@ -68,16 +74,13 @@ def create_absolute_change_twit_content(changes: Iterable[dict]) -> str:
 
         lines.append(
             (
-                f"#{i+1}. ${symbol}: "
+                f"#{i+1}. {'$' if i in indices_to_tag else ''}{symbol}: "
                 f"{'+' if change_diff >= 0 else ''}{change_diff}"
             )
         )
 
-    change_type = 'increases' if change_diff >= 0 else 'decreases'
-    header = (
-        f"Top {change_type} in popularity "
-        "for stocks held by Robinhood traders today:\n\n"
-    )
+    change_type = "increases" if change_diff >= 0 else "decreases"
+    header = f"Top {change_type} in popularity " "for stocks held by Robinhood traders today:\n\n"
     body = "\n".join(lines)
     footer = (
         "\n\nView the full list and popularity history for all symbols on Robintrack: \n"
@@ -85,17 +88,20 @@ def create_absolute_change_twit_content(changes: Iterable[dict]) -> str:
         f"?hoursAgo=24&relative=false&changeType={change_type}"
     )
 
-    return header + body +  footer
+    return header + body + footer
 
 
 def post_twit_from_changes(
     changes: Iterable[dict], map_changes_to_twit_msg_content: Callable, dry_run: bool
 ):
-    msg = map_changes_to_twit_msg_content(changes)
-    if not dry_run:
-        post_twit(msg)
-    print(msg, len(msg))
-    sleep(3)
+    for indices_to_tag in (range(0, 5), range(5, 10)):
+        msg = map_changes_to_twit_msg_content(changes, indices_to_tag)
+        if not dry_run:
+            post_twit(msg)
+        print(msg, len(msg))
+
+        if not dry_run:
+            sleep(TWIT_POST_DELAY)
 
 
 def run_top_popularity_changes(dry_run: bool):
