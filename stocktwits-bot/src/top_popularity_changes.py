@@ -50,13 +50,10 @@ def create_percent_change_twit_content(
         )
 
     header = "Top percentage changes in popularity for stocks held by Robinhood traders today:\n\n"
+    header += "https://robintrack.net/popularity_changes?hoursAgo=24&relative=true\n\n"
     body = "\n".join(lines)
-    footer = (
-        "\n\nView the full list and popularity history stats for all symbols on Robintrack: \n"
-        "https://robintrack.net/popularity_changes?hoursAgo=24&relative=true"
-    )
 
-    return header + body + footer
+    return header + body
 
 
 def create_absolute_change_twit_content(
@@ -79,16 +76,16 @@ def create_absolute_change_twit_content(
             )
         )
 
-    change_type = "increases" if change_diff >= 0 else "decreases"
+    change_type = "increases" if changes[0]["popularity_difference"] >= 0 else "decreases"
     header = f"Top {change_type} in popularity " "for stocks held by Robinhood traders today:\n\n"
-    body = "\n".join(lines)
-    footer = (
-        "\n\nView the full list and popularity history for all symbols on Robintrack: \n"
+    header += (
+        "View the full list and popularity history for all symbols on Robintrack: \n\n"
         "https://robintrack.net/popularity_changes"
-        f"?hoursAgo=24&relative=false&changeType={change_type}"
+        f"?hoursAgo=24&relative=false&changeType={change_type}\n\n"
     )
+    body = "\n".join(lines)
 
-    return header + body + footer
+    return header + body
 
 
 def post_twit_from_changes(
