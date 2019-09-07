@@ -4,7 +4,7 @@ import { compose } from 'recompose';
 import * as R from 'ramda';
 import { Column } from 'react-virtualized';
 import { Link } from 'react-router-dom';
-import { push } from 'react-router-redux';
+import { push } from 'connected-react-router';
 import numeral from 'numeral';
 import queryString from 'query-string';
 import { Switch } from '@blueprintjs/core';

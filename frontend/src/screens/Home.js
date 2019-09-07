@@ -116,7 +116,8 @@ const Info = () => (
 
     <span style={styles.disclaimer}>
       This site is for informational purposes only. It is not intended to serve as investment
-      advice.
+      advice. Robintrack is not affiliated with Robinhood in any way, but all popularity data is
+      sourced from Robinhood directly via a public API.
     </span>
   </div>
 );
@@ -131,7 +132,14 @@ const Home = ({ mobile }) => (
         justifyContent: 'center',
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          borderBottom: '1px solid #333',
+        }}
+      >
         {mobile ? (
           <a
             href="http://nerdetf.com/?utm_source=robintrack&utm_medium=cpm&utm_campaign=banners"
@@ -145,8 +153,6 @@ const Home = ({ mobile }) => (
 
         <img src="/images/robintrack_logo.svg" style={styles.logo} alt={ROBINTRACK_LOGO_ALT} />
       </div>
-
-      <hr />
 
       <About />
     </div>

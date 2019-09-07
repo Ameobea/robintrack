@@ -2,7 +2,7 @@ import React, { Component, Suspense } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { ButtonGroup, Button, Alignment } from '@blueprintjs/core';
-import { push } from 'react-router-redux';
+import { push } from 'connected-react-router';
 import * as R from 'ramda';
 import numeral from 'numeral';
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
-import { push } from 'react-router-redux';
+import { push } from 'connected-react-router';
 import { Link } from 'react-router-dom';
 import { compose } from 'recompose';
 import { Button, Menu, Popover, Position } from '@blueprintjs/core';
@@ -94,10 +94,10 @@ const SymbolSearch = connect(
 
   return (
     <div style={{ ...styles.searchWrapper, alignItems: logoShown ? 'center' : 'flex-end' }}>
-      <div className="pt-input-group">
-        <span className="pt-icon pt-icon-search" />
+      <div className="bp3-input-group">
+        <span className="bp3-icon bp3-icon-search" />
         <input
-          className="pt-input"
+          className="bp3-input"
           type="search"
           placeholder="Search Stock"
           dir="auto"

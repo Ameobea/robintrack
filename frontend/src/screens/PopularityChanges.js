@@ -172,7 +172,7 @@ const PopularityChangesConfig = connect(
           </div>
         </Setting>
         <Setting label="Lookback Period">
-          <div className="pt-select">
+          <div className="bp3-select">
             <select
               value={hoursAgo}
               onChange={e => setPopularityChangesHoursAgo(parseInt(e.target.value, 10))}
@@ -196,7 +196,7 @@ const PopularityChangesConfig = connect(
           />
         </Setting>
         <Setting label="Change Type">
-          <div className="pt-select">
+          <div className="bp3-select">
             <select
               value={changeType}
               onChange={e => setPopularityChangesChangeType(e.target.value)}

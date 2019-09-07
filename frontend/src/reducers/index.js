@@ -1,5 +1,5 @@
 import { applyMiddleware, createStore, combineReducers, compose } from 'redux';
-import { routerMiddleware, routerReducer } from 'react-router-redux';
+import { routerMiddleware, connectRouter } from 'connected-react-router';
 import createSagaMiddleware from 'redux-saga';
 
 import rootSaga from 'src/sagas';
@@ -9,13 +9,13 @@ import symbolSearchReducer from 'src/reducers/symbolSearch';
 // eslint-disable-next-line no-undef
 const createHistory = require('history').createBrowserHistory;
 
+export const history = createHistory();
+
 const reducers = {
-  router: routerReducer,
+  router: connectRouter(history),
   api: apiReducer,
   symbolSearch: symbolSearchReducer,
 };
-
-export const history = createHistory();
 
 const createdRouterMiddleware = routerMiddleware(history);
 const sagaMiddleware = createSagaMiddleware();

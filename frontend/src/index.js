@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { connect, Provider } from 'react-redux';
 import { Route, Switch } from 'react-router';
-import { ConnectedRouter } from 'react-router-redux';
+import { ConnectedRouter } from 'connected-react-router';
 import 'react-virtualized/styles.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
@@ -29,7 +29,7 @@ const ConnectedSwitch = connect(({ router: { location } }) => ({
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={history}>
-      <div style={{ height: '100%', backgroundColor }} className="pt-dark">
+      <div style={{ height: '100%', backgroundColor }} className="bp3-dark">
         <PageTracker />
         <Header />
 

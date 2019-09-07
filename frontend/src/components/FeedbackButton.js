@@ -138,10 +138,10 @@ class FeedbackButton extends Component {
         confirmLoading={this.state.confirmLoading}
         onCancel={this.hideModal}
         isOpen={this.state.modalShown}
-        className="pt-dark"
+        className="bp3-dark"
         style={{ padding: 15 }}
       >
-        <h1>Send Issues or Feedback</h1>
+        <h1 style={{ marginTop: 0 }}>Send Issues or Feedback</h1>
         <span style={{ paddingBottom: 15 }}>
           {`If you've found a problem with the site, have an idea for a new
              feature, or have any other feedback you would like to submit, feel free

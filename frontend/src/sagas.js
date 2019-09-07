@@ -6,7 +6,7 @@ import {
   takeEvery,
   takeLatest,
 } from 'redux-saga/effects';
-import { push } from 'react-router-redux';
+import { push } from 'connected-react-router';
 import queryString from 'query-string';
 import * as R from 'ramda';
 
