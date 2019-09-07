@@ -10,7 +10,7 @@ class StocksController < ApplicationController
 
     res = nil
     if cached_res
-      res = cached_res.map{ |datum| JSON.parse datum }
+      res = cached_res.map { |datum| JSON.parse datum }
     else
       key = "#{limit_param}_#{start_index_param}"
       res = with_cache(__method__.to_s, key) do
@@ -23,13 +23,13 @@ class StocksController < ApplicationController
 
   def least_popular
     # Try to use the cache, falling back to mongo query if it's not available
-    start_index = -start_index_param - limit_param
-    end_index = [start_index + limit_param, 0].min
+    start_index = -start_index_param
+    end_index = -start_index_param - limit_param
     cached_res = $redis.lrange "popularity_list", start_index, end_index
 
     res = nil
     if cached_res
-      res = cached_res.map{ |datum| JSON.parse datum }.reverse
+      res = cached_res.map { |datum| JSON.parse datum }.reverse
     else
       key = "#{limit_param}_#{start_index_param}"
       res = with_cache(__method__.to_s, key) do
@@ -51,7 +51,7 @@ class StocksController < ApplicationController
         bid: entry["bid_price"].to_f,
         ask: entry["ask_price"].to_f,
         simple_name: metadata["simple_name"],
-        name: metadata["name"]
+        name: metadata["name"],
       }
     end
 
@@ -99,7 +99,7 @@ class StocksController < ApplicationController
       res = with_cache(__method__.to_s, id) do
         entry = Popularity.get_ranking id
         raise NotFound unless entry
-        { symbol: entry["symbol"], ranking: entry["ranking"] }
+        {symbol: entry["symbol"], ranking: entry["ranking"]}
       end
     end
 
@@ -121,7 +121,7 @@ class StocksController < ApplicationController
 
     total_symbols = entry ? entry["total_symbols"] : 0
 
-    render json: { total_symbols: total_symbols }
+    render json: {total_symbols: total_symbols}
   end
 
   def popularity_bins
@@ -188,19 +188,19 @@ class StocksController < ApplicationController
 
   def format_popularity_entries(entries)
     entries.map do |entry|
-      { popularity: entry["latest_popularity"], symbol: entry["symbol"] }
+      {popularity: entry["latest_popularity"], symbol: entry["symbol"]}
     end
   end
 
   def format_quotes(quotes)
     quotes.each_with_object({}) do |quote, acc|
-      acc[quote["_id"]] = { bid: quote["latest_bid"].to_f, ask: quote["latest_ask"].to_f }
+      acc[quote["_id"]] = {bid: quote["latest_bid"].to_f, ask: quote["latest_ask"].to_f}
     end
   end
 
   def format_popularity_history(entries)
     entries.map do |entry|
-      { popularity: entry["popularity"], timestamp: entry["timestamp"].iso8601 }
+      {popularity: entry["popularity"], timestamp: entry["timestamp"].iso8601}
     end
   end
 
