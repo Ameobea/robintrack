@@ -20,8 +20,6 @@ const SymbolDetails = React.lazy(() => import('src/screens/SymbolDetails'));
 const PopularityChanges = React.lazy(() => import('src/screens/PopularityChanges'));
 const DataDownload = React.lazy(() => import('src/screens/DataDownload'));
 
-const RenderComponent = Comp => ({ ...props }) => <Comp {...props} />;
-
 const ConnectedSwitch = connect(({ router: { location } }) => ({
   location,
 }))(Switch);
@@ -35,11 +33,11 @@ ReactDOM.render(
 
         <Suspense fallback={<Loading />}>
           <ConnectedSwitch>
-            <Route exact path="/" component={RenderComponent(Home)} />
-            <Route path="/leaderboard" component={RenderComponent(Leaderboard)} />
-            <Route path="/symbol/:symbol" component={RenderComponent(SymbolDetails)} />
-            <Route path="/popularity_changes" component={RenderComponent(PopularityChanges)} />
-            <Route path="/data-download" component={RenderComponent(DataDownload)} />
+            <Route exact path="/" component={Home} />
+            <Route path="/leaderboard" component={Leaderboard} />
+            <Route path="/symbol/:symbol" component={SymbolDetails} />
+            <Route path="/popularity_changes" component={PopularityChanges} />
+            <Route path="/data-download" component={DataDownload} />
           </ConnectedSwitch>
         </Suspense>
 

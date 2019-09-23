@@ -185,6 +185,7 @@ const MobileHeader = ({ showLogo }) => {
             display: 'flex',
           }}
         >
+          {/* eslint-disable-next-line jsx-a11y/alt-text */}
           <img src="/images/nerd_mobile.gif" />
         </a>
       ) : null}
@@ -206,6 +207,7 @@ const DesktopHeader = ({ showLogo }) => (
         marginRight: 'auto',
       }}
     >
+      {/* eslint-disable-next-line jsx-a11y/alt-text */}
       <img src="/images/nerd_desktop.gif" />
     </a>
     <nav style={styles.desktopHeader}>

@@ -43,7 +43,7 @@
     },
     "ecmaVersion": 2017
   },
-  "plugins": ["react"],
+  "plugins": ["react", "jsx-a11y", "prettier"],
   "globals": {
     "process": true,
     "ga": true
