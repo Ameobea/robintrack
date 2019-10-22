@@ -30,7 +30,7 @@ TWEET_POST_DELAY = 10
 
 
 def create_percent_change_twit_content(
-    changes: Iterable[dict], indices_to_tag: Iterable[int], _hide_subheader: Optional[bool]
+    changes: Iterable[dict], indices_to_tag: Iterable[int], truncate: Optional[bool]
 ) -> str:
     i = -1
     lines = []
@@ -44,11 +44,15 @@ def create_percent_change_twit_content(
         change_diff = change["end_popularity"] - change["start_popularity"]
         change_symbol = "+" if change_diff >= 0 else ""
 
+        # If truncating, only show absolute change for the first 5
+        absolute_change_string = "" if truncate and i >= 5 else f" ({change_symbol}{change_diff})"
+        number_marker = "" if truncate else f"{i+1}. "
         lines.append(
             (
-                f"{i+1}. {'$' if i in indices_to_tag else ''}{symbol}: "
-                f"{change_symbol}{int(change_percent)}% ({change_symbol}{change_diff})"
+                f"{number_marker}{'$' if i in indices_to_tag else ''}{symbol}: "
+                f"{change_symbol}{int(change_percent)}%"
             )
+            + absolute_change_string
         )
 
     header = "Top percentage changes in popularity for stocks held by Robinhood traders today:\n\n"
