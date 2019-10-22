@@ -2,11 +2,12 @@
 about them. """
 
 from time import sleep
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Optional
 
 import requests
 
 from stocktwits_api import post_twit
+from twitter_api import post_tweet
 
 API_URL_BASE = "https://robintrack.net/api"
 
@@ -25,10 +26,11 @@ TOP_ABSOLUTE_POPULARITY_DECREASES_URL = (
 )
 
 TWIT_POST_DELAY = 30
+TWEET_POST_DELAY = 10
 
 
 def create_percent_change_twit_content(
-    changes: Iterable[dict], indices_to_tag: Iterable[int]
+    changes: Iterable[dict], indices_to_tag: Iterable[int], _hide_subheader: Optional[bool]
 ) -> str:
     i = -1
     lines = []
@@ -44,7 +46,7 @@ def create_percent_change_twit_content(
 
         lines.append(
             (
-                f"#{i+1}. {'$' if i in indices_to_tag else ''}{symbol}: "
+                f"{i+1}. {'$' if i in indices_to_tag else ''}{symbol}: "
                 f"{change_symbol}{int(change_percent)}% ({change_symbol}{change_diff})"
             )
         )
@@ -57,7 +59,7 @@ def create_percent_change_twit_content(
 
 
 def create_absolute_change_twit_content(
-    changes: Iterable[dict], indices_to_tag: Iterable[int]
+    changes: Iterable[dict], indices_to_tag: Iterable[int], hide_subheader: Optional[bool]
 ) -> str:
     i = -1
     lines = []
@@ -71,15 +73,18 @@ def create_absolute_change_twit_content(
 
         lines.append(
             (
-                f"#{i+1}. {'$' if i in indices_to_tag else ''}{symbol}: "
+                f"{i+1}. {'$' if i in indices_to_tag else ''}{symbol}: "
                 f"{'+' if change_diff >= 0 else ''}{change_diff}"
             )
         )
 
     change_type = "increases" if changes[0]["popularity_difference"] >= 0 else "decreases"
     header = f"Top {change_type} in popularity " "for stocks held by Robinhood traders today:\n\n"
+
+    if not hide_subheader:
+        header += "View the full list and popularity history for all symbols on Robintrack: \n\n"
+
     header += (
-        "View the full list and popularity history for all symbols on Robintrack: \n\n"
         "https://robintrack.net/popularity_changes"
         f"?hoursAgo=24&relative=false&changeType={change_type}\n\n"
     )
@@ -101,15 +106,36 @@ def post_twit_from_changes(
             sleep(TWIT_POST_DELAY)
 
 
+def post_tweet_from_changes(
+    changes: Iterable[dict], map_changes_to_twit_msg_content: Callable, dry_run: bool
+):
+    msg = map_changes_to_twit_msg_content(changes, range(0, len(changes)), True)
+    if not dry_run:
+        post_tweet(msg)
+    print(msg, len(msg))
+
+    if not dry_run:
+        sleep(TWEET_POST_DELAY)
+
+
 def run_top_popularity_changes(dry_run: bool):
     # Fetch the top popularity changes by percent from Robintrack
     top_percent_changes = requests.get(TOP_PERCENT_POPULARITY_CHANGES_URL).json()
+    # Post to StockTwits
     post_twit_from_changes(top_percent_changes, create_percent_change_twit_content, dry_run)
+    # Post to Twitter
+    post_tweet_from_changes(top_percent_changes, create_percent_change_twit_content, dry_run)
 
     # Fetch the top popularity increases by absolute diff from Robintrack
     top_absolute_increases = requests.get(TOP_ABSOLUTE_POPULARITY_INCREASES_URL).json()
+    # Post to StockTwits
     post_twit_from_changes(top_absolute_increases, create_absolute_change_twit_content, dry_run)
+    # Post to Twitter
+    post_tweet_from_changes(top_absolute_increases, create_absolute_change_twit_content, dry_run)
 
     # Fetch the top popularity decreases by absolute diff from Robintrack
     top_absolute_decreases = requests.get(TOP_ABSOLUTE_POPULARITY_DECREASES_URL).json()
+    # Post to StockTwits
     post_twit_from_changes(top_absolute_decreases, create_absolute_change_twit_content, dry_run)
+    # Post to Twitter
+    post_tweet_from_changes(top_absolute_decreases, create_absolute_change_twit_content, dry_run)
