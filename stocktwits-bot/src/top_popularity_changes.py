@@ -101,7 +101,7 @@ def post_twit_from_changes(
     changes: Iterable[dict], map_changes_to_twit_msg_content: Callable, dry_run: bool
 ):
     for indices_to_tag in (range(0, 5), range(5, 10)):
-        msg = map_changes_to_twit_msg_content(changes, indices_to_tag)
+        msg = map_changes_to_twit_msg_content(changes, indices_to_tag, False)
         if not dry_run:
             post_twit(msg)
         print(msg, len(msg))
