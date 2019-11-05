@@ -57,17 +57,11 @@ const HeaderItem = compose(
   connect(mapStateToProps),
   withMobileProp({ maxDeviceWidth: 1200 })
 )(({ content, url, pathname, style = {}, textStyle = {}, onItemSelect, mobile }) => {
-  const aggregateStyle = R.mergeAll([
-    styles.text,
-    { color: pathname === url ? fontColor : emphasis },
-    textStyle,
-  ]);
+  const aggregateStyle = R.mergeAll([styles.text, { color: pathname === url ? fontColor : emphasis }, textStyle]);
   const inner = <span style={aggregateStyle}>{content}</span>;
 
   return (
-    <div
-      style={R.mergeAll([styles.headerItem, mobile ? { fontSize: 16 } : { fontSize: 26 }, style])}
-    >
+    <div style={R.mergeAll([styles.headerItem, mobile ? { fontSize: 16 } : { fontSize: 26 }, style])}>
       {url && url !== pathname ? (
         <Link to={url} style={textStyle} onClick={onItemSelect}>
           {inner}
@@ -185,8 +179,9 @@ const MobileHeader = ({ showLogo }) => {
             display: 'flex',
           }}
         >
-          {/* eslint-disable-next-line jsx-a11y/alt-text */}
-          <img src="/images/nerd_mobile.gif" />
+          <video playsInline autoPlay muted loop>
+            <source src="/images/nerd_mobile.webm" type="video/webm"></source>
+          </video>
         </a>
       ) : null}
     </div>
@@ -208,7 +203,9 @@ const DesktopHeader = ({ showLogo }) => (
       }}
     >
       {/* eslint-disable-next-line jsx-a11y/alt-text */}
-      <img src="/images/nerd_desktop.gif" />
+      <video playsInline autoPlay muted loop>
+        <source src="/images/nerd_desktop.webm" type="video/webm"></source>
+      </video>
     </a>
     <nav style={styles.desktopHeader}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
