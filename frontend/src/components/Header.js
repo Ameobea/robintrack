@@ -179,7 +179,7 @@ const MobileHeader = ({ showLogo }) => {
             display: 'flex',
           }}
         >
-          <video playsInline autoPlay muted loop>
+          <video playsInline autoPlay muted loop disablePictureInPicture disableRemotePlayback>
             <source src="/images/nerd_mobile.webm" type="video/webm"></source>
           </video>
         </a>
@@ -203,7 +203,7 @@ const DesktopHeader = ({ showLogo }) => (
       }}
     >
       {/* eslint-disable-next-line jsx-a11y/alt-text */}
-      <video playsInline autoPlay muted loop>
+      <video playsInline autoPlay muted loop disablePictureInPicture disableRemotePlayback>
         <source src="/images/nerd_desktop.webm" type="video/webm"></source>
       </video>
     </a>
