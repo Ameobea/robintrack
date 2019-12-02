@@ -135,16 +135,13 @@ const mapLabelsToOptions = labels =>
     </option>
   ));
 
-const PopularityChangesConfig = connect(
-  undefined,
-  {
-    setSelectedSymbol,
-    setPopularityChangesRelative,
-    setPopularityChangesHoursAgo,
-    setPopularityChangesMinPopularity,
-    setPopularityChangesChangeType,
-  }
-)(
+const PopularityChangesConfig = connect(undefined, {
+  setSelectedSymbol,
+  setPopularityChangesRelative,
+  setPopularityChangesHoursAgo,
+  setPopularityChangesMinPopularity,
+  setPopularityChangesChangeType,
+})(
   ({
     config: { relative, hoursAgo, minPopularity, changeType },
     mobile,
@@ -260,11 +257,13 @@ class PopularityChanges extends React.Component {
   };
 
   loadMoreData = ({ startIndex, stopIndex }) =>
-    new Promise((fulfill, reject) =>
-      fetchPopularityChangesData(
-        R.mergeDeepLeft({ config: { startIndex, limit: stopIndex - startIndex } }, this.props),
-        fulfill
-      )
+    new Promise(
+      fulfill =>
+        console.log('fetching: ', startIndex, stopIndex) ||
+        fetchPopularityChangesData(
+          R.mergeDeepLeft({ config: { startIndex, limit: stopIndex - startIndex } }, this.props),
+          fulfill
+        )
     );
 
   getColumns = () => {
@@ -386,17 +385,14 @@ const mapStateToProps = (state, { pageSize = 50 }) => {
 };
 
 export default compose(
-  connect(
-    mapStateToProps,
-    {
-      requestLargestPopularityChanges,
-      setPopularityChangesChangeType,
-      setPopularityChangesRelative,
-      setSelectedSymbol,
-      requestPopularityHistory,
-      requestQuoteHistory,
-      requestTotalSymbols,
-    }
-  ),
+  connect(mapStateToProps, {
+    requestLargestPopularityChanges,
+    setPopularityChangesChangeType,
+    setPopularityChangesRelative,
+    setSelectedSymbol,
+    requestPopularityHistory,
+    requestQuoteHistory,
+    requestTotalSymbols,
+  }),
   withMobileProp({ maxDeviceWidth: 600 })
 )(PopularityChanges);
