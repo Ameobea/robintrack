@@ -110,13 +110,6 @@ const Info = () => (
       they both change with respect to each other and over time.
     </p>
 
-    <h2>About the Ads</h2>
-    <p>
-      Ads displayed on the site are sponsored by Roundhill Investments, providers of the $NERD ETF. For more information
-      about $NERD, check out their website:{' '}
-      <a href="http://nerdetf.com/?utm_source=robintrack&utm_medium=cpm&utm_campaign=banners">nerdetf.com</a>
-    </p>
-
     <span style={styles.disclaimer}>
       This site is for informational purposes only. It is not intended to serve as investment advice. Robintrack is not
       affiliated with Robinhood in any way, but all popularity data is sourced from Robinhood directly via a public API.
@@ -142,19 +135,6 @@ const Home = ({ mobile }) => (
           borderBottom: '1px solid #333',
         }}
       >
-        {mobile ? (
-          <a
-            href="http://nerdetf.com/?utm_source=robintrack&utm_medium=cpm&utm_campaign=banners"
-            // eslint-disable-next-line react/jsx-no-target-blank
-            target="_blank"
-            style={{ height: 250, width: 300, marginLeft: 'auto', marginRight: 'auto' }}
-          >
-            <video playsInline autoPlay muted loop disablePictureInPicture disableRemotePlayback>
-              <source src="/images/nerd_mobile.webm" type="video/webm"></source>
-            </video>
-          </a>
-        ) : null}
-
         <img src="/images/robintrack_logo.svg" style={styles.logo} alt={ROBINTRACK_LOGO_ALT} />
       </div>
 

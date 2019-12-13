@@ -77,13 +77,10 @@ const mapSymbolSearchStateToProps = ({ symbolSearch }) => ({
   searchContent: symbolSearch,
 });
 
-const SymbolSearch = connect(
-  mapSymbolSearchStateToProps,
-  {
-    setSymbolSearchContent,
-    push,
-  }
-)(({ logoShown = true, searchContent, setSymbolSearchContent, push }) => {
+const SymbolSearch = connect(mapSymbolSearchStateToProps, {
+  setSymbolSearchContent,
+  push,
+})(({ logoShown = true, searchContent, setSymbolSearchContent, push }) => {
   const submitSymbolSearch = () => push(`/symbol/${searchContent}`);
 
   return (
@@ -164,49 +161,12 @@ const MobileHeader = ({ showLogo }) => {
 
         <SymbolSearch />
       </nav>
-
-      {showLogo ? (
-        <a
-          href="http://nerdetf.com/?utm_source=robintrack&utm_medium=cpm&utm_campaign=banners"
-          target="__blank"
-          style={{
-            width: 300,
-            height: 250,
-            paddingTop: 10,
-            paddingBottom: 20,
-            marginRight: 'auto',
-            marginLeft: 'auto',
-            display: 'flex',
-          }}
-        >
-          <video playsInline autoPlay muted loop disablePictureInPicture disableRemotePlayback>
-            <source src="/images/nerd_mobile.webm" type="video/webm"></source>
-          </video>
-        </a>
-      ) : null}
     </div>
   );
 };
 
 const DesktopHeader = ({ showLogo }) => (
   <div style={{ display: 'flex', flexDirection: 'column' }}>
-    <a
-      href="http://nerdetf.com/?utm_source=robintrack&utm_medium=cpm&utm_campaign=banners"
-      target="__blank"
-      style={{
-        width: 970,
-        height: 250,
-        maxWidth: '100vw',
-        paddingBottom: 20,
-        marginLeft: 'auto',
-        marginRight: 'auto',
-      }}
-    >
-      {/* eslint-disable-next-line jsx-a11y/alt-text */}
-      <video playsInline autoPlay muted loop disablePictureInPicture disableRemotePlayback>
-        <source src="/images/nerd_desktop.webm" type="video/webm"></source>
-      </video>
-    </a>
     <nav style={styles.desktopHeader}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         {showLogo ? (
