@@ -257,13 +257,11 @@ class PopularityChanges extends React.Component {
   };
 
   loadMoreData = ({ startIndex, stopIndex }) =>
-    new Promise(
-      fulfill =>
-        console.log('fetching: ', startIndex, stopIndex) ||
-        fetchPopularityChangesData(
-          R.mergeDeepLeft({ config: { startIndex, limit: stopIndex - startIndex } }, this.props),
-          fulfill
-        )
+    new Promise(fulfill =>
+      fetchPopularityChangesData(
+        R.mergeDeepLeft({ config: { startIndex, limit: stopIndex - startIndex } }, this.props),
+        fulfill
+      )
     );
 
   getColumns = () => {

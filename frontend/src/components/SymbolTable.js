@@ -89,7 +89,7 @@ const SymbolTable = ({
     <div style={{ height, flexDirection: 'row' }}>
       <InfiniteLoader
         isRowLoaded={({ index }) => !!data[index]}
-        loadMoreRows={(...args) => console.log(args) || loadMoreData(args)}
+        loadMoreRows={loadMoreData}
         rowCount={totalRowCount}
         minimumBatchSize={minBatchSize}
         threshold={25}

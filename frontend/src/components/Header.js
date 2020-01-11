@@ -57,11 +57,17 @@ const HeaderItem = compose(
   connect(mapStateToProps),
   withMobileProp({ maxDeviceWidth: 1200 })
 )(({ content, url, pathname, style = {}, textStyle = {}, onItemSelect, mobile }) => {
-  const aggregateStyle = R.mergeAll([styles.text, { color: pathname === url ? fontColor : emphasis }, textStyle]);
+  const aggregateStyle = R.mergeAll([
+    styles.text,
+    { color: pathname === url ? fontColor : emphasis },
+    textStyle,
+  ]);
   const inner = <span style={aggregateStyle}>{content}</span>;
 
   return (
-    <div style={R.mergeAll([styles.headerItem, mobile ? { fontSize: 16 } : { fontSize: 26 }, style])}>
+    <div
+      style={R.mergeAll([styles.headerItem, mobile ? { fontSize: 16 } : { fontSize: 26 }, style])}
+    >
       {url && url !== pathname ? (
         <Link to={url} style={textStyle} onClick={onItemSelect}>
           {inner}
@@ -161,12 +167,40 @@ const MobileHeader = ({ showLogo }) => {
 
         <SymbolSearch />
       </nav>
+
+      {showLogo ? (
+        <iframe
+          style={{
+            paddingTop: 10,
+            paddingBottom: 20,
+            marginRight: 'auto',
+            marginLeft: 'auto',
+            display: 'flex',
+            border: 'none',
+          }}
+          src="/thcx/300_250/index.html"
+          width={300}
+          height={250}
+        />
+      ) : null}
     </div>
   );
 };
 
 const DesktopHeader = ({ showLogo }) => (
   <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <iframe
+      style={{
+        maxWidth: '100vw',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        border: 'none',
+      }}
+      src="/thcx/970_250/index.html"
+      width={970}
+      height={270}
+    />
+
     <nav style={styles.desktopHeader}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         {showLogo ? (

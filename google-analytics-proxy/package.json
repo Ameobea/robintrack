@@ -1,0 +1,11 @@
+{
+  "name": "ga-proxy",
+  "version": "0.1.0",
+  "description": "Google Analytics collection proxy",
+  "main": "index.js",
+  "author": "Casey Primozic <casey@cprimozic.net>",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-http-proxy": "^1.6.0"
+  }
+}
