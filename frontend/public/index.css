@@ -9,7 +9,8 @@ body {
 }
 
 #root {
-  font-family: 'PT Sans', sans-serif;
+  font-display: optional;
+  font-family: "PT Sans", sans-serif;
   padding: 0px 20px 15px 10px;
 }
 
