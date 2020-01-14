@@ -119,7 +119,7 @@ const Info = () => (
       Ads displayed on the site are sponsored by Innovation Shares, providers of the $THCX ETF. For
       more information about $THCX, check out their website:{' '}
       <a href="https://thcxetf.com?utm_source=robintrack&utm_medium=display&utm_campaign=thcx&utm_content=thcx_etf">
-        nerdetf.com
+        thcxetf.com
       </a>
     </p>
 
