@@ -26,8 +26,12 @@ const checkSymbolPage = path => {
 };
 
 const sendGa = curPath => {
-  window.ga('set', 'page', curPath);
-  window.ga('send', 'pageview');
+  const tracker = window.ga.getAll()[0];
+  if (!tracker) {
+    return;
+  }
+  tracker.set('page', curPath);
+  tracker.send('pageview');
 };
 
 class PageTracker extends Component {
@@ -65,7 +69,4 @@ const mapStateToProps = ({
   },
 }) => ({ path: pathname });
 
-export default connect(
-  mapStateToProps,
-  { push }
-)(PageTracker);
+export default connect(mapStateToProps, { push })(PageTracker);
