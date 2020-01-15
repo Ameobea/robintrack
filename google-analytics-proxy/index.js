@@ -1,6 +1,9 @@
-var express = require('express'),
-  proxy = require('express-http-proxy'),
-  app = express();
+const express = require('express');
+const proxy = require('express-http-proxy');
+const cors = require('cors');
+
+const app = express();
+app.use(cors());
 
 app.use(express.static(__dirname)); // serve static files from cwd
 

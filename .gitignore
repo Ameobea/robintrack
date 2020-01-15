@@ -4,3 +4,4 @@ __pycache__
 .cache
 .pyre
 .pyre_configuration
+.DS_Store

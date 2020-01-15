@@ -5,6 +5,7 @@
   "main": "index.js",
   "author": "Casey Primozic <casey@cprimozic.net>",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-http-proxy": "^1.6.0"
   }
