@@ -1,4 +1,3 @@
-import datetime
 import os
 from typing import List
 
@@ -64,4 +63,3 @@ def main(output_directory: str):
 
 if __name__ == "__main__":
     main()  # pylint: disable=no-value-for-parameter
-

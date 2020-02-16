@@ -1,0 +1,8 @@
+Dockerfile*
+.dockerignore
+backend/Dockerfile
+Justfile
+frontend/node_modules/
+google-analytics-proxy/node_modules
+scripts/combined_csv_writer/tmp
+scripts/combined_csv_writer/*.zip
