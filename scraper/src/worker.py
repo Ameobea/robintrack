@@ -335,7 +335,7 @@ def cli(mode: str, rabbitmq_host: str, rabbitmq_port: str, worker_request_cooldo
             worker_request_cooldown_seconds=worker_request_cooldown_seconds,
         )
 
-    rabbitmq_channel.basic_consume(handle_work, queue=channel_name, no_ack=True)
+    rabbitmq_channel.basic_consume(channel_name, handle_work, auto_ack=False)
     rabbitmq_channel.start_consuming()
 
 

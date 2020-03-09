@@ -1,5 +1,4 @@
-# This must be 3.6 because the `pika` library uses the `async` keyword which breaks 3.7*
-FROM python:3.6
+FROM python:3.7
 
 ADD ./scraper /app
 ADD ./python_common /app/src/python_common
