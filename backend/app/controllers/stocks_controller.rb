@@ -205,11 +205,8 @@ class StocksController < ApplicationController
   end
 
   def format_popularity_history_csv(entries)
-    entries.reduce("timestamp,popularity\n") do |acc, entry|
-      timestamp = entry["timestamp"]
-      popularity = entry["popularity"]
-
-      acc + "\"#{timestamp}\",#{popularity}\n"
+    CSV.generate do |csv|
+      entries.each { |entry| csv << [entry["timestamp"], entry["popularity"]] }
     end
   end
 

@@ -3,18 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@blueprintjs/core": "^3.24.0",
-    "connected-react-router": "^6.7.0",
-    "echarts": "^4.6.0",
+    "@blueprintjs/core": "^3.26.0",
+    "connected-react-router": "^6.8.0",
+    "echarts": "^4.7.0",
     "echarts-for-react": "^2.0.14",
     "history": "^4.10.1",
-    "node-sass": "^4.13.1",
+    "node-sass": "^4.14.0",
     "numeral": "^2.0.6",
     "prop-types": "^15.7.2",
     "query-string": "6",
     "ramda": "^0.27.0",
-    "react": "^16.13.0",
-    "react-dom": "^16.13.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
     "react-redux": "^7.2.0",
     "react-responsive": "^8.0.3",
     "react-router": "^5.1.2",
@@ -34,10 +34,10 @@
   },
   "devDependencies": {
     "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-prettier": "^3.1.3",
     "eslint-plugin-react": "^7.19.0"
   },
-  "proxy": "https://robintrack.net/api",
+  "proxy": "http://localhost:4000",
   "homepage": "https://robintrack.net",
   "browserslist": {
     "production": [
