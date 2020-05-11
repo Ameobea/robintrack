@@ -1,0 +1,75 @@
+==================================================================
+https://keybase.io/ameo
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of https://robintrack.net
+  * I am ameo (https://keybase.io/ameo) on keybase.
+  * I have a public key with fingerprint 3217 FED5 F754 BF58 FF12  A3EC 2A02 222D A342 5B99
+
+To do so, I am signing this object:
+
+{
+  "body": {
+    "key": {
+      "eldest_kid": "01019c3bfa3d3e9bb0f978580ca15c6094b17cb9c1ed286d71dd59e44074b07a1c6d0a",
+      "fingerprint": "3217fed5f754bf58ff12a3ec2a02222da3425b99",
+      "host": "keybase.io",
+      "key_id": "2a02222da3425b99",
+      "kid": "01019c3bfa3d3e9bb0f978580ca15c6094b17cb9c1ed286d71dd59e44074b07a1c6d0a",
+      "uid": "b3a74314b587c10f71a74eba77290319",
+      "username": "ameo"
+    },
+    "service": {
+      "hostname": "robintrack.net",
+      "protocol": "https:"
+    },
+    "type": "web_service_binding",
+    "version": 1
+  },
+  "ctime": 1528056980,
+  "expire_in": 157680000,
+  "prev": "521f1b79b795db95836f2cbc2f684322f3980fe54d9aedc173b1eb34828273d3",
+  "seqno": 59,
+  "tag": "signature"
+}
+
+which yields the signature:
+
+-----BEGIN PGP MESSAGE-----
+Version: Keybase OpenPGP v2.0.77
+Comment: https://keybase.io/crypto
+
+yMM9AnicrVJrTBxVFF4okIBFsEGjFBs6pRUoj7nz2JnZlqShCa2RIr5IBOp2HneW
+6cLOOvtgKaUBRcDEYlsb3i0FUmxTahHdNhsIlodWeZSoCGpqljRCy8NIKqQlBvUO
+qf/86c3NvTnnfN93HjnD4ZsMYQGJgVhyR3peY8DoQJ3LkBeVebYUE1SpBDOVYla4
+8cFCCTqcZqsiYSYMBzjgRFKQeVIiIScIuMwxLM3iIg9o0YhzlAAYUeBEACWCNUoM
+kCSagxSFM5SAMzwQjRLOY0mYrNgsULNris2JZEkCMDKUaJmhKUGmWVkGBE9CkeBx
+Ah2JJymCFjgOEQtUh85AxQm8A6YoKvIhw7xR3n/g/+e6XRtyAskzFAkogWYZEeAy
+A5ANBZ5hCA4ngZ7X5YCajS+CCI1eFStLwpDHrYhQH6rexeOopgpoCBovWlNs0ImY
+dk11qqJaiGIFTqfdYdK5zhK7Di6GgvmxjBnRJDRFxHBDzaGoNswEEFJ0KrouoAkW
+p40ciydh0GNXNGhWdATNGFkcHT0PdCNJmgAyEBgOXVoSOJoljTIhCiIhG1mKJAiZ
+RBoypCmJ46EkAoYUABRIiiVYgkHTxPTG3rapmInmUJ28BWk6FIuNd7o0iJUNDuQH
+GQLCDCHBgfp6GcJCI/9dusjUiL/Ty5/v6AurmFC+Pf+HZTF67dj9H8KfWgqa9Vfm
+VcUG3Lk3l9CVda6G7sit6fZ3ZD6gizEfG5XpbXctTKd6PZ6TA+vLWdVrbb/WHLy+
+8uf2sU2+w7O1Tdzq8Fp0S85vnhMvgL9GE8ext5aDf7p56gKYDTxjGcn2/z5XvzUj
+9dbPMWlDi48yUq5kW9azgq9cirr5i/dg2dhRMFg5NCnFKPklTS1f7I4vkl8dCTW/
+9N7c2tl5/6WscefX7DdJq++ntr5m+bEv8nzF2A65ZMe7ja8ovs8j6nZek4eI5bhS
+37MP+6+2SSPNtYf600cDq8p72gtS9mS60wpfZ9czXDlV30vX7x3fNX9kZuHO1SNW
+NuaUFqnNdF5s98a3NEXP1xx41Fm/r43dO3Z50DS9MJy8ZXtc3DTfNRfbmnbgQX9v
+3tJqSrz/w9y4T2aSt8y/M+FuZqz5dZ1He27VfxybJYb2lk82e0YvxPR9R94NcgDh
+y8/8MyMNT3+0T33OdejYwuZgnyp13Q3P9HYVd53o3frB4cRq7/IbEcm7g3NXVj+9
+X7mtwt1gx3xnEm+/PPJwceJk9q7u0/CcqknEkvnaTqDiN0JWn7zRWSxNzedMJVzG
+9lsTb69EDJyeenG8KHp/7Xp1SO/yMz1PbGs4Xu+3LH3VGvCmIbq7aG/bZIJnz8XG
+3Fjj0OZpjHKMJvwDQ3LCgQ==
+=OFms
+-----END PGP MESSAGE-----
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/ameo
+
+==================================================================
+
