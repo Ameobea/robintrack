@@ -57,15 +57,37 @@ class Popularity
     ]).first
   end
 
-  def self.get_history_for_symbol(symbol)
-    entry = MongoClient[:index].aggregate([
-      { "$match" => { symbol: symbol } },
-      { "$lookup" => {
+  def self.get_history_for_symbol(symbol, start_date, end_date)
+    lookup = nil
+    if start_date || end_date
+      lookup = {
+        from: "popularity",
+        as: "popularity_history",
+        let: { "instrument_id": "$instrument_id" },
+        pipeline: [
+          { "$match": {
+            "$expr": { "$eq": [ "$instrument_id", "$$instrument_id"] },
+          }},
+          start_date && { "$match": {
+            "timestamp": { "$gte": start_date }
+          }},
+          end_date && { "$match": {
+            "timestamp": { "$lte": end_date }
+          }},
+        ].compact,
+      }
+    else
+      lookup = {
         from: "popularity",
         localField: "instrument_id",
         foreignField: "instrument_id",
         as: "popularity_history",
-      } },
+      }
+    end
+
+    entry = MongoClient[:index].aggregate([
+      { "$match" => { symbol: symbol } },
+      { "$lookup" => lookup },
       { "$limit" => 1 },
     ]).first
     entry && entry["popularity_history"]
