@@ -68,21 +68,59 @@ class StocksController < ApplicationController
 
   def popularity_history
     id = params[:id]
-    res = with_cache(__method__.to_s, id) do
-      entries = Popularity.get_history_for_symbol id
+    start_time = params[:start_time]
+    end_time = params[:end_time]
+
+    parsed_start_time = nil
+    parsed_end_time = nil
+    begin
+      if start_time
+        parsed_start_time = start_time.to_datetime
+      end
+      if end_time
+        parsed_end_time = end_time.to_datetime
+      end
+    rescue => ex
+      raise BadRequest, "invalid_date"
+    end
+
+    key = "#{id}_#{(parsed_start_time || '').to_s}_#{(parsed_end_time || '').to_s}"
+
+    res = with_cache(__method__.to_s, key) do
+      entries = Popularity.get_history_for_symbol id, parsed_start_time, parsed_end_time
       raise NotFound unless entries
       format_popularity_history entries
     end
+
     render json: res
   end
 
   def popularity_history_csv
     id = params[:id]
-    res = with_cache(__method__.to_s, id, json: false) do
-      entries = Popularity.get_history_for_symbol id
+    start_time = params[:start_time]
+    end_time = params[:end_time]
+
+    parsed_start_time = nil
+    parsed_end_time = nil
+    begin
+      if start_time
+        parsed_start_time = start_time.to_datetime
+      end
+      if end_time
+        parsed_end_time = end_time.to_datetime
+      end
+    rescue => ex
+      raise BadRequest, "invalid_date"
+    end
+
+    key = "#{id}_#{(parsed_start_time || '').to_s}_#{(parsed_end_time || '').to_s}"
+
+    res = with_cache(__method__.to_s, key, json: false) do
+      entries = Popularity.get_history_for_symbol id, parsed_start_time, parsed_end_time
       raise NotFound unless entries
       format_popularity_history_csv entries
     end
+
     send_data res, :type => "text/csv", :filename => "#{id}_popularity.csv"
   end
 
