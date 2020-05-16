@@ -1,4 +1,4 @@
-FROM ruby:2.5.1-alpine3.7
+FROM ruby:2.7.1-alpine3.11
 
 RUN apk update && \
   apk add --no-cache build-base libxslt-dev libxml2-dev sqlite-dev tzdata && \
@@ -11,7 +11,8 @@ COPY Gemfile /app/Gemfile
 COPY Gemfile.lock /app/Gemfile.lock
 
 RUN gem install pkg-config -v "~> 1.1"
-RUN bundle install --without test development
+RUN bundle config set without 'test development'
+RUN bundle install
 
 COPY . .
 
