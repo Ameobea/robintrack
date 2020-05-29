@@ -6,12 +6,61 @@ spawn_docker:
   docker rm robintrack-backend
   docker run -d --name robintrack-backend \
     --net host \
-    -p 4000:4000 \
     -e "REDIS_HOST=${REDIS_HOST:-localhost}" \
     -e "MONGO_HOST=${MONGO_HOST:-localhost}" \
     -e "MONGO_PORT=${MONGO_PORT:-27017}" \
     -e "SECRET_KEY_BASE=${SECRET_KEY_BASE}" \
-    robintrack-backend
+    --cap-add=SYS_PTRACE \
+    robintrack-backend \
+    /app/bin/rails s -b 0.0.0.0 -e production -p 4000
+
+  docker stop robintrack-backend-2
+  docker rm robintrack-backend-2
+  docker run -d --name robintrack-backend-2 \
+    --net host \
+    -e "REDIS_HOST=${REDIST_HOST:-localhost}" \
+    -e "MONGO_HOST=${MONGO_HOST:-localhost}" \
+    -e "MONGO_PORT=${MONGO_PORT:-27017}" \
+    -e "SECRET_KEY_BASE=${SECRET_KEY_BASE}" \
+    --cap-add=SYS_PTRACE \
+    robintrack-backend \
+    /app/bin/rails s -b 0.0.0.0 -e production -p 4001
+
+  docker stop robintrack-backend-3
+  docker rm robintrack-backend-3
+  docker run -d --name robintrack-backend-3 \
+    --net host \
+    -e "REDIS_HOST=${REDIST_HOST:-localhost}" \
+    -e "MONGO_HOST=${MONGO_HOST:-localhost}" \
+    -e "MONGO_PORT=${MONGO_PORT:-27017}" \
+    -e "SECRET_KEY_BASE=${SECRET_KEY_BASE}" \
+    --cap-add=SYS_PTRACE \
+    robintrack-backend \
+    /app/bin/rails s -b 0.0.0.0 -e production -p 4002
+
+  docker stop robintrack-backend-4
+  docker rm robintrack-backend-4
+  docker run -d --name robintrack-backend-4 \
+    --net host \
+    -e "REDIS_HOST=${REDIST_HOST:-localhost}" \
+    -e "MONGO_HOST=${MONGO_HOST:-localhost}" \
+    -e "MONGO_PORT=${MONGO_PORT:-27017}" \
+    -e "SECRET_KEY_BASE=${SECRET_KEY_BASE}" \
+    --cap-add=SYS_PTRACE \
+    robintrack-backend \
+    /app/bin/rails s -b 0.0.0.0 -e production -p 4003
+
+  docker stop robintrack-backend-5
+  docker rm robintrack-backend-5
+  docker run -d --name robintrack-backend-5 \
+    --net host \
+    -e "REDIS_HOST=${REDIST_HOST:-localhost}" \
+    -e "MONGO_HOST=${MONGO_HOST:-localhost}" \
+    -e "MONGO_PORT=${MONGO_PORT:-27017}" \
+    -e "SECRET_KEY_BASE=${SECRET_KEY_BASE}" \
+    --cap-add=SYS_PTRACE \
+    robintrack-backend \
+    /app/bin/rails s -b 0.0.0.0 -e production -p 4004
 
 build_docker:
 	docker build -t robintrack-backend .
