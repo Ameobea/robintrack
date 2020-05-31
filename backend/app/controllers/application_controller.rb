@@ -5,10 +5,13 @@ class ApplicationController < ActionController::Base
   before_action :rate_limit_by_ip
 
   def rate_limit_by_ip
-    if RateLimiter.should_block_request?(request.remote_ip)
+    ip = request.headers["X-Forwarded-For"]
+    puts ip
+
+    if RateLimiter.should_block_request?(ip)
       render status: :too_many_requests
     else
-      RateLimiter.incr_requests(request.remote_ip)
+      RateLimiter.incr_requests(ip)
     end
   end
 

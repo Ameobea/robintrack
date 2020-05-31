@@ -1,7 +1,7 @@
 class RateLimiter
 
-  MAX_REQUESTS_PER_PERIOD = 700
-  TIME_PERIOD_IN_SECONDS = 60
+  MAX_REQUESTS_PER_PERIOD = 60 * 5 * 3
+  TIME_PERIOD_IN_SECONDS = 60 * 5
   BASE_REDIS_KEY = 'request-count-ip'
 
   def self.should_block_request?(ip)
