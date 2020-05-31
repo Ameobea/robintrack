@@ -6,7 +6,6 @@ class ApplicationController < ActionController::Base
 
   def rate_limit_by_ip
     ip = request.headers["X-Forwarded-For"]
-    puts ip
 
     if RateLimiter.should_block_request?(ip)
       render status: :too_many_requests
