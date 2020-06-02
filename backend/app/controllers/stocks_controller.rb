@@ -18,7 +18,11 @@ class StocksController < ApplicationController
         format_popularity_entries entries
       end
     end
-    render json: res
+
+    respond_to do |format|
+      format.json { render json: res }
+      format.csv { send_data format_popularity_entries_csv(res), filename: Time.now.utc.strftime("leaderboard_%Y-%m-%d_%H-00-00.csv") }
+    end
   end
 
   def least_popular
@@ -211,6 +215,15 @@ class StocksController < ApplicationController
   def format_popularity_entries(entries)
     entries.map do |entry|
       {popularity: entry["latest_popularity"], symbol: entry["symbol"]}
+    end
+  end
+
+  def format_popularity_entries_csv(entries)
+    CSV.generate do |csv|
+      csv << %w[symbol, popularity]
+      entries.each do |entry|
+        csv << entry.values_at(:symbol, :popularity)
+      end
     end
   end
 
