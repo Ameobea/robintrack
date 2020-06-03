@@ -124,7 +124,7 @@ class Leaderboard extends Component {
           </h1>
         </center>
 
-        <Suspense fallback={<Loading />}>
+        <Suspense fallback={<Loading style={{ height: this.props.mobile ? '50vh' : '68vh' }} />}>
           <PopularityChart
             symbol={symbol}
             popularityHistory={popularityHistoryForSymbol}
@@ -139,14 +139,7 @@ class Leaderboard extends Component {
   getColumns = () => [
     <Column key={1} label="#" dataKey="i" width={100} flexGrow={0.5} style={styles.text} />,
     SymbolColumn({ mobile: false }),
-    <Column
-      key={3}
-      label="Popularity"
-      dataKey="popularity"
-      width={150}
-      flexGrow={1}
-      style={styles.text}
-    />,
+    <Column key={3} label="Popularity" dataKey="popularity" width={150} flexGrow={1} style={styles.text} />,
   ];
 
   getRowGetter = data => ({ index }) => {
@@ -239,16 +232,13 @@ const mapStateToProps = ({ api, router: { location } }) => ({
 });
 
 export default compose(
-  connect(
-    mapStateToProps,
-    {
-      requestBottomSymbols,
-      requestTopSymbols,
-      requestPopularityHistory,
-      requestQuoteHistory,
-      requestTotalSymbols,
-      push,
-    }
-  ),
+  connect(mapStateToProps, {
+    requestBottomSymbols,
+    requestTopSymbols,
+    requestPopularityHistory,
+    requestQuoteHistory,
+    requestTotalSymbols,
+    push,
+  }),
   withMobileProp({ maxDeviceWidth: 600 })
 )(Leaderboard);

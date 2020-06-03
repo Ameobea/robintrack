@@ -49,12 +49,8 @@ const analyzeTimeSeries = (series, zoomStart, zoomEnd) => {
   const timeRangeMs = last[0] - first[0];
   const windowPadding = Math.abs(MS_PER_DAY / timeRangeMs) * 100;
 
-  const zoomStartDate = new Date(
-    first[0].getTime() + (Math.max(zoomStart - windowPadding, 0) * timeRangeMs) / 100
-  );
-  const zoomEndDate = new Date(
-    first[0].getTime() + (Math.min(zoomEnd + windowPadding, 100) * timeRangeMs) / 100
-  );
+  const zoomStartDate = new Date(first[0].getTime() + (Math.max(zoomStart - windowPadding, 0) * timeRangeMs) / 100);
+  const zoomEndDate = new Date(first[0].getTime() + (Math.min(zoomEnd + windowPadding, 100) * timeRangeMs) / 100);
 
   const values = (series.length > 0
     ? series.filter(([date]) => date >= zoomStartDate && date <= zoomEndDate)
@@ -145,7 +141,7 @@ const buildToolboxConfig = symbol => ({
         color: 'white',
         borderColor: '#00000000',
       },
-      onclick: function() {
+      onclick: function () {
         window.open(buildCSVDownloadURL(symbol), 'blank');
       },
     },
@@ -179,35 +175,19 @@ const getBaseConfigDefaults = mobile => ({
   animation: true,
 });
 
-const getChartOptions = ({
-  symbol,
-  quoteHistory = [],
-  popularityHistory = [],
-  zoomStart,
-  zoomEnd,
-  mobile,
-}) => {
+const getChartOptions = ({ symbol, quoteHistory = [], popularityHistory = [], zoomStart, zoomEnd, mobile }) => {
   const quoteSeries = quoteHistory.map(({ timestamp, last_trade_price: lastTradePrice }) => [
     new Date(timestamp),
     lastTradePrice,
   ]);
-  const popularitySeries = popularityHistory.map(({ timestamp, popularity }) => [
-    new Date(timestamp),
-    popularity,
-  ]);
+  const popularitySeries = popularityHistory.map(({ timestamp, popularity }) => [new Date(timestamp), popularity]);
 
-  const [minQuote, maxQuote, firstQuote, lastQuote, quoteOffset] = analyzeTimeSeries(
-    quoteSeries,
+  const [minQuote, maxQuote, firstQuote, lastQuote, quoteOffset] = analyzeTimeSeries(quoteSeries, zoomStart, zoomEnd);
+  const [minPopularity, maxPopularity, firstPopularity, lastPopularity, popularityOffset] = analyzeTimeSeries(
+    popularitySeries,
     zoomStart,
     zoomEnd
   );
-  const [
-    minPopularity,
-    maxPopularity,
-    firstPopularity,
-    lastPopularity,
-    popularityOffset,
-  ] = analyzeTimeSeries(popularitySeries, zoomStart, zoomEnd);
 
   const xAxisOptions = getXAxisOptions({
     mobile,
@@ -273,8 +253,7 @@ const getChartOptions = ({
   };
 };
 
-const getViewportHeight = () =>
-  Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+export const getViewportHeight = () => Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
 const BasePopularityChart = ({ mobile, style, options, ...props }) => {
   const viewportHeight = getViewportHeight();

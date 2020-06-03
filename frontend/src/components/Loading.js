@@ -13,6 +13,6 @@ const styles = {
   },
 };
 
-const Loading = () => <div style={styles.root}>Loading...</div>;
+const Loading = ({ style = {} }) => <div style={{ ...styles.root, ...style }}>Loading...</div>;
 
 export default Loading;

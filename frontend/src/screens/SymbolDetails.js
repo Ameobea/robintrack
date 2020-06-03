@@ -16,6 +16,8 @@ import {
 } from 'src/actions/api';
 import Loading from 'src/components/Loading';
 import { withMobileOrDesktop } from 'src/components/ResponsiveHelpers';
+import { withMobileProp } from '../components/ResponsiveHelpers';
+import { getViewportHeight } from '../components/PopularityChart';
 
 const PopularityChart = React.lazy(() => import('src/components/PopularityChart'));
 
@@ -90,11 +92,7 @@ const Title = ({ popularityRanking, symbol, bid, ask, name, fullName }) => (
 
 const DesktopNavigationHeader = ({ nextLeastPopular, nextMostPopular, isLoading, ...props }) => (
   <div style={styles.navigationHeader}>
-    <DesktopPagerLink
-      symbol={nextLeastPopular}
-      popularityRanking={props.popularityRanking - 1}
-      isLoading={isLoading}
-    />
+    <DesktopPagerLink symbol={nextLeastPopular} popularityRanking={props.popularityRanking - 1} isLoading={isLoading} />
 
     <NavigationHeaderItem style={{ flex: 3 }}>
       <Title {...props} />
@@ -109,22 +107,21 @@ const DesktopNavigationHeader = ({ nextLeastPopular, nextMostPopular, isLoading,
   </div>
 );
 
-const MobilePagerLink = connect(
-  undefined,
-  { push }
-)(({ symbol, popularityRanking, isLoading, isRight = false, push }) => {
-  const text = isLoading ? 'Loading...' : `#${popularityRanking}: ${symbol}`;
+const MobilePagerLink = connect(undefined, { push })(
+  ({ symbol, popularityRanking, isLoading, isRight = false, push }) => {
+    const text = isLoading ? 'Loading...' : `#${popularityRanking}: ${symbol}`;
 
-  return (
-    <Button
-      disabled={popularityRanking === 0}
-      text={popularityRanking === 0 ? '' : <div style={{ fontSize: 12 }}>{text}</div>}
-      icon={!isRight ? 'chevron-left' : undefined}
-      rightIcon={isRight ? 'chevron-right' : undefined}
-      onClick={() => !isLoading && push(`/symbol/${symbol}`)}
-    />
-  );
-});
+    return (
+      <Button
+        disabled={popularityRanking === 0}
+        text={popularityRanking === 0 ? '' : <div style={{ fontSize: 12 }}>{text}</div>}
+        icon={!isRight ? 'chevron-left' : undefined}
+        rightIcon={isRight ? 'chevron-right' : undefined}
+        onClick={() => !isLoading && push(`/symbol/${symbol}`)}
+      />
+    );
+  }
+);
 
 const MobileNavigationHeader = ({
   nextLeastPopular,
@@ -140,11 +137,7 @@ const MobileNavigationHeader = ({
   <div style={styles.mobileNavigationHeader}>
     <h2>{name ? `${symbol} - ${name}` : symbol}</h2>
     <ButtonGroup alignText={Alignment.CENTER} style={{ paddingBottom: 10 }}>
-      <MobilePagerLink
-        symbol={nextLeastPopular}
-        popularityRanking={popularityRanking - 1}
-        isLoading={isLoading}
-      />
+      <MobilePagerLink symbol={nextLeastPopular} popularityRanking={popularityRanking - 1} isLoading={isLoading} />
 
       <MobilePagerLink
         symbol={nextMostPopular}
@@ -154,16 +147,11 @@ const MobileNavigationHeader = ({
       />
     </ButtonGroup>
 
-    <span style={{ paddingTop: 5, fontSize: 16 }}>
-      {bid && ask ? `$${bid} - $${ask}` : 'Loading...'}
-    </span>
+    <span style={{ paddingTop: 5, fontSize: 16 }}>{bid && ask ? `$${bid} - $${ask}` : 'Loading...'}</span>
   </div>
 );
 
-const NavigationHeader = withMobileOrDesktop({ maxDeviceWidth: 800 })(
-  MobileNavigationHeader,
-  DesktopNavigationHeader
-);
+const NavigationHeader = withMobileOrDesktop({ maxDeviceWidth: 800 })(MobileNavigationHeader, DesktopNavigationHeader);
 
 const SymbolNotFound = ({ symbol }) => (
   <div style={styles.notFound}>
@@ -205,7 +193,7 @@ class SymbolDetails extends Component {
   };
 
   render = () => {
-    const { symbol, popularityHistory, quoteHistory, quotes, notFound, ...props } = this.props;
+    const { symbol, popularityHistory, quoteHistory, quotes, notFound, mobile, ...props } = this.props;
 
     if (notFound) {
       return <SymbolNotFound symbol={symbol} />;
@@ -221,6 +209,9 @@ class SymbolDetails extends Component {
 
     const { bid, ask, name: fullName, simple_name: name } = quotes[symbol] || {};
 
+    const viewportHeight = getViewportHeight();
+    const height = (mobile ? 0.5 : 0.7) * viewportHeight;
+
     return (
       <div style={styles.root}>
         <NavigationHeader
@@ -233,7 +224,7 @@ class SymbolDetails extends Component {
           {...props}
         />
 
-        <Suspense fallback={<Loading />}>
+        <Suspense fallback={<Loading style={{ display: 'block', flex: 'unset', height }} />}>
           <PopularityChart
             symbol={symbol}
             quoteHistory={quoteHistory[symbol]}
@@ -246,17 +237,7 @@ class SymbolDetails extends Component {
 }
 
 const mapStateToProps = (
-  {
-    api: {
-      quotes,
-      popularityHistory,
-      quoteHistory,
-      popularityMapping,
-      symbolPopularities,
-      notFound,
-      totalSymbols,
-    },
-  },
+  { api: { quotes, popularityHistory, quoteHistory, popularityMapping, symbolPopularities, notFound, totalSymbols } },
   {
     match: {
       params: { symbol },
@@ -278,14 +259,13 @@ const mapStateToProps = (
   };
 };
 
-export default connect(
-  mapStateToProps,
-  {
+export default withMobileProp({ maxDeviceWidth: 600 })(
+  connect(mapStateToProps, {
     requestQuote,
     requestPopularityHistory,
     requestQuoteHistory,
     fetchPopularityRanking,
     fetchNeighborRankingSymbols,
     requestTotalSymbols,
-  }
-)(SymbolDetails);
+  })(SymbolDetails)
+);

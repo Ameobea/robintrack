@@ -57,17 +57,11 @@ const HeaderItem = compose(
   connect(mapStateToProps),
   withMobileProp({ maxDeviceWidth: 1200 })
 )(({ content, url, pathname, style = {}, textStyle = {}, onItemSelect, mobile }) => {
-  const aggregateStyle = R.mergeAll([
-    styles.text,
-    { color: pathname === url ? fontColor : emphasis },
-    textStyle,
-  ]);
+  const aggregateStyle = R.mergeAll([styles.text, { color: pathname === url ? fontColor : emphasis }, textStyle]);
   const inner = <span style={aggregateStyle}>{content}</span>;
 
   return (
-    <div
-      style={R.mergeAll([styles.headerItem, mobile ? { fontSize: 16 } : { fontSize: 26 }, style])}
-    >
+    <div style={R.mergeAll([styles.headerItem, mobile ? { fontSize: 16 } : { fontSize: 26 }, style])}>
       {url && url !== pathname ? (
         <Link to={url} style={textStyle} onClick={onItemSelect}>
           {inner}
@@ -90,7 +84,12 @@ const SymbolSearch = connect(mapSymbolSearchStateToProps, {
   const submitSymbolSearch = () => push(`/symbol/${searchContent}`);
 
   return (
-    <div style={{ ...styles.searchWrapper, alignItems: logoShown ? 'center' : 'flex-end' }}>
+    <div
+      style={{
+        ...styles.searchWrapper,
+        alignItems: logoShown ? 'center' : 'flex-end',
+      }}
+    >
       <div className="bp3-input-group">
         <span className="bp3-icon bp3-icon-search" />
         <input
@@ -180,7 +179,7 @@ const MobileHeader = ({ showLogo }) => {
           }}
           src="/thcx/300_250/index.html"
           width={300}
-          height={250}
+          height={280}
         />
       ) : null}
     </div>
