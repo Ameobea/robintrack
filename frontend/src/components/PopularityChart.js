@@ -306,6 +306,7 @@ const PopularityChart = ({ style, symbol, popularityHistory, quoteHistory, mobil
     );
     eChartsInstance.current = null;
   }, [zoomStart, zoomEnd, symbol, popularityHistory, quoteHistory, mobile]);
+  useEffect(() => setZoom({ zoomStart: 0, zoomEnd: 100 }), [symbol]);
 
   const onEvents = useMemo(() => {
     const handleDataZoom = ({ start, end }, instance) => {
