@@ -3,7 +3,7 @@
  * popularity to the price of an asset over time.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import ReactEchartsCore from 'echarts-for-react/lib/core';
 import echarts from 'echarts/lib/echarts';
 import 'echarts/lib/chart/line';
@@ -112,12 +112,13 @@ const getYAxisDefaults = memoizeOne(mobile => ({
   splitLine: splitLineOptions,
 }));
 
-const buildToolboxConfig = symbol => ({
+const buildToolboxConfig = memoizeOne(symbol => ({
   show: true,
   top: 8,
   left: 20,
   itemGap: 30,
   itemSize: 24,
+  height: 100,
   iconStyle: {
     emphasis: {
       color: 'white',
@@ -132,6 +133,7 @@ const buildToolboxConfig = symbol => ({
       iconStyle: {
         color: 'white',
         borderColor: '#00000000',
+        marginTop: 20,
       },
     },
     myDataDownload: {
@@ -147,7 +149,7 @@ const buildToolboxConfig = symbol => ({
       },
     },
   },
-});
+}));
 
 const getBaseConfigDefaults = mobile => ({
   backgroundColor: '#1d2126',
@@ -264,11 +266,14 @@ export const getViewportHeight = () => Math.max(document.documentElement.clientH
 const BasePopularityChart = ({ mobile, style = {}, options, ...props }) => {
   const viewportHeight = getViewportHeight();
   const height = (mobile ? 0.5 : 0.7) * viewportHeight;
-  const mergedStyle = {
-    height,
-    ...(mobile ? { marginLeft: -15, marginRight: -15 } : {}),
-    ...style,
-  };
+  const mergedStyle = useMemo(
+    () => ({
+      height,
+      ...(mobile ? { marginLeft: -15, marginRight: -15 } : {}),
+      ...style,
+    }),
+    [height, mobile, style]
+  );
 
   return (
     <ReactEchartsCore
@@ -284,23 +289,35 @@ const BasePopularityChart = ({ mobile, style = {}, options, ...props }) => {
 };
 
 const PopularityChart = ({ style, symbol, popularityHistory, quoteHistory, mobile }) => {
+  const eChartsInstance = useRef(null);
   const [{ zoomStart, zoomEnd }, setZoom] = useState({ zoomStart: 0, zoomEnd: 100 });
-  const options = useMemo(() => getChartOptions({ symbol, popularityHistory, quoteHistory, zoomStart, zoomEnd }), [
-    symbol,
-    popularityHistory,
-    quoteHistory,
-    zoomStart,
-    zoomEnd,
-  ]);
+  const options = useMemo(
+    () => getChartOptions({ symbol, popularityHistory, quoteHistory, zoomStart, zoomEnd, mobile }),
+    [symbol, popularityHistory, quoteHistory, mobile]
+  );
+
+  useEffect(() => {
+    if (!eChartsInstance.current) {
+      return;
+    }
+
+    eChartsInstance.current.setOption(
+      getChartOptions({ symbol, popularityHistory, quoteHistory, zoomStart, zoomEnd, mobile })
+    );
+    eChartsInstance.current = null;
+  }, [zoomStart, zoomEnd, symbol, popularityHistory, quoteHistory, mobile]);
 
   const onEvents = useMemo(() => {
-    const handleDataZoom = ({ start, end }, instance) => setZoom({ zoomStart: start, zoomEnd: end });
+    const handleDataZoom = ({ start, end }, instance) => {
+      eChartsInstance.current = instance;
+      setZoom({ zoomStart: start, zoomEnd: end });
+    };
     return { datazoom: handleDataZoom };
   }, []);
 
   return (
     <>
-      <BasePopularityChart options={options} onEvents={onEvents} style={style} />
+      <BasePopularityChart options={options} onEvents={onEvents} style={style} mobile={mobile} />
 
       {mobile ? <center style={styles.mobileHint}>Touch the chart to view price + popularity values</center> : null}
     </>
