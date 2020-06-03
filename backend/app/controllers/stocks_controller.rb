@@ -222,7 +222,7 @@ class StocksController < ApplicationController
     CSV.generate do |csv|
       csv << %w[symbol, popularity]
       entries.each do |entry|
-        csv << entry.values_at(:symbol, :popularity)
+        csv << entry.values_at("symbol", "popularity")
       end
     end
   end
