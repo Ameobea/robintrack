@@ -3,7 +3,7 @@
  * popularity to the price of an asset over time.
  */
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import ReactEchartsCore from 'echarts-for-react/lib/core';
 import echarts from 'echarts/lib/echarts';
 import 'echarts/lib/chart/line';
@@ -18,6 +18,7 @@ import { emphasis, emphasis2 } from 'src/style';
 import { withMobileProp } from 'src/components/ResponsiveHelpers';
 import MobileZoomHandle from 'src/components/MobileZoomHandle';
 import { buildCSVDownloadURL } from 'src/api';
+import memoizeOne from 'memoize-one';
 
 const styles = {
   root: {},
@@ -96,7 +97,7 @@ const seriesDefaults = {
   animation: false,
 };
 
-const getYAxisDefaults = mobile => ({
+const getYAxisDefaults = memoizeOne(mobile => ({
   type: 'value',
   ...(mobile
     ? { axisLabel: { show: false }, axisTick: { show: false } }
@@ -109,7 +110,7 @@ const getYAxisDefaults = mobile => ({
       }),
   splitNumber: mobile ? 7 : 10,
   splitLine: splitLineOptions,
-});
+}));
 
 const buildToolboxConfig = symbol => ({
   show: true,
@@ -175,12 +176,17 @@ const getBaseConfigDefaults = mobile => ({
   animation: true,
 });
 
+const mapQuotes = memoizeOne(quoteHistory =>
+  quoteHistory.map(({ timestamp, last_trade_price: lastTradePrice }) => [new Date(timestamp), lastTradePrice])
+);
+
+const mapPopularity = memoizeOne(popularityHistory =>
+  popularityHistory.map(({ timestamp, popularity }) => [new Date(timestamp), popularity])
+);
+
 const getChartOptions = ({ symbol, quoteHistory = [], popularityHistory = [], zoomStart, zoomEnd, mobile }) => {
-  const quoteSeries = quoteHistory.map(({ timestamp, last_trade_price: lastTradePrice }) => [
-    new Date(timestamp),
-    lastTradePrice,
-  ]);
-  const popularitySeries = popularityHistory.map(({ timestamp, popularity }) => [new Date(timestamp), popularity]);
+  const quoteSeries = mapQuotes(quoteHistory);
+  const popularitySeries = mapPopularity(popularityHistory);
 
   const [minQuote, maxQuote, firstQuote, lastQuote, quoteOffset] = analyzeTimeSeries(quoteSeries, zoomStart, zoomEnd);
   const [minPopularity, maxPopularity, firstPopularity, lastPopularity, popularityOffset] = analyzeTimeSeries(
@@ -255,7 +261,7 @@ const getChartOptions = ({ symbol, quoteHistory = [], popularityHistory = [], zo
 
 export const getViewportHeight = () => Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
-const BasePopularityChart = ({ mobile, style, options, ...props }) => {
+const BasePopularityChart = ({ mobile, style = {}, options, ...props }) => {
   const viewportHeight = getViewportHeight();
   const height = (mobile ? 0.5 : 0.7) * viewportHeight;
   const mergedStyle = {
@@ -277,21 +283,26 @@ const BasePopularityChart = ({ mobile, style, options, ...props }) => {
   );
 };
 
-const PopularityChart = ({ style, ...props }) => {
-  const handleDataZoom = ({ start, end }, instance) =>
-    instance.setOption(getChartOptions({ ...props, zoomStart: start, zoomEnd: end }));
+const PopularityChart = ({ style, symbol, popularityHistory, quoteHistory, mobile }) => {
+  const [{ zoomStart, zoomEnd }, setZoom] = useState({ zoomStart: 0, zoomEnd: 100 });
+  const options = useMemo(() => getChartOptions({ symbol, popularityHistory, quoteHistory, zoomStart, zoomEnd }), [
+    symbol,
+    popularityHistory,
+    quoteHistory,
+    zoomStart,
+    zoomEnd,
+  ]);
+
+  const onEvents = useMemo(() => {
+    const handleDataZoom = ({ start, end }, instance) => setZoom({ zoomStart: start, zoomEnd: end });
+    return { datazoom: handleDataZoom };
+  }, []);
 
   return (
     <>
-      <BasePopularityChart
-        options={getChartOptions({ ...props, zoomStart: 0, zoomEnd: 100 })}
-        onEvents={{ datazoom: handleDataZoom }}
-        {...props}
-      />
+      <BasePopularityChart options={options} onEvents={onEvents} style={style} />
 
-      {props.mobile ? (
-        <center style={styles.mobileHint}>Touch the chart to view price + popularity values</center>
-      ) : null}
+      {mobile ? <center style={styles.mobileHint}>Touch the chart to view price + popularity values</center> : null}
     </>
   );
 };
