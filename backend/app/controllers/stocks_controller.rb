@@ -220,7 +220,7 @@ class StocksController < ApplicationController
 
   def format_popularity_entries_csv(entries)
     CSV.generate do |csv|
-      csv << %w[symbol, popularity]
+      csv << %w[symbol popularity]
       entries.each do |entry|
         csv << entry.values_at("symbol", "popularity")
       end
