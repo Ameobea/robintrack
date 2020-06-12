@@ -9,7 +9,7 @@ WINDOWS_RESERVED_FILENAMES = ("CON", "AUX", "LST", "PRN", "NUL", "EOF", "INP", "
 
 def write_csv_file(output_dir: str, symbol: str, popularity_history: List[dict]):
     prefix = ""
-    if str.upper() in WINDOWS_RESERVED_FILENAMES
+    if str.upper() in WINDOWS_RESERVED_FILENAMES:
         prefix = "_"
     with open(os.path.join(output_dir, f"{prefix}{symbol}.csv"), "w+") as f:
         f.write("timestamp,users_holding\n")
