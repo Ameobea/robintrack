@@ -179,9 +179,16 @@ const getBaseConfigDefaults = mobile => ({
   animation: true,
 });
 
-const mapQuotes = memoizeOne(quoteHistory =>
-  quoteHistory.map(({ timestamp, last_trade_price: lastTradePrice }) => [new Date(timestamp), lastTradePrice])
-);
+const mapQuotes = memoizeOne(quoteHistory => {
+  let lastTimestamp;
+  return quoteHistory
+    .filter(({ timestamp }) => {
+      const isDup = timestamp === lastTimestamp;
+      lastTimestamp = timestamp;
+      return !isDup;
+    })
+    .map(({ timestamp, last_trade_price: lastTradePrice }) => [new Date(timestamp), lastTradePrice]);
+});
 
 const mapPopularity = memoizeOne(popularityHistory =>
   popularityHistory.map(({ timestamp, popularity }) => [new Date(timestamp), popularity])
