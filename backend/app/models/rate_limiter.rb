@@ -4,10 +4,18 @@ class RateLimiter
   BASE_REDIS_KEY = 'request-count-ip'
 
   def self.should_block_request?(ip, path)
+    p path
+    if path.starts_with?("/most_popular") || path.starts_with?("/least_popular")
+      return false
+    end
     recent_requests(ip, path).to_i >= MAX_REQUESTS_PER_PERIOD
   end
 
   def self.incr_requests(ip, path)
+    if path.starts_with?("/most_popular") || path.starts_with?("/least_popular")
+      return
+    end
+
     Redis.current.multi do |multi|
       key = redis_key(ip, path)
       multi.incr(key)
