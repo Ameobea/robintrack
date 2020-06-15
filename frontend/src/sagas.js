@@ -1,11 +1,4 @@
-import {
-  all,
-  call,
-  select,
-  put,
-  takeEvery,
-  takeLatest,
-} from 'redux-saga/effects';
+import { all, call, select, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import queryString from 'query-string';
 import * as R from 'ramda';
@@ -44,6 +37,8 @@ function* canSkip(...selectors) {
   return resultArray.find(R.identity);
 }
 
+let lastAlertedAt = 0;
+
 /**
  * Generic wrapper that makes a request to and API endpoint and handles errors with the
  * request including non-success response codes and connection errors.  Handles automatically
@@ -57,15 +52,18 @@ function* apiCall(apiFunction, args, retries = 0) {
 
     if (res.status === 200 || res.status === 404) {
       return yield res.json();
-    } else {
-      // TODO: show alert to user
+    } else if (res.status === 429) {
+      const now = new Date().getTime();
+      if (now - lastAlertedAt > 1000) {
+        lastAlertedAt = now;
+        alert(
+          'Too many requests from this IP; please wait a minute before continuing to use the site and limit your access rate to one page per 2 seconds'
+        );
+      }
     }
   } catch (err) {
     if (retries < retryCount) {
-      console.warn(
-        `API request failed; retrying #${retries +
-          1} after ${retryTimeoutMs}ms...`
-      );
+      console.warn(`API request failed; retrying #${retries + 1} after ${retryTimeoutMs}ms...`);
       yield delay(retryTimeoutMs);
       yield apiCall(apiFunction, args, retries + 1);
     } else {
@@ -107,17 +105,12 @@ function* fetchTopSymbols({ limit, startIndex, cb }) {
 }
 
 function* fetchBottomSymbols({ limit, startIndex, cb }) {
-  const existingBottomSymbols = yield select(
-    getBottomSymbols(limit, startIndex)
-  );
+  const existingBottomSymbols = yield select(getBottomSymbols(limit, startIndex));
   if (existingBottomSymbols.length === limit) {
     return;
   }
 
-  const bottomSymbols = yield apiCall(Api.fetchBottomSymbols, [
-    limit,
-    startIndex,
-  ]);
+  const bottomSymbols = yield apiCall(Api.fetchBottomSymbols, [limit, startIndex]);
   yield put({
     type: apiActions.BOTTOM_SYMBOLS_FETCHED,
     limit,
@@ -207,14 +200,9 @@ function* fetchPopularityRanking({ symbol }) {
 }
 
 function* fetchNeighborRankingSymbols({ middleRanking }) {
-  const existingNeighborRankings = yield select(
-    getNeighborRankings(middleRanking)
-  );
+  const existingNeighborRankings = yield select(getNeighborRankings(middleRanking));
   const expectedLength = middleRanking === 1 ? 2 : 3;
-  if (
-    existingNeighborRankings.length === expectedLength &&
-    !!existingNeighborRankings[0]
-  ) {
+  if (existingNeighborRankings.length === expectedLength && !!existingNeighborRankings[0]) {
     return;
   }
 
@@ -229,8 +217,7 @@ function* fetchNeighborRankingSymbols({ middleRanking }) {
   });
 
   const apiRes = yield apiCall(Api.fetchLastNextPopularities, [middleRanking]);
-  const [previousSymbol, curSymbol, nextSymbol] =
-    apiRes.length === 2 ? [null, ...apiRes] : apiRes;
+  const [previousSymbol, curSymbol, nextSymbol] = apiRes.length === 2 ? [null, ...apiRes] : apiRes;
 
   yield put({
     type: apiActions.NEIGHBOR_RANKING_SYMBOLS_FETCHED,
@@ -261,9 +248,7 @@ function* fetchTotalSymbols({ hoursAgo }) {
     return;
   }
 
-  const { total_symbols: totalSymbols } = yield apiCall(Api.fetchSymbolCount, [
-    hoursAgo,
-  ]);
+  const { total_symbols: totalSymbols } = yield apiCall(Api.fetchSymbolCount, [hoursAgo]);
   yield put({ type: apiActions.TOTAL_SYMBOLS_FETCHED, totalSymbols });
 }
 
@@ -271,9 +256,7 @@ function* addQueryParam({ newParams, defaults }) {
   const existingParams = yield select(getQueryParams);
   const mergedParams = R.merge(existingParams, newParams);
   // Remove query params that are default if defaults are provided
-  const nonDefaultParams = defaults
-    ? R.pickBy((val, key) => defaults[key] !== val, mergedParams)
-    : mergedParams;
+  const nonDefaultParams = defaults ? R.pickBy((val, key) => defaults[key] !== val, mergedParams) : mergedParams;
 
   yield put(push({ search: queryString.stringify(nonDefaultParams) }));
 }
@@ -281,24 +264,12 @@ function* addQueryParam({ newParams, defaults }) {
 function* rootSaga() {
   yield takeLatest(apiActions.FETCH_QUOTE_REQUESTED, fetchQuote);
   yield takeEvery(apiActions.FETCH_TOP_SYMBOLS_REQUESTED, fetchTopSymbols);
-  yield takeEvery(
-    apiActions.FETCH_BOTTOM_SYMBOLS_REQUESTED,
-    fetchBottomSymbols
-  );
-  yield takeLatest(
-    apiActions.FETCH_POPULARITY_HISTORY_REQUESTED,
-    fetchPopularityHistory
-  );
+  yield takeEvery(apiActions.FETCH_BOTTOM_SYMBOLS_REQUESTED, fetchBottomSymbols);
+  yield takeLatest(apiActions.FETCH_POPULARITY_HISTORY_REQUESTED, fetchPopularityHistory);
   yield takeLatest(apiActions.FETCH_QUOTE_HISTORY_REQUESTED, fetchQuoteHistory);
-  yield takeEvery(
-    apiActions.FETCH_LARGEST_POPULARITY_CHANGES_REQUESTED,
-    fetchLargestPopularityChanges
-  );
+  yield takeEvery(apiActions.FETCH_LARGEST_POPULARITY_CHANGES_REQUESTED, fetchLargestPopularityChanges);
   yield takeEvery(apiActions.FETCH_POPULARITY_RANKING, fetchPopularityRanking);
-  yield takeEvery(
-    apiActions.FETCH_NEIGHBOR_RANKING_SYMBOLS,
-    fetchNeighborRankingSymbols
-  );
+  yield takeEvery(apiActions.FETCH_NEIGHBOR_RANKING_SYMBOLS, fetchNeighborRankingSymbols);
   yield takeLatest(apiActions.FETCH_TOTAL_SYMBOLS, fetchTotalSymbols);
   yield takeEvery(routerActions.ADD_QUERY_PARAMS, addQueryParam);
 }
