@@ -47,7 +47,7 @@ def set_popularity_rankings(redis_client, rankings: Cursor):
     print("Finished fetching population data.")
     for entry in rankings:
         symbol = entry.get("symbol")
-        name = entry.get("short_name")
+        name = entry.get("name")
         if symbol is None:
             continue
         popularity = entry.get("latest_popularity", 0)

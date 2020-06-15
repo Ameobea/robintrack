@@ -8,7 +8,6 @@ import { Popover, Position } from '@blueprintjs/core';
 
 import { emphasis, fontColor } from 'src/style';
 import { withMobileProp } from 'src/components/ResponsiveHelpers';
-import { setSelectedSymbol } from '../actions/popularityChanges';
 
 const styles = {
   root: {
@@ -143,30 +142,36 @@ const SymbolTable = ({
   );
 };
 
-const Symbol = React.memo(({ cellData, mobile, tooltipContent }) => (
-  <Popover
-    hoverCloseDelay={0}
-    hoverOpenDelay={0}
-    content={
-      <span
-        style={{
-          fontSize: 16,
-          display: 'block',
-          height: 28,
-        }}
-      >
-        <div style={{ paddingTop: 2, paddingRight: 4 }}>{tooltipContent}</div>
-      </span>
-    }
-    isOpen={!!tooltipContent}
-    position={Position.RIGHT}
-    usePortal={false}
-  >
-    <Link to={`/symbol/${cellData}`}>
-      <span style={{ fontSize: mobile ? 12 : 24, color: emphasis }}>{cellData}</span>
-    </Link>
-  </Popover>
-));
+const Symbol = React.memo(
+  ({ cellData, mobile, tooltipContent }) => (
+    <Popover
+      hoverCloseDelay={0}
+      hoverOpenDelay={0}
+      content={
+        <span
+          style={{
+            fontSize: 16,
+            display: 'block',
+            height: 28,
+          }}
+        >
+          <div style={{ paddingTop: 2, paddingRight: 4 }}>{tooltipContent}</div>
+        </span>
+      }
+      isOpen={!!tooltipContent}
+      position={Position.RIGHT}
+      usePortal={false}
+    >
+      <Link to={`/symbol/${cellData}`}>
+        <span style={{ fontSize: mobile ? 12 : 24, color: emphasis }}>{cellData}</span>
+      </Link>
+    </Popover>
+  ),
+  (oldProps, newProps) =>
+    oldProps.cellData === newProps.cellData &&
+    oldProps.mobile === newProps.mobile &&
+    oldProps.tooltipContent === newProps.tooltipContent
+);
 
 export const SymbolColumn = ({ mobile }) => (
   <Column

@@ -143,11 +143,12 @@ class Leaderboard extends Component {
   ];
 
   getRowGetter = data => ({ index }) => {
-    const { popularity, symbol } = data[index];
+    const { popularity, symbol, name } = data[index];
 
     return {
       symbol,
       popularity: numeral(popularity).format('0,0'),
+      name,
       i: index + 1,
     };
   };

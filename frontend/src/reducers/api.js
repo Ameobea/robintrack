@@ -28,11 +28,7 @@ const getInitialState = () => ({
 export default (state = getInitialState(), action = {}) => {
   switch (action.type) {
     case QUOTE_FETCHED: {
-      return R.set(
-        R.lensPath(['quotes', action.symbol]),
-        R.omit(['symbol'], action.quote),
-        state
-      );
+      return R.set(R.lensPath(['quotes', action.symbol]), R.omit(['symbol'], action.quote), state);
     }
 
     case TOP_SYMBOLS_FETCHED: {
@@ -54,19 +50,11 @@ export default (state = getInitialState(), action = {}) => {
     }
 
     case POPULARITY_HISTORY_FETCHED: {
-      return R.set(
-        R.lensPath(['popularityHistory', action.symbol]),
-        action.payload,
-        state
-      );
+      return R.set(R.lensPath(['popularityHistory', action.symbol]), action.payload, state);
     }
 
     case QUOTE_HISTORY_FETCHED: {
-      return R.set(
-        R.lensPath(['quoteHistory', action.symbol]),
-        action.payload,
-        state
-      );
+      return R.set(R.lensPath(['quoteHistory', action.symbol]), action.payload, state);
     }
 
     case LARGEST_POPULARITY_CHANGES_FETCHED: {
@@ -81,11 +69,7 @@ export default (state = getInitialState(), action = {}) => {
     }
 
     case POPULARITY_RANKING_FETCHED: {
-      return R.set(
-        R.lensPath(['symbolPopularities', action.symbol]),
-        action.popularityRanking,
-        state
-      );
+      return R.set(R.lensPath(['symbolPopularities', action.symbol]), action.popularityRanking, state);
     }
 
     case NEIGHBOR_RANKING_SYMBOLS_FETCHED: {
