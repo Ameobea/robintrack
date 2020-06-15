@@ -80,6 +80,7 @@ class PopularitiesController < ApplicationController
         end_popularity: entry["end_popularity"],
         popularity_difference: entry["popularity_difference"],
         symbol: entry["symbol"],
+        name: entry["name"],
       }
     end
   end

@@ -93,30 +93,28 @@ const styles = {
   },
 };
 
-const Setting = withMobileProp({ maxDeviceWidth: 600 })(
-  ({ label, style = {}, flex = 1, mobile, children }) => (
-    <div
-      style={{
-        ...styles.setting,
-        ...(mobile ? styles.mobileSetting : {}),
-        flex,
-        minWidth: mobile ? '40vw' : undefined,
-        maxWidth: mobile ? '40vw' : undefined,
-        ...style,
-      }}
-    >
-      <Label>
-        {label}
-        {children}
-      </Label>
-    </div>
-  )
-);
+const Setting = withMobileProp({ maxDeviceWidth: 600 })(({ label, style = {}, flex = 1, mobile, children }) => (
+  <div
+    style={{
+      ...styles.setting,
+      ...(mobile ? styles.mobileSetting : {}),
+      flex,
+      minWidth: mobile ? '40vw' : undefined,
+      maxWidth: mobile ? '40vw' : undefined,
+      ...style,
+    }}
+  >
+    <Label>
+      {label}
+      {children}
+    </Label>
+  </div>
+));
 
 const lookbackOptionLabels = {
   1: '1 Hour',
   4: '4 Hours',
-  24: '1 Day',
+  24: '24 Hours',
   [24 * 3]: '3 Days',
   [24 * 7]: '1 Week',
   [30 * 7]: '1 Month',
@@ -146,7 +144,6 @@ const PopularityChangesConfig = connect(undefined, {
     config: { relative, hoursAgo, minPopularity, changeType },
     mobile,
     setPopularityChangesRelative,
-    setSelectedSymbol,
     setPopularityChangesHoursAgo,
     setPopularityChangesMinPopularity,
     setPopularityChangesChangeType,
@@ -160,20 +157,13 @@ const PopularityChangesConfig = connect(undefined, {
             <Switch
               large={!mobile}
               checked={isRelative}
-              onChange={() =>
-                setPopularityChangesRelative(
-                  isRelative ? RELATIVITY.NOT_RELATIVE : RELATIVITY.RELATIVE
-                )
-              }
+              onChange={() => setPopularityChangesRelative(isRelative ? RELATIVITY.NOT_RELATIVE : RELATIVITY.RELATIVE)}
             />
           </div>
         </Setting>
         <Setting label="Lookback Period">
           <div className="bp3-select">
-            <select
-              value={hoursAgo}
-              onChange={e => setPopularityChangesHoursAgo(parseInt(e.target.value, 10))}
-            >
+            <select value={hoursAgo} onChange={e => setPopularityChangesHoursAgo(parseInt(e.target.value, 10))}>
               {mapLabelsToOptions(lookbackOptionLabels)}
             </select>
           </div>
@@ -194,10 +184,7 @@ const PopularityChangesConfig = connect(undefined, {
         </Setting>
         <Setting label="Change Type">
           <div className="bp3-select">
-            <select
-              value={changeType}
-              onChange={e => setPopularityChangesChangeType(e.target.value)}
-            >
+            <select value={changeType} onChange={e => setPopularityChangesChangeType(e.target.value)}>
               {mapLabelsToOptions(changeTypeOptionLabels)}
             </select>
           </div>
@@ -228,8 +215,7 @@ const fetchAllData = ({ requestTotalSymbols, totalSymbols, selectedSymbol, ...pr
   }
 };
 
-const popularityChangesSettingsDiffer = (oldProps, newProps) =>
-  !R.equals(oldProps.config, newProps.config);
+const popularityChangesSettingsDiffer = (oldProps, newProps) => !R.equals(oldProps.config, newProps.config);
 
 const getDefaultColumnProps = mobile => ({
   width: 150,
@@ -284,9 +270,7 @@ class PopularityChanges extends React.Component {
               color: cellData > 0 ? '#43b249' : '#b24343',
             }}
           >
-            {isRelative
-              ? numeral(cellData / 100).format('+0.00%')
-              : numeral(cellData).format('+0,0')}
+            {isRelative ? numeral(cellData / 100).format('+0.00%') : numeral(cellData).format('+0,0')}
           </span>
         )}
         flexGrow={1.2}
@@ -346,16 +330,29 @@ class PopularityChanges extends React.Component {
   };
 
   render = () => (
-    <div style={styles.root}>
-      <div>
-        <PopularityChangesConfig config={this.props.config} mobile={this.props.mobile} />
-        {this.renderSymbolTable()}
+    <>
+      <div style={{ marginTop: 18, marginBottom: 34 }}>
+        <p style={{ fontSize: this.props.mobile ? 14 : 18 }}>
+          This page shows the stocks that have the largest changes in popularity according to the critera picked below.
+          All displayed numbers are in terms of Robinhood accounts holding shares of each asset.{' '}
+        </p>
+        <p>
+          Robinhood doesn&apos;t support shorting, so these represent long positions. However, fractional shares do
+          count.
+        </p>
       </div>
 
-      <div style={this.props.mobile ? styles.mobileChartWrapper : styles.chartWrapper}>
-        <div style={{ width: '100%', height: '100%' }}>{this.renderPopularityChart()}</div>
+      <div style={styles.root}>
+        <div>
+          <PopularityChangesConfig config={this.props.config} mobile={this.props.mobile} />
+          {this.renderSymbolTable()}
+        </div>
+
+        <div style={this.props.mobile ? styles.mobileChartWrapper : styles.chartWrapper}>
+          <div style={{ width: '100%', height: '100%' }}>{this.renderPopularityChart()}</div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -375,10 +372,7 @@ const mapStateToProps = (state, { pageSize = 50 }) => {
     config,
     selectedSymbol: config.symbol,
     data: data ? data.map((datum, i) => ({ ...datum, i: i + 1 })) : null,
-    ...R.pick(
-      ['largestPopularityChanges', 'popularityHistory', 'quoteHistory', 'totalSymbols'],
-      state.api
-    ),
+    ...R.pick(['largestPopularityChanges', 'popularityHistory', 'quoteHistory', 'totalSymbols'], state.api),
   };
 };
 

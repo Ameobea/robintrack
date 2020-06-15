@@ -212,6 +212,16 @@ class Leaderboard extends Component {
             minBatchSize={50}
             {...symbolTableProps}
           />
+
+          <div style={{ textAlign: 'center', marginTop: 10 }}>
+            <a
+              rel="noopener noreferrer"
+              target="_blank"
+              href={`/api/${show === 'bottom' ? 'least_popular' : 'most_popular'}.csv?limit=100000`}
+            >
+              Download Full Leaderboard as CSV
+            </a>
+          </div>
         </div>
 
         <div style={this.props.mobile ? styles.mobileChartWrapper : styles.chartWrapper}>

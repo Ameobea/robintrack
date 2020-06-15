@@ -11,6 +11,7 @@ import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/legend';
 import 'echarts/lib/component/dataZoom';
 import 'echarts/lib/component/toolbox';
+import 'echarts/lib/component/graphic';
 import { IconSvgPaths20 } from '@blueprintjs/icons/lib/esm/generated/iconSvgPaths';
 import * as R from 'ramda';
 
@@ -237,6 +238,17 @@ const getChartOptions = ({ symbol, quoteHistory = [], popularityHistory = [], zo
         minInterval: 1,
       },
     ],
+    graphic: mobile
+      ? undefined
+      : {
+          type: 'text',
+          top: 6,
+          right: 6,
+          style: {
+            text: 'robintrack.net',
+            fill: '#eee',
+          },
+        },
     series: [
       {
         ...seriesDefaults,

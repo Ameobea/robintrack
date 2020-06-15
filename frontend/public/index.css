@@ -10,7 +10,7 @@ body {
 
 #root {
   font-display: optional;
-  font-family: "PT Sans", sans-serif;
+  font-family: 'PT Sans', sans-serif;
   padding: 0px 20px 15px 10px;
 }
 
@@ -31,4 +31,9 @@ a:visited {
 
 .bp3-button-group.bp3-vertical.bp3-fixed {
   margin-top: 6px !important;
+}
+
+.bp3-button-group.bp3-vertical.bp3-fixed button span {
+  margin-top: -2px !important;
+  margin-left: -8px !important;
 }

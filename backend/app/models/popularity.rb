@@ -29,7 +29,10 @@ class Popularity
         foreignField: "instrument_id",
         as: "indexes",
       } },
-      { "$addFields" => { symbol: { "$arrayElemAt" => ["$indexes.symbol", 0] } } },
+      { "$addFields" => {
+        symbol: { "$arrayElemAt" => ["$indexes.symbol", 0] },
+        name: { "$arrayElemAt" => ["$indexes.simple_name", 0] }
+      } },
       { "$sort" => { latest_popularity: sort_direction, symbol: SORT_ASCENDING } },
       { "$skip" => start_index },
       { "$limit" => limit },
@@ -148,7 +151,10 @@ class Popularity
         foreignField: "instrument_id",
         as: "indexes",
       } },
-      { "$addFields" => { symbol: { "$arrayElemAt" => ["$indexes.symbol", 0] } } },
+      { "$addFields" => {
+        symbol: { "$arrayElemAt" => ["$indexes.symbol", 0] },
+        name: { "$arrayElemAt" => ["$indexes.simple_name", 0] },
+      } },
       { "$addFields" => { popularity_difference: difference_query } },
       { "$addFields" => { diff_is_null: { "$eq" => [{ "$type" => "$#{sort_field}" }, "null"] } } },
       take_absoute_value && { "$addFields" => { abs_popularity_difference: { "$abs" => "$popularity_difference" } } },

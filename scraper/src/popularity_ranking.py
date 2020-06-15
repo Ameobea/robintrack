@@ -20,7 +20,10 @@ def get_popularity_ranking_query():
                 "as": "indexes",
             }
         },
-        {"$addFields": {"symbol": {"$arrayElemAt": ["$indexes.symbol", 0]}}},
+        {"$addFields": {
+            "symbol": {"$arrayElemAt": ["$indexes.symbol", 0]},
+            "name": {"$arrayElemAt": ["$indexes.simple_name", 0]},
+        }},
         {"$sort": {"latest_popularity": -1, "symbol": 1}},
     ]
 
@@ -44,13 +47,14 @@ def set_popularity_rankings(redis_client, rankings: Cursor):
     print("Finished fetching population data.")
     for entry in rankings:
         symbol = entry.get("symbol")
+        name = entry.get("short_name")
         if symbol is None:
             continue
         popularity = entry.get("latest_popularity", 0)
 
         ranking += 1
         rankings_map[symbol] = ranking
-        rankings_list.append(json.dumps({"symbol": symbol, "popularity": popularity}))
+        rankings_list.append(json.dumps({"symbol": symbol, "popularity": popularity, "name": name}))
 
     print("Setting popularity rankings hash...")
     # Populate the popularity mapping hash used to map symbol to ranking
