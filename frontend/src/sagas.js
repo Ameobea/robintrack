@@ -57,7 +57,7 @@ function* apiCall(apiFunction, args, retries = 0) {
       if (now - lastAlertedAt > 1000) {
         lastAlertedAt = now;
         alert(
-          'Too many requests from this IP; please wait a minute before continuing to use the site and limit your access rate to one page per 2 seconds'
+          'Too many requests from this IP; please limit your access rate to one page per 2 seconds.  Wait a minute and refresh the page before continuing to use the site.'
         );
       }
     }
@@ -68,7 +68,6 @@ function* apiCall(apiFunction, args, retries = 0) {
       yield apiCall(apiFunction, args, retries + 1);
     } else {
       console.error('API request failed and max retries reached!');
-      // TODO: show alert to user
     }
   }
 }

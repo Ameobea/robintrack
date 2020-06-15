@@ -25,7 +25,6 @@ class RateLimiter
 
   def self.redis_key(ip, path)
     path = path.starts_with?("/stocks/") ? path.split("/")[3] : path
-    p path
     "#{BASE_REDIS_KEY}-#{ip}-#{path}-#{TIME_PERIOD_IN_SECONDS}-#{Time.current.to_i / TIME_PERIOD_IN_SECONDS}"
   end
 end
