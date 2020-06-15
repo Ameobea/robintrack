@@ -10,6 +10,7 @@ docker kill robintrack-scraper-popularity
 docker rm robintrack-scraper-popularity
 docker run -d --net host --name robintrack-scraper-popularity \
   -e "MONGO_HOST=${MONGO_HOST:-localhost}" \
+  -e "REDIS_HOSt=${REDIS_HOST:-localhost}" \
   robintrack-scraper \
   ./run_worker.sh popularity
 docker kill robintrack-scraper-quotes
@@ -19,5 +20,6 @@ docker run -d --net host --name robintrack-scraper-quotes \
   -e "ROBINHOOD_USERNAME=$ROBINHOOD_USERNAME" \
   -e "MFA_SECRET=$MFA_SECRET" \
   -e "MONGO_HOST=${MONGO_HOST:-localhost}" \
+  -e "REDIS_HOST=${REDIS_HOST:-localhost}" \
   robintrack-scraper \
   ./run_worker.sh quote
