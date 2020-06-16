@@ -17,7 +17,7 @@ def main(output_directory: str):
     symbol = fname.split(".csv")[0]
     if symbol.startswith("_"):
       symbol = symbol[1:]
-    with open(fname) as f:
+    with open(os.path.join(output_directory, fname)) as f:
       next(f) # skip header row
 
       last_date = None
