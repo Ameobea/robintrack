@@ -117,7 +117,7 @@ const lookbackOptionLabels = {
   24: '24 Hours',
   [24 * 3]: '3 Days',
   [24 * 7]: '1 Week',
-  [30 * 7]: '1 Month',
+  [30 * 24]: '30 Days',
 };
 
 const changeTypeOptionLabels = {
