@@ -88,6 +88,8 @@ class StocksController < ApplicationController
       format_popularity_history entries
     end
 
+    res = limit_datapoints_per_day(res) if params[:daily_datapoints]
+
     render json: res
   end
 
@@ -139,6 +141,9 @@ class StocksController < ApplicationController
       raise NotFound unless entries
       format_quote_history entries
     end
+
+    res = limit_datapoints_per_day(res) if params[:daily_datapoints]
+
     render json: res
   end
 
@@ -181,6 +186,16 @@ class StocksController < ApplicationController
   end
 
   private
+
+  def limit_datapoints_per_day(datapoints)
+    uniq_days = {}
+    datapoints.select do |datapoint|
+      day = Date.parse(datapoint["timestamp"])
+      is_uniq = uniq_days[day]
+      uniq_days[day] = true
+      is_uniq
+    end
+  end
 
   def hours_ago_param
     if params[:hours_ago]
