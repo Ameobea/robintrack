@@ -191,6 +191,7 @@ class StocksController < ApplicationController
     uniq_days = {}
     datapoints.select do |datapoint|
       day = Date.parse(datapoint["timestamp"])
+      return true if day > 1.year.ago # datapoints in the last year don't need to be truncated
       is_uniq = uniq_days[day]
       uniq_days[day] = true
       is_uniq
