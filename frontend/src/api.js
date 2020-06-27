@@ -37,7 +37,7 @@ export const fetchBottomSymbols = apiBaseCaller(
 );
 
 export const fetchPopularityHistory = apiBaseCaller(
-  symbol => `stocks/${symbol}/popularity_history`,
+  symbol => `stocks/${symbol}/popularity_history?daily_datapoints=1`,
   () =>
     R.times(R.identity, 200).map(i => {
       const timestamp = new Date();
@@ -48,7 +48,7 @@ export const fetchPopularityHistory = apiBaseCaller(
 );
 
 export const fetchQuoteHistory = apiBaseCaller(
-  symbol => `stocks/${symbol}/quote_history`,
+  symbol => `stocks/${symbol}/quote_history?daily_datapoints=1`,
   () =>
     R.times(R.identity, 200).map(i => {
       const timestamp = new Date();

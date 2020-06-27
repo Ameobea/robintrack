@@ -82,13 +82,14 @@ class StocksController < ApplicationController
 
     key = "#{id}_#{parsed_start_time.to_s}_#{parsed_end_time.to_s}"
 
-    res = with_cache(__method__.to_s, key) do
+    res = with_cache(__method__.to_s, "#{key}-#{!!params[:daily_datapoints]}") do
       entries = Popularity.get_history_for_symbol id, parsed_start_time, parsed_end_time
       raise NotFound unless entries
+      if params[:daily_datapoints]
+        entries = limit_datapoints_per_day(entries)
+      end
       format_popularity_history entries
     end
-
-    res = limit_datapoints_per_day(res) if params[:daily_datapoints]
 
     render json: res
   end
@@ -136,13 +137,12 @@ class StocksController < ApplicationController
 
   def quote_history
     id = params[:id]
-    res = with_cache(__method__.to_s, id) do
+    res = with_cache(__method__.to_s, "#{id}-#{!!params[:daily_datapoints]}") do
       entries = Quote.search_by_symbol id
       raise NotFound unless entries
+      entries = limit_datapoints_per_day(entries) if params[:daily_datapoints]
       format_quote_history entries
     end
-
-    res = limit_datapoints_per_day(res) if params[:daily_datapoints]
 
     render json: res
   end
@@ -190,9 +190,10 @@ class StocksController < ApplicationController
   def limit_datapoints_per_day(datapoints)
     uniq_days = {}
     datapoints.select do |datapoint|
-      day = Date.parse(datapoint["timestamp"])
-      return true if day > 1.year.ago # datapoints in the last year don't need to be truncated
-      is_uniq = uniq_days[day]
+      date = datapoint["timestamp"] || datapoint["updated_at"]
+      next true if date > 1.year.ago # datapoints in the last year don't need to be truncated
+      day = date.strftime('%Y-%m-%d')
+      is_uniq = !uniq_days[day]
       uniq_days[day] = true
       is_uniq
     end
