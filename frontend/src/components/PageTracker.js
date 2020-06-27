@@ -26,7 +26,12 @@ const checkSymbolPage = path => {
 };
 
 const sendGa = curPath => {
-  const tracker = window.ga.getAll()[0];
+  let tracker = typeof window?.ga?.getAll === 'function' ? window.ga.getAll() : null;
+  if (Array.isArray(tracker)) {
+    tracker = tracker[0];
+  } else {
+    tracker = null;
+  }
   if (!tracker) {
     return;
   }
@@ -56,7 +61,7 @@ class PageTracker extends Component {
     }
 
     if (prevProps.path !== this.props.path) {
-      window.ga && sendGa(curPath);
+      sendGa(curPath);
     }
   };
 
