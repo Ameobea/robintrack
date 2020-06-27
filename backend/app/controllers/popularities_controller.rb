@@ -52,6 +52,12 @@ class PopularitiesController < ApplicationController
     if hours_ago <= 0
       raise BadRequest, "please provide a positive integer for hours_ago"
     end
+
+    # Special case for 1 hour lookback.  We need at least 2 updates to compare and there
+    # will never be more than one update per hour.
+    if hours_ago == 1
+      hours_ago = 2
+    end
     hours_ago
   end
 
