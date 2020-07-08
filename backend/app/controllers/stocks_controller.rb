@@ -189,9 +189,10 @@ class StocksController < ApplicationController
 
   def limit_datapoints_per_day(datapoints)
     uniq_days = {}
+    date_cutoff = 1.year.ago
     datapoints.select do |datapoint|
       date = datapoint["timestamp"] || datapoint["updated_at"]
-      next true if date > 1.year.ago # datapoints in the last year don't need to be truncated
+      next true if date > date_cutoff # datapoints in the last year don't need to be truncated
       day = date.strftime('%Y-%m-%d')
       is_uniq = !uniq_days[day]
       uniq_days[day] = true
