@@ -74,12 +74,12 @@ class StocksController < ApplicationController
 
     key = "#{id}_#{parsed_start_time.to_s}_#{parsed_end_time.to_s}"
 
-    res = with_cache(__method__.to_s, "#{key}-#{!!params[:daily_datapoints]}") do
+    res = with_cache(__method__.to_s, key) do
       entries = Popularity.get_history_for_symbol id, parsed_start_time, parsed_end_time
       raise NotFound unless entries
-      if params[:daily_datapoints]
-        entries = limit_datapoints_per_day(entries)
-      end
+      # if params[:daily_datapoints]
+      entries = limit_datapoints_per_day(entries)
+      # end
       format_popularity_history entries
     end
 
