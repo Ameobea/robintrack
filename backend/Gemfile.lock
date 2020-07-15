@@ -139,6 +139,8 @@ GEM
     rb-inotify (0.10.1)
       ffi (~> 1.0)
     redis (4.1.4)
+    redlock (1.2.0)
+      redis (>= 3.0.0, < 5.0)
     rspec-core (3.9.2)
       rspec-support (~> 3.9.3)
     rspec-expectations (3.9.2)
@@ -194,6 +196,7 @@ DEPENDENCIES
   puma (~> 4.3.5)
   rails (~> 6.0.3)
   redis (~> 4.1.4)
+  redlock
   rspec-rails (~> 3.7)
   spring
   spring-watcher-listen (~> 2.0.1)

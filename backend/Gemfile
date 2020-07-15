@@ -14,6 +14,7 @@ gem 'bootsnap', '>= 1.4.6', require: false
 
 gem 'mongo', '~> 2.12.1'
 gem 'redis', '~> 4.1.4'
+gem 'redlock'
 
 group :development do
   gem 'web-console', '>= 4.0.2'

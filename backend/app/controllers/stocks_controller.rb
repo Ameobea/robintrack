@@ -62,14 +62,6 @@ class StocksController < ApplicationController
     render json: res
   end
 
-  def quotes
-    symbols = params[:symbols].to_s.split(",")
-    raise BadRequest, "no_symbols_supplied" if symbols.empty?
-
-    entries = Quote.search_symbols(symbols)
-    render json: format_quotes(entries)
-  end
-
   def popularity_history
     id = params[:id]
 

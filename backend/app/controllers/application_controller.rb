@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   class NotFound < StandardError; end
   class BadRequest < StandardError; end
+  class LockError < StandardError; end
 
   before_action :rate_limit_by_ip
 
@@ -21,5 +22,9 @@ class ApplicationController < ActionController::Base
 
   rescue_from BadRequest do |message|
     render json: { error: message }, status: :bad_request
+  end
+
+  rescue_from LockError do |message|
+    render json: { error: "Error acquiring lock of cache entry in timeout window" }, status: :service_unavailable
   end
 end
