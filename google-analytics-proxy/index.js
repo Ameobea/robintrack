@@ -15,7 +15,7 @@ function getIpFromReq(req) {
       req.headers['x-forwarded-for'] ||
       req.connection.remoteAddress ||
       '');
-  return (bareIP.match(/:([^:]+)$/) || [])[1] || '127.0.0.1';
+  return (bareIP.match(/:([^:]+)$/) || [])[1].split(',')[0] || '127.0.0.1';
 }
 
 // proxying requests from /analytics to www.google-analytics.com.
@@ -23,13 +23,15 @@ app.use(
   '/',
   proxy('www.google-analytics.com', {
     https: true,
-    proxyReqPathResolver: function(req) {
+    proxyReqPathResolver: function (req) {
+      const ip = getIpFromReq(req);
+      console.log(ip);
       const proxiedURL =
         '/j' +
         req.url.replace('_collect', 'collect') +
         (req.url.indexOf('?') === -1 ? '?' : '&') +
         'uip=' +
-        encodeURIComponent(getIpFromReq(req));
+        encodeURIComponent(ip);
       return proxiedURL;
     },
   })
