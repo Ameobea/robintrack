@@ -140,11 +140,15 @@ class StocksController < ApplicationController
   end
 
   def total_symbols
-    entry = Popularity.total_symbols(hours_ago_param)
+    hours_ago = hours_ago_param
+    res = with_cache(__method__.to_s, "#{hours_ago}") do
+      entry = Popularity.total_symbols(hours_ago)
+      total_symbols = entry ? entry["total_symbols"] : 0
 
-    total_symbols = entry ? entry["total_symbols"] : 0
+      {total_symbols: total_symbols}
+    end
 
-    render json: {total_symbols: total_symbols}
+    render json: res
   end
 
   def popularity_bins
