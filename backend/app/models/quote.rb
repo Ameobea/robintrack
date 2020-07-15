@@ -1,45 +1,39 @@
 class Quote
   def self.find_by_symbol(symbol)
-    MongoClient[:index].aggregate([
-      { "$match": { symbol: symbol } },
-      { "$lookup": {
-        from: "quotes",
-        localField: "instrument_id",
-        foreignField: "instrument_id",
-        as: "quote",
-      } },
-      { "$unwind": { path: "$quote" } },
-      { "$replaceRoot": { newRoot: "$quote" } },
-      { "$sort": { updated_at: -1 } },
-      { "$limit": 1 },
-    ]).first
+    instrument = MongoClient[:index].find({ symbol: symbol }).first
+    if !instrument
+      return nil
+    end
+    instrument_id = instrument[:instrument_id]
+
+    p MongoClient[:quotes].find({ instrument_id: instrument_id }).first
+
+    MongoClient[:quotes]
+      .find({ instrument_id: instrument_id })
+      .sort({ updated_at: -1 })
+      .limit(1)
+      .first
   end
 
   def self.search_by_symbol(symbol)
-    MongoClient[:index].aggregate([
-      { "$match": { symbol: symbol } },
-      { "$lookup": {
-        from: "quotes",
-        localField: "instrument_id",
-        foreignField: "instrument_id",
-        as: "quote",
-      } },
-      { "$unwind": { path: "$quote" } },
-      { "$replaceRoot": { newRoot: "$quote" } },
-      { "$sort": { updated_at: 1 } },
-    ])
+    instrument = MongoClient[:index].find({ symbol: symbol }).first
+    if !instrument
+      return nil
+    end
+    instrument_id = instrument[:instrument_id]
+
+    MongoClient[:quotes].find({ instrument_id: instrument_id }).sort({ updated_at: 1 })
   end
 
   def self.search_symbols(symbols)
-    MongoClient[:index].aggregate([
-      { "$match": { symbol: { "$in": symbols } } },
-      { "$lookup": {
-        from: "quotes",
-        localField: "instrument_id",
-        foreignField: "instrument_id",
-        as: "quote",
-      } },
-      { "$unwind": { path: "$quote" } },
+    instrument = MongoClient[:index].find({ symbol: symbol }).first
+    if !instrument
+      return nil
+    end
+    instrument_id = instrument[:instrument_id]
+
+    MongoClient[:quotes].aggregate([
+      { "$match": { instrument_id: instrument_id } },
       { "$sort": { "quote.updated_at": -1 } },
       { "$group": {
         _id: "$symbol",
