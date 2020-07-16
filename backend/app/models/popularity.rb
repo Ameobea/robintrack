@@ -88,7 +88,7 @@ class Popularity
       query[:timestamp]["$lte"] = end_date
     end
 
-    MongoClient[:popularity].find(query).toArray
+    MongoClient[:popularity].find(query).to_a
   end
 
   def self.largest_popularity_changes(options)
