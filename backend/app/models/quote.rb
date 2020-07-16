@@ -6,8 +6,6 @@ class Quote
     end
     instrument_id = instrument[:instrument_id]
 
-    p MongoClient[:quotes].find({ instrument_id: instrument_id }).first
-
     MongoClient[:quotes]
       .find({ instrument_id: instrument_id })
       .sort({ updated_at: -1 })

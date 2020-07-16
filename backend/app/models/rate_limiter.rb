@@ -16,7 +16,7 @@ class RateLimiter
       return
     end
 
-    Redis.current.multi do |multi|
+    $redis.multi do |multi|
       key = redis_key(ip, path)
       multi.incr(key)
       multi.expire(key, TIME_PERIOD_IN_SECONDS)
@@ -24,11 +24,11 @@ class RateLimiter
   end
 
   def self.recent_requests(ip, path)
-    Redis.current.get(redis_key(ip, path))
+    $redis.get(redis_key(ip, path))
   end
 
   def self.block_requests(ip, seconds = TIME_PERIOD_IN_SECONDS)
-    Redis.current.set(redis_key(ip, path), MAX_REQUESTS_PER_PERIOD, ex: seconds)
+    $redis.set(redis_key(ip, path), MAX_REQUESTS_PER_PERIOD, ex: seconds)
   end
 
   def self.redis_key(ip, path)
