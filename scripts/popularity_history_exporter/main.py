@@ -28,6 +28,11 @@ def main(output_directory: str):
 
     db = get_db()
 
+    index_items = db["index"].find({}, projection={})
+    symbols_by_instrument_id = {}
+    for item in index_items:
+        symbols_by_instrument_id[item["_id"]] = item["symbol"]
+
     aggregation_res = db["popularity"].aggregate(
         [
             {"$sort": {"timestamp": 1}},
@@ -39,23 +44,14 @@ def main(output_directory: str):
                     },
                 }
             },
-            {
-                "$lookup": {
-                    "from": "index",
-                    "localField": "_id",
-                    "foreignField": "instrument_id",
-                    "as": "indexes",
-                }
-            },
-            {"$addFields": {"symbol": {"$arrayElemAt": ["$indexes.symbol", 0]}}},
-            {"$project": {"popularity_history": True, "symbol": True, "_id": True}},
         ],
         allowDiskUse=True,
     )
 
     written_count = 0
     for datum in aggregation_res:
-        symbol = datum.get("symbol")
+        instrument_id = datum.get("instrument_id")
+        symbol = symbols_by_instrument_id.get(instrument_id)
         if symbol is None:
             continue
 

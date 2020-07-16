@@ -12,30 +12,26 @@ def get_popularity_ranking_query():
     return [
         {"$match": {"timestamp": {"$gte": two_hours_ago}}},
         {"$group": {"_id": "$instrument_id", "latest_popularity": {"$first": "$popularity"}}},
-        {
-            "$lookup": {
-                "from": "index",
-                "localField": "_id",
-                "foreignField": "instrument_id",
-                "as": "indexes",
-            }
-        },
-        {"$addFields": {
-            "symbol": {"$arrayElemAt": ["$indexes.symbol", 0]},
-            "name": {"$arrayElemAt": ["$indexes.simple_name", 0]},
-        }},
         {"$sort": {"latest_popularity": -1, "symbol": 1}},
     ]
 
 
-def compute_popularity_rankings(get_db) -> Cursor:
+def compute_popularity_rankings(get_db) -> list:
     """ Returns a list of all symbols ordered by current popularity, ordered most to least
     popular. """
 
     db = get_db()
 
     print("Performing popularity aggregation query")
-    return db["popularity"].aggregate(get_popularity_ranking_query())
+    res = list(db["popularity"].aggregate(get_popularity_ranking_query()))
+
+    unique_instrument_ids = [datum["_id"] for datum in res]
+    index_res = db["index"].find({ "instrument_id": { "$in": unique_instrument_ids } })
+    instrument_data = {}
+    for item in index_res:
+        instrument_data[item["instrument_id"]] = item
+
+    return [{"latest_popularity": datum["latest_popularity"], "name": instrument_data[datum["_id"]]["simple_name"], "symbol": instrument_data[datum["_id"]]["symbol"]} for datum in res]
 
 
 def set_popularity_rankings(redis_client, rankings: Cursor):

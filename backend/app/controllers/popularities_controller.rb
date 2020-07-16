@@ -6,7 +6,7 @@ class PopularitiesController < ApplicationController
   def largest_popularity_changes
     options = options_from_params
     res = with_cache("largest_popularity_changes", hash_hash(options)) do
-      format_popularity_entries Popularity.largest_popularity_changes(options)
+      Popularity.largest_popularity_changes(options)
     end
     render json: res
   end
@@ -14,7 +14,7 @@ class PopularitiesController < ApplicationController
   def largest_popularity_decreases
     options = options_from_params
     res = with_cache("largest_popularity_decreases", hash_hash(options)) do
-      format_popularity_entries Popularity.largest_popularity_decreases(options)
+      Popularity.largest_popularity_decreases(options)
     end
     render json: res
   end
@@ -22,7 +22,7 @@ class PopularitiesController < ApplicationController
   def largest_popularity_increases
     options = options_from_params
     res = with_cache("largest_popularity_increases", hash_hash(options)) do
-      format_popularity_entries Popularity.largest_popularity_increases(options)
+      Popularity.largest_popularity_increases(options)
     end
     render json: res
   end
@@ -77,17 +77,5 @@ class PopularitiesController < ApplicationController
       raise BadRequest, "please provide a positive integer for min_popularity"
     end
     min_popularity
-  end
-
-  def format_popularity_entries(entries)
-    entries.map do |entry|
-      {
-        start_popularity: entry["start_popularity"],
-        end_popularity: entry["end_popularity"],
-        popularity_difference: entry["popularity_difference"],
-        symbol: entry["symbol"],
-        name: entry["name"],
-      }
-    end
   end
 end

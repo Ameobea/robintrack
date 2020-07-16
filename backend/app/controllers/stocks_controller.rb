@@ -228,7 +228,7 @@ class StocksController < ApplicationController
 
   def format_popularity_entries(entries)
     entries.map do |entry|
-      {popularity: entry["latest_popularity"], symbol: entry["symbol"]}
+      { popularity: entry["latest_popularity"], symbol: entry["symbol"], name: entry["name"] }
     end
   end
 

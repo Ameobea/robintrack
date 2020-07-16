@@ -19,81 +19,76 @@ class Popularity
   end
 
   def self.sort_by_popularity(sort_direction, limit, start_index)
-    MongoClient[:popularity].aggregate([
+    res = MongoClient[:popularity].aggregate([
       { "$match" => { timestamp: { "$gte": 2.hour.ago } } },
       { "$sort" => { timestamp: -1 } },
       { "$group" => { _id: "$instrument_id", latest_popularity: { "$first" => "$popularity" } } },
-      { "$lookup" => {
-        from: "index",
-        localField: "_id",
-        foreignField: "instrument_id",
-        as: "indexes",
-      } },
-      { "$addFields" => {
-        symbol: { "$arrayElemAt" => ["$indexes.symbol", 0] },
-        name: { "$arrayElemAt" => ["$indexes.simple_name", 0] }
-      } },
       { "$sort" => { latest_popularity: sort_direction, symbol: SORT_ASCENDING } },
       { "$skip" => start_index },
       { "$limit" => limit },
-    ])
+    ]).to_a
+
+    all_instrument_ids = res.map { |elem| elem[:instrument_id] }
+    data_by_instrument_id = MongoClient[:index]
+      .find(
+        { instrument_id: { "$in": all_instrument_ids } },
+        projection: { _id: 0, instrument_id: 1, simple_name: 1, symbol: 1 }
+      )
+      .reduce({}) do |acc, x|
+        acc[x[:instrument_id]] = x
+        acc
+      end
+
+    res.map do |elem|
+      data_for_instrument = data_by_instrument_id[elem[:instrument_id]]
+      { symbol: data_for_instrument[:symbol], name: data_for_instrument[:simple_name], popularity: latest_popularity }
+    end
   end
 
   def self.get_ranking(symbol)
+    instrument = MongoClient[:index].find({ symbol: symbol }).first
+    if !instrument
+      return nil
+    end
+    instrument_id = instrument[:instrument_id]
+
     MongoClient[:popularity].aggregate([
       { "$match" => { timestamp: { "$gte": 2.hour.ago } } },
       { "$sort" => { timestamp: -1 } },
-      { "$group" => { _id: "$instrument_id", latest_popularity: { "$first" => "$popularity" } } },
-      { "$lookup" => {
-        from: "index",
-        localField: "_id",
-        foreignField: "instrument_id",
-        as: "indexes",
+      { "$group" => {
+        _id: "$instrument_id",
+        instrument_id: { "$first" => "$instrument_id" },
+        latest_popularity: { "$first" => "$popularity" }
       } },
-      { "$addFields" => { symbol: { "$arrayElemAt" => ["$indexes.symbol", 0] } } },
-      { "$sort" => { latest_popularity: SORT_DESCENDING, symbol: SORT_ASCENDING } },
-      { "$group" => { _id: 1, symbol: { "$push" => "$symbol" } } },
-      { "$unwind" => { path: "$symbol", includeArrayIndex: "ranking" } },
-      { "$match" => { symbol: symbol } },
-      { "$addFields" => { ranking: { "$add" => ["$ranking", 1] } } },
+      { "$sort" => { latest_popularity: SORT_DESCENDING } },
+      { "$group" => { _id: 1, instrument_id: { "$push" => "$instrument_id" } } },
+      { "$unwind" => { path: "$instrument_id", includeArrayIndex: "ranking" } },
+      { "$match" => { instrument_id: instrument_id } },
+      { "$addFields" => { ranking: { "$add" => ["$ranking", 1] }, symbol: symbol } },
       { "$limit" => 1 },
     ]).first
   end
 
   def self.get_history_for_symbol(symbol, start_date, end_date)
-    lookup = nil
-    if start_date || end_date
-      lookup = {
-        from: "popularity",
-        as: "popularity_history",
-        let: { "instrument_id": "$instrument_id" },
-        pipeline: [
-          { "$match": {
-            "$expr": { "$eq": [ "$instrument_id", "$$instrument_id"] },
-          }},
-          start_date && { "$match": {
-            "timestamp": { "$gte": start_date }
-          }},
-          end_date && { "$match": {
-            "timestamp": { "$lte": end_date }
-          }},
-        ].compact,
-      }
-    else
-      lookup = {
-        from: "popularity",
-        localField: "instrument_id",
-        foreignField: "instrument_id",
-        as: "popularity_history",
-      }
+    instrument = MongoClient[:index].find({ symbol: symbol }).first
+    if !instrument
+      return nil
+    end
+    instrument_id = instrument[:instrument_id]
+
+    query = { instrument_id: instrument_id }
+    if start_date
+      query[:timestamp] = { "$gte": start_date }
+    end
+    if end_date
+      if !query[:timestamp]
+        query[:timestamp] = {}
+      end
+
+      query[:timestamp]["$lte"] = end_date
     end
 
-    entry = MongoClient[:index].aggregate([
-      { "$match" => { symbol: symbol } },
-      { "$lookup" => lookup },
-      { "$limit" => 1 },
-    ]).first
-    entry && entry["popularity_history"]
+    MongoClient[:popularity].find(query).toArray
   end
 
   def self.largest_popularity_changes(options)
@@ -118,25 +113,33 @@ class Popularity
     min_popularity     = options[:min_popularity]
     start_index        = options[:start_index]
 
-    if percentage
-      difference_query = { "$cond" => [
+    difference_query = if percentage
+      { "$cond" => [
         { "$eq" => ["$start_popularity", 0] },
         nil,
         { "$multiply" => [100, { "$divide" => [{ "$subtract" => ["$end_popularity", "$start_popularity"] }, "$start_popularity"] }] },
       ]}
     else
-      difference_query = { "$subtract" => ["$end_popularity", "$start_popularity"] }
+      { "$subtract" => ["$end_popularity", "$start_popularity"] }
     end
 
     if take_absoute_value
       sort_field = :abs_popularity_difference
-      sorter = { "$sort" => { diff_is_null: SORT_ASCENDING, abs_popularity_difference: sort_direction, symbol: SORT_ASCENDING } }
+      sorter = { "$sort" => { diff_is_null: SORT_ASCENDING, abs_popularity_difference: sort_direction } }
     else
       sort_field = :popularity_difference
-      sorter = { "$sort" => { diff_is_null: SORT_ASCENDING, popularity_difference: sort_direction, symbol: SORT_ASCENDING } }
+      sorter = { "$sort" => { diff_is_null: SORT_ASCENDING, popularity_difference: sort_direction } }
     end
 
-    MongoClient[:popularity].aggregate([
+    add_fields_query = {
+      diff_is_null: { "$eq" => [{ "$type" => "$#{sort_field}" }, "null"] },
+      popularity_difference: difference_query
+    }
+    if take_absoute_value
+      add_fields_query[:abs_popularity_difference] = { "$abs" => difference_query }
+    end
+
+    res = MongoClient[:popularity].aggregate([
       { "$match" => { timestamp: { "$gte" => hours_ago.hour.ago } } },
       { "$sort" => { timestamp: -1 } },
       { "$group" => {
@@ -145,23 +148,35 @@ class Popularity
         start_popularity: { "$last" => "$popularity" },
       } },
       min_popularity && { "$match" => { start_popularity: { "$gte" => min_popularity } } },
-      { "$lookup" => {
-        from: "index",
-        localField: "_id",
-        foreignField: "instrument_id",
-        as: "indexes",
-      } },
-      { "$addFields" => {
-        symbol: { "$arrayElemAt" => ["$indexes.symbol", 0] },
-        name: { "$arrayElemAt" => ["$indexes.simple_name", 0] },
-      } },
-      { "$addFields" => { popularity_difference: difference_query } },
-      { "$addFields" => { diff_is_null: { "$eq" => [{ "$type" => "$#{sort_field}" }, "null"] } } },
-      take_absoute_value && { "$addFields" => { abs_popularity_difference: { "$abs" => "$popularity_difference" } } },
+      { "$addFields" => add_fields_query },
       sorter,
       { "$skip" => start_index },
       { "$limit" => limit },
-    ].compact)
+    ].compact).to_a
+
+    all_instrument_ids = res.map { |elem| elem[:_id] }
+    data_by_instrument_id = MongoClient[:index]
+      .find(
+        { instrument_id: { "$in": all_instrument_ids } },
+        projection: { _id: 0, instrument_id: 1, simple_name: 1, symbol: 1 }
+      )
+      .reduce({}) do |acc, x|
+        acc[x[:instrument_id]] = x
+        acc
+      end
+
+    res.map do |entry|
+      instrument_id = entry[:_id]
+      data_for_instrument = data_by_instrument_id[instrument_id]
+
+      {
+        start_popularity: entry[:start_popularity],
+        end_popularity: entry[:end_popularity],
+        popularity_difference: entry[:popularity_difference],
+        symbol: data_for_instrument&.[](:symbol),
+        name: data_for_instrument&.[](:simple_name),
+      }
+    end
   end
 
   def self.bucket_popularity(bucket_count)
@@ -169,6 +184,6 @@ class Popularity
       { "$match": { timestamp: { "$gte": 2.hours.ago } } },
       { "$sort": { timestamp: -1 } },
       { "$group": { _id: "$instrument_id", latest_popularity: { "$first": "$popularity" } } },
-    ])
+    ]).to_a
   end
 end
