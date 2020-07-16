@@ -31,7 +31,10 @@ def main(output_directory: str):
     index_items = db["index"].find({}, projection={})
     symbols_by_instrument_id = {}
     for item in index_items:
-        symbols_by_instrument_id[item["_id"]] = item["symbol"]
+        symbol = item.get("symbol")
+        if symbol is None:
+            continue
+        symbols_by_instrument_id[item["_id"]] = symbol
 
     aggregation_res = db["popularity"].aggregate(
         [
