@@ -19,20 +19,9 @@ module ApplicationHelper
   # will be called.  Its return value will be inserted into the cache and returned from this
   # function for returning to the user.
   def with_cache(hash_name, key, json: true)
-    # Lock the cache entry that we're trying to write to in order to ensure that we're not
-    # computing the same expensive value that some other worker is already computing
-    lock_key = "#{hash_name}_#{key}"
-    $lock_manager.lock(lock_key, 240000) do |locked|
-      if locked
-        cached = get_cache hash_name, key
-        return cached if cached
+    cached = get_cache hash_name, key
+    return cached if cached
 
-        # Compute the new value while holding the lock, set it in the cache, and then drop the lock
-        return put_cache hash_name, key, yield, json
-      else
-        p "ERROR: Failed to acquire a lock for key #{lock_key} in the timeout period"
-        raise ApplicationController::LockError
-      end
-    end
+    return put_cache hash_name, key, yield, json
   end
 end
