@@ -151,36 +151,6 @@ class StocksController < ApplicationController
     render json: res
   end
 
-  def popularity_bins
-    bucket_count = bin_count_param
-    res = with_cache(__method__.to_s, bucket_count) do
-      entries = Popularity.bucket_popularity bucket_count
-
-      minmax_docs = entries.minmax do |a, b|
-        a[:latest_popularity] <=> b[:latest_popularity]
-      end
-      min_popularity, max_popularity = minmax_docs.map { |doc| doc[:latest_popularity] }
-
-      bucket_size = (max_popularity.to_f - min_popularity.to_f) / bucket_count.to_f
-      binned_entries = entries.group_by do |elem|
-        bucket_index = (elem[:latest_popularity].to_f / bucket_size).floor
-        if bucket_index == bucket_count
-          bucket_index -= 1
-        end
-
-        bucket_index
-      end
-
-      buckets = (0...bucket_count).map { |i| binned_entries.fetch(i, []).size }
-      {
-        min_popularity: min_popularity,
-        max_popularity: max_popularity,
-        buckets: buckets,
-      }
-    end
-    render json: res
-  end
-
   private
 
   def limit_datapoints_per_day(datapoints)

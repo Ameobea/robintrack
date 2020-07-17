@@ -31,7 +31,15 @@ def compute_popularity_rankings(get_db) -> list:
     for item in index_res:
         instrument_data[item["instrument_id"]] = item
 
-    return [{"latest_popularity": datum["latest_popularity"], "name": instrument_data[datum["_id"]]["simple_name"], "symbol": instrument_data[datum["_id"]]["symbol"]} for datum in res]
+    ret = []
+    for datum in res:
+        instrument_datum = instrument_data.get(datum["_id"])
+        if instrument_datum is None:
+            continue
+
+        ret.append({ "latest_popularity": datum["latest_popularity"], "name": instrument_datum["simple_name"], "symbol": instrument_datum["symbol"] })
+
+    return ret
 
 
 def set_popularity_rankings(redis_client, rankings: Cursor):
