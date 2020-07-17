@@ -5,4 +5,4 @@ if Rails.env == "test"
   Mongo::Logger.level = Logger::FATAL
 end
 
-::MongoClient = Mongo::Client.new(["#{host}:#{port}"], database: "robinhood")
+::MongoClient = Mongo::Client.new(["#{host}:#{port}"], database: "robinhood", max_pool_size: 20)
