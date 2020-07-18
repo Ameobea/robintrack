@@ -50,7 +50,6 @@ def main(output_directory: str):
     cur_symbol = None
     acc = []
     for datum in cursor:
-        print(datum)
         instrument_id = datum.get("instrument_id")
         symbol = symbols_by_instrument_id.get(instrument_id)
 
