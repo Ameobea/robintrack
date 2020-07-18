@@ -124,18 +124,18 @@ def post_tweet_from_changes(
 
 def run_top_popularity_changes(dry_run: bool):
     # Fetch the top popularity changes by percent from Robintrack
-    # top_percent_changes = requests.get(TOP_PERCENT_POPULARITY_CHANGES_URL).json()
-    # # Post to StockTwits
-    # post_twit_from_changes(top_percent_changes, create_percent_change_twit_content, dry_run)
-    # # Post to Twitter
-    # post_tweet_from_changes(top_percent_changes, create_percent_change_twit_content, dry_run)
+    top_percent_changes = requests.get(TOP_PERCENT_POPULARITY_CHANGES_URL).json()
+    # Post to StockTwits
+    post_twit_from_changes(top_percent_changes, create_percent_change_twit_content, dry_run)
+    # Post to Twitter
+    post_tweet_from_changes(top_percent_changes, create_percent_change_twit_content, dry_run)
 
-    # # Fetch the top popularity increases by absolute diff from Robintrack
-    # top_absolute_increases = requests.get(TOP_ABSOLUTE_POPULARITY_INCREASES_URL).json()
-    # # Post to StockTwits
-    # post_twit_from_changes(top_absolute_increases, create_absolute_change_twit_content, dry_run)
-    # # Post to Twitter
-    # post_tweet_from_changes(top_absolute_increases, create_absolute_change_twit_content, dry_run)
+    # Fetch the top popularity increases by absolute diff from Robintrack
+    top_absolute_increases = requests.get(TOP_ABSOLUTE_POPULARITY_INCREASES_URL).json()
+    # Post to StockTwits
+    post_twit_from_changes(top_absolute_increases, create_absolute_change_twit_content, dry_run)
+    # Post to Twitter
+    post_tweet_from_changes(top_absolute_increases, create_absolute_change_twit_content, dry_run)
 
     # Fetch the top popularity decreases by absolute diff from Robintrack
     top_absolute_decreases = requests.get(TOP_ABSOLUTE_POPULARITY_DECREASES_URL).json()

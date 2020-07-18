@@ -1,1 +1,2 @@
 click~=5.0
+pymongo~=3.6.1
