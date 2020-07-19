@@ -6,7 +6,7 @@ import { Column } from 'react-virtualized';
 import { Link } from 'react-router-dom';
 import * as R from 'ramda';
 import numeral from 'numeral';
-import { Card, Label, NumericInput } from '@blueprintjs/core';
+import { Card, Label } from '@blueprintjs/core';
 
 import SymbolTable, { SymbolColumn } from 'src/components/SymbolTable';
 import {
@@ -169,18 +169,14 @@ const PopularityChangesConfig = connect(undefined, {
           </div>
         </Setting>
         <Setting label="Minimum Popularity" flex={1.1}>
-          <NumericInput
-            size={8}
-            buttonPosition="left"
-            fill={false}
-            min={0}
-            width={50}
-            minorStepSize={10}
-            stepSize={25}
-            majorStepSize={50}
-            value={minPopularity}
-            onValueChange={setPopularityChangesMinPopularity}
-          />
+          <div className="bp3-select">
+            <select
+              value={minPopularity}
+              onChange={e => setPopularityChangesMinPopularity(parseInt(e.target.value, 10))}
+            >
+              {mapLabelsToOptions({ 1: '1', 10: '10', 50: '50', 100: '100', 500: '500', 1000: '1000', 10000: '10000' })}
+            </select>
+          </div>
         </Setting>
         <Setting label="Change Type">
           <div className="bp3-select">

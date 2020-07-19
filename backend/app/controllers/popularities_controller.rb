@@ -73,8 +73,9 @@ class PopularitiesController < ApplicationController
     return unless percentage_param
 
     min_popularity = params[:min_popularity].to_i
-    if min_popularity < 0
-      raise BadRequest, "please provide a positive integer for min_popularity"
+    p min_popularity
+    if ![1, 10, 50, 100, 500, 1000, 10000].include?(min_popularity)
+      raise BadRequest, "min_popularity must be one of 1, 10, 50, 100, 500, 1000, 10000"
     end
     min_popularity
   end
