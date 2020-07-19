@@ -1,4 +1,4 @@
-import { all, call, select, put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, select, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import queryString from 'query-string';
 import * as R from 'ramda';
@@ -46,12 +46,12 @@ let lastAlertedAt = 0;
  *
  * @param {string} endpoint string appended to the API base path to create the final URL.
  */
-function* apiCall(apiFunction, args, retries = 0) {
+async function apiCall(apiFunction, args, retries = 0) {
   try {
-    const res = yield call(apiFunction, ...args);
+    const res = await apiFunction(...args);
 
     if (res.status === 200 || res.status === 404) {
-      return yield res.json();
+      return res.json();
     } else if (res.status === 429) {
       const now = new Date().getTime();
       if (now - lastAlertedAt > 1000) {
@@ -67,8 +67,8 @@ function* apiCall(apiFunction, args, retries = 0) {
   } catch (err) {
     if (retries < retryCount) {
       console.warn(`API request failed; retrying #${retries + 1} after ${retryTimeoutMs}ms...`);
-      yield delay(retryTimeoutMs);
-      yield apiCall(apiFunction, args, retries + 1);
+      await delay(retryTimeoutMs);
+      return apiCall(apiFunction, args, retries + 1);
     } else {
       console.error('API request failed and max retries reached!');
     }
