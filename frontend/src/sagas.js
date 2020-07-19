@@ -20,8 +20,8 @@ import {
 } from 'src/selectors/api';
 import { getQueryParams } from 'src/selectors/router';
 
-const retryCount = 3;
-const retryTimeoutMs = 5000;
+const retryCount = 60 * 4;
+const retryTimeoutMs = 1000;
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
@@ -60,6 +60,9 @@ function* apiCall(apiFunction, args, retries = 0) {
           'Too many requests from this IP; please limit your access rate to one page per 2 seconds.  Wait a minute and refresh the page before continuing to use the site.'
         );
       }
+    } else if (res.status >= 500) {
+      console.warn(`Got code ${res.status} from the API`);
+      throw res.status;
     }
   } catch (err) {
     if (retries < retryCount) {

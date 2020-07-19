@@ -33,7 +33,7 @@
     "es6": true,
     "browser": true
   },
-  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:react-hooks/recommended"],
   "parser": "babel-eslint",
   "parserOptions": {
     "sourceType": "module",

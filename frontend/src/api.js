@@ -2,8 +2,6 @@
  * Defines an interface to the backend.
  */
 
-import * as R from 'ramda';
-
 const apiPrefix = process.env.REACT_APP_API_PREFIX || '';
 
 const apiBaseCaller = mapArgsToUrlSuffix => (...args) => fetch(`${apiPrefix}/${mapArgsToUrlSuffix(...args)}`);

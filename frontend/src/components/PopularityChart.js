@@ -312,6 +312,7 @@ const PopularityChart = ({ style, symbol, popularityHistory, quoteHistory, mobil
   const [{ zoomStart, zoomEnd }, setZoom] = useState({ zoomStart: 0, zoomEnd: 100 });
   const options = useMemo(
     () => getChartOptions({ symbol, popularityHistory, quoteHistory, zoomStart, zoomEnd, mobile }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [symbol, popularityHistory, quoteHistory, mobile]
   );
 
