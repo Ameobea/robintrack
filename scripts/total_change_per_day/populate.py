@@ -72,7 +72,7 @@ def main(day):
 
         last_val = doc["last_trade_price"]
     if diffs_by_instrument_id.get(cur_instrument_id) is not None:
-        diffs_by_instrument_id[cur_instrument_id]["start_price"] = start_val
+        diffs_by_instrument_id[cur_instrument_id]["start_price"] = cur_start_val
         diffs_by_instrument_id[cur_instrument_id]["end_price"] = last_val
 
     total_pop_diff = 0
