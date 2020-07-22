@@ -6,7 +6,7 @@
 [ -z "$2" ] && echo "USAGE: ./build_popularity_archive.sh /path/to/output-file.tar.gz /path/to/output/combined.csv" && exit 1
 
 mkdir /tmp/popularity_export
-docker run --rm -it --name robintrack-popularity-exporter \
+docker run --net host --rm -it --name robintrack-popularity-exporter \
   -e "MONGO_HOST=${MONGO_HOST:-localhost}" \
   -e "MONGO_PORT=${MONGO_PORT:-27017}" \
   -v /tmp/popularity_export:/output \
