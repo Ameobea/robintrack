@@ -6,10 +6,10 @@ class ApplicationController < ActionController::Base
   before_action :rate_limit_by_ip
 
   def rate_limit_by_ip
-    ip = request.headers["X-Forwarded-For"]
+    ip = request.headers["X-Forwarded-For"]&.split(', ')&.first || request.remote_ip
     path = request.path
 
-    if RateLimiter.should_block_request?(ip, path)
+    if ip != nil && RateLimiter.should_block_request?(ip, path)
       render plain: 'Too many requests; please keep scraping to under 1 request every 2 seconds', status: :too_many_requests
     else
       RateLimiter.incr_requests(ip, path)
