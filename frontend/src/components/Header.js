@@ -177,7 +177,7 @@ const MobileHeader = ({ showLogo }) => {
             display: 'flex',
             border: 'none',
           }}
-          src="/thcx/300_250/index.html"
+          src="/fivg/300_250.html"
           width={300}
           height={280}
         />
@@ -195,7 +195,7 @@ const DesktopHeader = ({ showLogo }) => (
         marginRight: 'auto',
         border: 'none',
       }}
-      src="/thcx/970_250/index.html"
+      src="/fivg/970_250.html"
       width={970}
       height={270}
     />

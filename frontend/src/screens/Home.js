@@ -41,32 +41,29 @@ const About = withMobileProp({ maxDeviceWidth: 600 })(({ mobile }) => (
   >
     <h2>What is it Robintrack?</h2>
     <p>
-      Robintrack keeps track of how many <a href="https://robinhood.com/">Robinhood</a> users hold a
-      particular stock over time. It generates charts showing the relationship between price and
-      popularity, and compiles some lists using the data.
+      Robintrack keeps track of how many <a href="https://robinhood.com/">Robinhood</a> users hold a particular stock
+      over time. It generates charts showing the relationship between price and popularity, and compiles some lists
+      using the data.
     </p>
 
     <h2 style={{ paddingTop: 10 }}>What can it do?</h2>
     <p>
-      One of the most useful things that you can do with the data that this site provides is to
-      figure out how people are reacting to moves in the market. Depending on if people are buying
-      the dip, getting onboard during a pump because they think it&#39;s going to go higher, or
-      taking profits, this data lets you observe each of those different situations and plan your
-      own trading accordingly.
+      One of the most useful things that you can do with the data that this site provides is to figure out how people
+      are reacting to moves in the market. Depending on if people are buying the dip, getting onboard during a pump
+      because they think it&#39;s going to go higher, or taking profits, this data lets you observe each of those
+      different situations and plan your own trading accordingly.
     </p>
   </div>
 ));
 
-const ExampleImage = withMobileProp({ maxDeviceWidth: 600 })(
-  ({ src, alt, caption, url, mobile }) => (
-    <div style={{ ...styles.exampleImage, minWidth: mobile ? 250 : 400 }}>
-      <Link to={url}>
-        <img src={src} alt={alt} style={{ minWidth: 250, maxWidth: mobile ? '90vw' : 400 }} />
-      </Link>
-      <center>{caption}</center>
-    </div>
-  )
-);
+const ExampleImage = withMobileProp({ maxDeviceWidth: 600 })(({ src, alt, caption, url, mobile }) => (
+  <div style={{ ...styles.exampleImage, minWidth: mobile ? 250 : 400 }}>
+    <Link to={url}>
+      <img src={src} alt={alt} style={{ minWidth: 250, maxWidth: mobile ? '90vw' : 400 }} />
+    </Link>
+    <center>{caption}</center>
+  </div>
+));
 
 const Info = () => (
   <div style={{ marginTop: 10, paddingBottom: 10 }}>
@@ -108,25 +105,20 @@ const Info = () => (
 
     <h2>How it works</h2>
     <p>
-      Every hour, the price and popularity for every stock on Robinhood is downloaded from the
-      Robinhood API and stored. By combining all of these data points together, it&#39;s possible to
-      view trends and analyze the ways in which they both change with respect to each other and over
-      time.
+      Every hour, the price and popularity for every stock on Robinhood is downloaded from the Robinhood API and stored.
+      By combining all of these data points together, it&#39;s possible to view trends and analyze the ways in which
+      they both change with respect to each other and over time.
     </p>
 
     <h2>About the Ads</h2>
     <p>
-      Ads displayed on the site are sponsored by Innovation Shares, providers of the $THCX ETF. For
-      more information about $THCX, check out their website:{' '}
-      <a href="https://thcxetf.com?utm_source=robintrack&utm_medium=display&utm_campaign=thcx&utm_content=thcx_etf">
-        thcxetf.com
-      </a>
+      Ads displayed on the site are sponsored by Defiance ETFs, providers of the $FIVG ETF. For more information about
+      $FIVG, check out their website: <a href="https://www.defianceetfs.com?utm_source=robintrack">defianceetfs.com</a>
     </p>
 
     <span style={styles.disclaimer}>
-      This site is for informational purposes only. It is not intended to serve as investment
-      advice. Robintrack is not affiliated with Robinhood in any way, but all popularity data is
-      sourced from Robinhood directly via a public API.
+      This site is for informational purposes only. It is not intended to serve as investment advice. Robintrack is not
+      affiliated with Robinhood in any way, but all popularity data is sourced from Robinhood directly via a public API.
     </span>
   </div>
 );
@@ -152,7 +144,7 @@ const Home = ({ mobile }) => (
         {mobile ? (
           <iframe
             style={{ marginRight: 'auto', marginLeft: 'auto', border: 'none' }}
-            src="/thcx/300_250/index.html"
+            src="/fivg/300_250.html"
             width={300}
             height={250}
           />
