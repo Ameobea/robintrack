@@ -27,7 +27,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "cp ./src/iconSvgPaths.js ./node_modules/@blueprintjs/icons/lib/esm/generated/iconSvgPaths.js && REACT_APP_API_PREFIX='/api' react-scripts build",
+    "build": "cp ./src/iconSvgPaths.js ./node_modules/@blueprintjs/icons/lib/esm/generated/iconSvgPaths.js && REACT_APP_API_PREFIX='/api' react-scripts build && uglifyjs --compress --mangle -o build/fivg/970_250.js -- build/fivg/970_250.js && uglifyjs --compress --mangle -o build/fivg/300_250.js -- build/fivg/300_250.js",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
