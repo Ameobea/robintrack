@@ -6367,7 +6367,7 @@
         return;
       }
 
-      window.open('https://bit.ly/3eTYCtj', '_blank');
+      window.open('https://bit.ly/3gagMbP', '_blank');
     });
 
     // timeline functions:

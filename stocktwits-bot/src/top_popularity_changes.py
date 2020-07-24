@@ -14,7 +14,7 @@ API_URL_BASE = "https://robintrack.net/api"
 
 TOP_PERCENT_POPULARITY_CHANGES_URL = (
     f"{API_URL_BASE}/largest_popularity_changes?hours_ago=24"
-    "&limit=10&percentage=true&min_popularity=200"
+    "&limit=10&percentage=true&min_popularity=50"
 )
 
 TOP_ABSOLUTE_POPULARITY_INCREASES_URL = (
@@ -55,7 +55,9 @@ def create_percent_change_twit_content(
             + absolute_change_string
         )
 
-    header = "Top percentage changes in # users holding for stocks held by Robinhood traders today:\n\n"
+    header = (
+        "Top percentage changes in # users holding for stocks held by Robinhood traders today:\n\n"
+    )
     header += "https://robintrack.net/popularity_changes?hoursAgo=24&relative=true\n\n"
     body = "\n".join(lines)
 
@@ -83,7 +85,9 @@ def create_absolute_change_twit_content(
         )
 
     change_type = "increases" if changes[0]["popularity_difference"] >= 0 else "decreases"
-    header = f"Top {change_type} in # users holding " "for stocks held by Robinhood traders today:\n\n"
+    header = (
+        f"Top {change_type} in # users holding " "for stocks held by Robinhood traders today:\n\n"
+    )
 
     if not hide_subheader:
         header += "View the full list and history for all symbols on Robintrack: \n\n"
