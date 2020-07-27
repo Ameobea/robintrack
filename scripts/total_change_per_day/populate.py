@@ -87,6 +87,7 @@ def populate_day(day: str):
 def save_backfill(db, buckets_by_dayid: Dict[str, Dict[str, dict]]):
     for (day_id, buckets) in buckets_by_dayid.items():
         to_insert = []
+        abs_pop_diff_sum = 0
 
         for (instrument_id, doc) in buckets.items():
             to_insert.append(
@@ -99,8 +100,16 @@ def save_backfill(db, buckets_by_dayid: Dict[str, Dict[str, dict]]):
                     "end_popularity": doc.get("end_pop"),
                 }
             )
+
+            if doc.get("start_pop") is not None and doc.get("end_pop") is not None:
+                abs_pop_diff_sum += abs(doc["end_pop"] - doc["start_pop"])
         db["total_change_per_day"].delete_many({"day_id": day_id})
         db["total_change_per_day"].insert_many(to_insert)
+
+        db["total_change_per_day_sums"].delete_many({"day_id": day_id})
+        db["total_change_per_day_sums"].insert_one(
+            {"day_id": day_id, "abs_pop_diff_sum": abs_pop_diff_sum}
+        )
 
 
 def backfill():
