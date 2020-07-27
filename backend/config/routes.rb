@@ -16,6 +16,9 @@ Rails.application.routes.draw do
     end
   end
 
+  get 'barometer/timeseries', to: "barometer#barometer_timeseries", defaults: { format: :json }
+  get 'barometer/top_changes/:day_id', to: "barometer#top_changes", constraints: { day_id: /\d{4}-\d\d-\d\d/i }, defaults: { format: :json }
+
   get :largest_popularity_changes, to: "popularities#largest_popularity_changes", defaults: { format: :json }
   get :largest_popularity_decreases, to: "popularities#largest_popularity_decreases", defaults: { format: :json }
   get :largest_popularity_increases, to: "popularities#largest_popularity_increases", defaults: { format: :json }

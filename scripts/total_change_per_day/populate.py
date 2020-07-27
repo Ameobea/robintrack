@@ -116,7 +116,7 @@ def backfill():
     db = get_db()
     buckets_by_dayid = {}
 
-    for doc in db["popularity"].find().limit(10000):
+    for doc in db["popularity"].find():
         if (
             doc.get("popularity") is None
             or doc.get("instrument_id") is None
@@ -145,7 +145,7 @@ def backfill():
             acc["end_pop_timestamp"] = doc["timestamp"]
             acc["end_pop"] = int(doc["popularity"])
 
-    for doc in db["quotes"].find().limit(10000):
+    for doc in db["quotes"].find():
         if (
             doc.get("instrument_id") is None
             or doc.get("updated_at") is None
