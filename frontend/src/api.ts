@@ -19,7 +19,7 @@ export const fetchBottomSymbols = apiBaseCaller(
 
 export const fetchPopularityHistory = apiBaseCaller(symbol => `stocks/${symbol}/popularity_history?daily_datapoints=1`);
 
-export const fetchQuoteHistory = apiBaseCaller(symbol => `stocks/${symbol}/quote_history?daily_datapoints=1`);
+export const fetchQuoteHistory = apiBaseCaller((symbol: string) => `stocks/${symbol}/quote_history?daily_datapoints=1`);
 
 export const fetchPopularityChanges = apiBaseCaller(
   ({ limit, relative, hoursAgo, minPopularity, suffix, startIndex }) => {

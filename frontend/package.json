@@ -36,6 +36,7 @@
   "devDependencies": {
     "@babel/helper-call-delegate": "^7.10.4",
     "@types/echarts": "^4.6.4",
+    "@types/ramda": "^0.27.13",
     "@types/react": "^16.9.43",
     "@types/react-query": "^1.1.2",
     "@typescript-eslint/parser": "^3.7.1",
