@@ -15,6 +15,7 @@
     "ramda": "^0.27.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-query": "^2.5.8",
     "react-redux": "^7.2.0",
     "react-responsive": "^8.1.0",
     "react-router": "^5.2.0",
@@ -23,7 +24,8 @@
     "react-virtualized": "^9.21.2",
     "recompose": "^0.30.0",
     "redux": "^4.0.5",
-    "redux-saga": "^1.1.3"
+    "redux-saga": "^1.1.3",
+    "typescript": "^3.9.7"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -33,9 +35,14 @@
   },
   "devDependencies": {
     "@babel/helper-call-delegate": "^7.10.4",
+    "@types/echarts": "^4.6.4",
+    "@types/react": "^16.9.43",
+    "@types/react-query": "^1.1.2",
+    "@typescript-eslint/parser": "^3.7.1",
+    "eslint": "^6.6",
     "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-prettier": "^3.1.4",
-    "eslint-plugin-react": "^7.20.3",
+    "eslint-plugin-react": "^7.20.5",
     "eslint-plugin-react-hooks": "^4.0.8",
     "prettier": "^2.0.5"
   },

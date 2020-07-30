@@ -19,6 +19,7 @@ const Leaderboard = React.lazy(() => import('src/screens/Leaderboard'));
 const SymbolDetails = React.lazy(() => import('src/screens/SymbolDetails'));
 const PopularityChanges = React.lazy(() => import('src/screens/PopularityChanges'));
 const DataDownload = React.lazy(() => import('src/screens/DataDownload'));
+const Barometer = React.lazy(() => import('src/screens/Barometer'));
 
 const ConnectedSwitch = connect(({ router: { location } }) => ({
   location,
@@ -38,6 +39,7 @@ ReactDOM.render(
             <Route path="/symbol/:symbol" component={SymbolDetails} />
             <Route path="/popularity_changes" component={PopularityChanges} />
             <Route path="/data-download" component={DataDownload} />
+            <Route path="/barometer" component={Barometer} />
           </ConnectedSwitch>
         </Suspense>
 

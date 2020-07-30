@@ -1,40 +1,37 @@
 {
   "rules": {
-    "indent": 0,
-    "quotes": [2, "single"],
-    "react/display-name": 0,
-    "react/forbid-component-props": 0,
-    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".tsx"] }],
-    "react/jsx-handler-names": 0,
-    "react/jsx-indent": [1, 2],
-    "react/jsx-indent-props": [1, 2],
-    "react/jsx-max-props-per-line": [1, { "maximum": 3, "when": "multiline" }],
-    "react/jsx-no-literals": 0,
-    "react/jsx-sort-props": 0,
-    "react/no-multi-comp": 0,
-    "react/no-set-state": 0,
-    "react/prop-types": 0,
+    "@typescript-eslint/indent": 0,
+    "quotes": [2, "single", { "avoidEscape": true }],
     "linebreak-style": [2, "unix"],
     "semi": [2, "always"],
     "comma-dangle": [2, "only-multiline"],
     "no-console": 0,
     "no-global-assign": 0,
-    "no-unused-vars": [1, { "vars": "all", "args": "none", "argsIgnorePattern": "^_.*$" }],
     "no-multiple-empty-lines": [2, { "max": 1 }],
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
     "prefer-const": [
       "error",
       {
         "destructuring": "any",
         "ignoreReadBeforeAssign": false
       }
-    ]
+    ],
+    "@typescript-eslint/explicit-function-return-type": 0,
+    "@typescript-eslint/no-explicit-any": 0,
+    "@typescript-eslint/no-non-null-assertion": 0,
+    "@typescript-eslint/camelcase": 0,
+    "react/prop-types": 0,
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "jsx-a11y/iframe-has-title": 0
   },
   "env": {
     "es6": true,
     "browser": true
   },
-  "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:react-hooks/recommended"],
-  "parser": "babel-eslint",
+  "extends": ["plugin:@typescript-eslint/recommended", "plugin:react/recommended"],
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "sourceType": "module",
     "ecmaFeatures": {
@@ -43,9 +40,12 @@
     },
     "ecmaVersion": 2017
   },
-  "plugins": ["react", "jsx-a11y", "prettier"],
+  "plugins": ["@typescript-eslint", "react", "react-hooks"],
   "globals": {
     "process": true,
-    "ga": true
+    "ga": true,
+    "module": true,
+    "__dirname": true,
+    "require": true
   }
 }

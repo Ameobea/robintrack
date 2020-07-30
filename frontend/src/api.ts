@@ -4,7 +4,8 @@
 
 const apiPrefix = process.env.REACT_APP_API_PREFIX || '';
 
-const apiBaseCaller = mapArgsToUrlSuffix => (...args) => fetch(`${apiPrefix}/${mapArgsToUrlSuffix(...args)}`);
+const apiBaseCaller = <T>(mapArgsToUrlSuffix: (...args: T[]) => string) => (...args: T[]) =>
+  fetch(`${apiPrefix}/${mapArgsToUrlSuffix(...args)}`);
 
 export const fetchQuote = apiBaseCaller(symbol => `stocks/${symbol}/quote`);
 
@@ -37,7 +38,7 @@ export const fetchPopularityChanges = apiBaseCaller(
 
 export const fetchSymbolPopularityRanking = apiBaseCaller(symbol => `stocks/${symbol}/popularity_ranking`);
 
-export const fetchLastNextPopularities = popularityRanking => {
+export const fetchLastNextPopularities = (popularityRanking: number) => {
   const first = popularityRanking === 1;
   const limit = first ? 2 : 3;
   const startIndex = first ? 0 : popularityRanking - 2;
@@ -47,4 +48,9 @@ export const fetchLastNextPopularities = popularityRanking => {
 
 export const fetchSymbolCount = apiBaseCaller((hoursAgo = 2) => `total_symbols?hours_ago=${hoursAgo}`);
 
-export const buildCSVDownloadURL = symbol => `${apiPrefix}/stocks/${symbol}/popularity_history_csv`;
+export const buildCSVDownloadURL = (symbol: string) => `${apiPrefix}/stocks/${symbol}/popularity_history_csv`;
+
+const fetchBarometerTimeseriesInner = apiBaseCaller(() => 'barometer/timeseries');
+
+export const fetchBarometerTimeseries = (): Promise<{ day_id: string; abs_pop_diff_sum: number }[]> =>
+  fetchBarometerTimeseriesInner().then(res => res.json());

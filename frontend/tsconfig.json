@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "es6",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "lib": ["esnext", "dom"],
+    "sourceMap": true,
+    "rootDir": ".",
+    "forceConsistentCasingInFileNames": true,
+    "strictFunctionTypes": false,
+    "strict": true,
+    "noStrictGenericChecks": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "suppressImplicitAnyIndexErrors": false,
+    "noUnusedLocals": true,
+    "typeRoots": ["./node_modules/@types"],
+    "types": [],
+    "jsx": "react",
+    "baseUrl": ".",
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noEmit": true
+  },
+  "paths": {
+    "src/*": ["src/**/*"]
+  },
+  "include": ["./index.d.ts", "src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "scripts",
+    "acceptance-tests",
+    "webpack",
+    "jest",
+    "deprecated",
+    "backend",
+    "faust-compiler",
+    "engine"
+  ]
+}

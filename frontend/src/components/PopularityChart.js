@@ -78,7 +78,7 @@ const getXAxisOptions = ({ mobile, firstPopularity, lastPopularity, firstQuote, 
     color: 'white',
     showMinLabel: false,
     showMaxLabel: false,
-    formatter: (value, index) => {
+    formatter: (value, _index) => {
       // Formatted to be month/day; display year only in the first label
       const date = new Date(value);
       return `${date.getMonth() + 1}/${date.getDate()}\n${date.getFullYear()}`;
@@ -152,7 +152,7 @@ const buildToolboxConfig = memoizeOne(symbol => ({
   },
 }));
 
-const getBaseConfigDefaults = mobile => ({
+export const getBaseConfigDefaults = mobile => ({
   backgroundColor: '#1d2126',
   legend: { show: true, textStyle: { color: '#fff' } },
   grid: {
@@ -162,21 +162,18 @@ const getBaseConfigDefaults = mobile => ({
     right: mobile ? 13 : 75,
   },
   tooltip: { trigger: 'axis' },
-  dataZoom: [
-    {
-      type: 'slider',
-      show: true,
-      xAxisIndex: [0, 1],
-      showDetail: true,
-      fillerColor: '#2d2f33',
-      bottom: 5,
-      textStyle: { color: '#fff' },
-      filterMode: 'none',
-      realtime: false,
-      ...(mobile ? { handleIcon: MobileZoomHandle, handleSize: '80%' } : {}),
-    },
-  ],
   animation: true,
+  graphic: mobile
+    ? undefined
+    : {
+        type: 'text',
+        top: 6,
+        right: 6,
+        style: {
+          text: 'robintrack.net',
+          fill: '#eee',
+        },
+      },
 });
 
 const mapQuotes = memoizeOne(quoteHistory => {
@@ -216,6 +213,20 @@ const getChartOptions = ({ symbol, quoteHistory = [], popularityHistory = [], zo
 
   return {
     ...getBaseConfigDefaults(mobile),
+    dataZoom: [
+      {
+        type: 'slider',
+        show: true,
+        xAxisIndex: [0, 1],
+        showDetail: true,
+        fillerColor: '#2d2f33',
+        bottom: 5,
+        textStyle: { color: '#fff' },
+        filterMode: 'none',
+        realtime: false,
+        ...(mobile ? { handleIcon: MobileZoomHandle, handleSize: '80%' } : {}),
+      },
+    ],
     title: { text: `Popularity History for ${symbol}` },
     xAxis: [
       xAxisOptions,
@@ -245,17 +256,7 @@ const getChartOptions = ({ symbol, quoteHistory = [], popularityHistory = [], zo
         minInterval: 1,
       },
     ],
-    graphic: mobile
-      ? undefined
-      : {
-          type: 'text',
-          top: 6,
-          right: 6,
-          style: {
-            text: 'robintrack.net',
-            fill: '#eee',
-          },
-        },
+
     series: [
       {
         ...seriesDefaults,

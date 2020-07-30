@@ -123,6 +123,10 @@ export const headerItems = [
     content: <FeedbackButton />,
     textStyle: { cursor: 'pointer' },
   },
+  {
+    content: 'Retail Trading Barometer',
+    url: '/barometer',
+  },
   { content: 'Data Download', url: '/data-download' },
 ];
 
