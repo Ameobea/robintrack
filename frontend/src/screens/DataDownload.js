@@ -49,7 +49,7 @@ const DataDownload = () => (
     </p>
 
     <div style={styles.downloadButtonWrapper}>
-      <a href="https://robintrack.net/robintrack-popularity-history.tar.gz" style={styles.downloadButton}>
+      <a href="https://robintrack-data.ameo.design/robintrack-popularity-history.tar.gz" style={styles.downloadButton}>
         Download Full Robintrack Popularity History
       </a>
     </div>
