@@ -1,4 +1,5 @@
 import os
+from collections import OrderedDict
 
 import click
 
@@ -20,15 +21,14 @@ def main(output_directory: str):
     with open(os.path.join(output_directory, fname)) as f:
       next(f) # skip header row
 
-      last_date = None
+      d = OrderedDict()
+
       for line in f:
-        date = line[1:11]
-        if date == last_date:
-          continue
-
-        last_date = date
+        date_str = line[1:11]
         popularity = line.split('",')[1]
+        d[date_str] = popularity
 
+      for date, popularity in d.items():
         out.write(date)
         out.write(",")
         out.write(symbol)
