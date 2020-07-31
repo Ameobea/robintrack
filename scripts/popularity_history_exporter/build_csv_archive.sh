@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# USAGE: ./build_poularity_archive.sh output-file.tar.gz combined.csv
+# USAGE: ./build_popularity_archive.sh output-file.tar.gz combined.csv
 
 [ -z "$1" ] && echo "USAGE: ./build_popularity_archive.sh /path/to/output-file.tar.gz /path/to/output/combined.csv" && exit 1
 [ -z "$2" ] && echo "USAGE: ./build_popularity_archive.sh /path/to/output-file.tar.gz /path/to/output/combined.csv" && exit 1
