@@ -172,7 +172,7 @@ const buildOptions = (
     series: [
       {
         type: 'bar',
-        name: 'Aggregate Unique Position Count Difference',
+        name: 'Abs. Agg. Position Count Diff',
         data: valueData,
         lineStyle: { color: emphasis },
         itemStyle: { color: emphasis },

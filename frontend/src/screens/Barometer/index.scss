@@ -14,6 +14,18 @@
   }
 }
 
+@media only screen and (max-width: 800px) {
+  .barometer p {
+    font-size: 15px;
+    text-align: justify;
+    word-spacing: -1.5px;
+    word-break: break-word;
+    text-align-last: left;
+    hyphens: auto;
+    line-height: 1.325;
+  }
+}
+
 .pop-change-cell {
   display: flex;
   flex-direction: row;
