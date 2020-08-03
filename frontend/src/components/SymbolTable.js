@@ -36,7 +36,7 @@ const styles = {
 const SymbolRow = ({
   key,
   style,
-  index,
+  index: _index,
   columns,
   onRowClick,
   className,
@@ -142,38 +142,40 @@ const SymbolTable = ({
   );
 };
 
+const SymbolInner = ({ cellData, mobile, tooltipContent }) => (
+  <Popover
+    hoverCloseDelay={0}
+    hoverOpenDelay={0}
+    content={
+      <span
+        style={{
+          fontSize: 16,
+          display: 'block',
+          height: 28,
+        }}
+      >
+        <div style={{ paddingTop: 2, paddingRight: 4 }}>{tooltipContent}</div>
+      </span>
+    }
+    isOpen={!!tooltipContent}
+    position={Position.RIGHT}
+    usePortal={false}
+  >
+    <Link to={`/symbol/${cellData}`}>
+      <span style={{ fontSize: mobile ? 12 : 24, color: emphasis }}>{cellData}</span>
+    </Link>
+  </Popover>
+);
+
 const Symbol = React.memo(
-  ({ cellData, mobile, tooltipContent }) => (
-    <Popover
-      hoverCloseDelay={0}
-      hoverOpenDelay={0}
-      content={
-        <span
-          style={{
-            fontSize: 16,
-            display: 'block',
-            height: 28,
-          }}
-        >
-          <div style={{ paddingTop: 2, paddingRight: 4 }}>{tooltipContent}</div>
-        </span>
-      }
-      isOpen={!!tooltipContent}
-      position={Position.RIGHT}
-      usePortal={false}
-    >
-      <Link to={`/symbol/${cellData}`}>
-        <span style={{ fontSize: mobile ? 12 : 24, color: emphasis }}>{cellData}</span>
-      </Link>
-    </Popover>
-  ),
+  SymbolInner,
   (oldProps, newProps) =>
     oldProps.cellData === newProps.cellData &&
     oldProps.mobile === newProps.mobile &&
     oldProps.tooltipContent === newProps.tooltipContent
 );
 
-export const SymbolColumn = ({ mobile }) => (
+export const SymbolColumn = ({ mobile, width = 125 }) => (
   <Column
     key="symbol"
     label="Symbol"
@@ -185,7 +187,7 @@ export const SymbolColumn = ({ mobile }) => (
         {...props}
       />
     )}
-    width={125}
+    width={width}
     flexGrow={1}
     style={{ fontSize: mobile ? 14 : 24 }}
   />

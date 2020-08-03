@@ -61,7 +61,7 @@ const HeaderItem = compose(
   const inner = <span style={aggregateStyle}>{content}</span>;
 
   return (
-    <div style={R.mergeAll([styles.headerItem, mobile ? { fontSize: 16 } : { fontSize: 26 }, style])}>
+    <div style={R.mergeAll([styles.headerItem, mobile ? { fontSize: 16 } : { fontSize: 'max(1.48vw, 18px)' }, style])}>
       {url && url !== pathname ? (
         <Link to={url} style={textStyle} onClick={onItemSelect}>
           {inner}

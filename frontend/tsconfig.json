@@ -16,7 +16,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "suppressImplicitAnyIndexErrors": false,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "typeRoots": ["./node_modules/@types"],
     "types": [],
     "jsx": "react",

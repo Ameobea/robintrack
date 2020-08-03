@@ -1,14 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import BarometerTimeseries from './Timeseries';
 import './index.scss';
+import DayDetails from './DayDetails';
+import { withMobileProp } from 'src/components/ResponsiveHelpers';
 
-const Barometer: React.FC<{}> = () => {
+const Barometer: React.FC<{ mobile: boolean }> = ({ mobile }) => {
+  const [selectedDayID, setSelectedDayID] = useState<string | null>(null);
+
   return (
     <div className="barometer">
-      <BarometerTimeseries />
+      {mobile ? <h1 style={{ textAlign: 'center' }}>Retail Trading Barometer</h1> : null}
+      <BarometerTimeseries onDaySelect={setSelectedDayID} />
 
-      <h2>What Does This Show?</h2>
+      <div className="day-details">
+        {selectedDayID ? (
+          <DayDetails dayID={selectedDayID} />
+        ) : (
+          <div style={{ textAlign: 'center', fontSize: 22, fontStyle: 'italic' }}>
+            Click/tap a bar or point on the chart above to display details about the assets which changed the most in
+            popularity for that day
+          </div>
+        )}
+      </div>
+
+      <hr />
+      <h2 style={{ textAlign: 'center' }}>What Does This Show?</h2>
       <p>
         The above chart shows the <b>aggregate absolute change</b> in number of users holding all trackable assets on
         Robinhood for each day (pink) vs. the price of the S&amp;P500 ETF $SPY. For each asset, the number of users
@@ -27,4 +44,4 @@ const Barometer: React.FC<{}> = () => {
   );
 };
 
-export default Barometer;
+export default withMobileProp({ maxDeviceWidth: 800 })(Barometer);

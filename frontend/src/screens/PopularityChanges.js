@@ -213,7 +213,7 @@ const fetchAllData = ({ requestTotalSymbols, totalSymbols, selectedSymbol, ...pr
 
 const popularityChangesSettingsDiffer = (oldProps, newProps) => !R.equals(oldProps.config, newProps.config);
 
-const getDefaultColumnProps = mobile => ({
+export const getDefaultColumnProps = mobile => ({
   width: 150,
   flexGrow: 1,
   style: getTextStyle(mobile),

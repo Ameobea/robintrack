@@ -54,3 +54,18 @@ const fetchBarometerTimeseriesInner = apiBaseCaller(() => 'barometer/timeseries'
 
 export const fetchBarometerTimeseries = (): Promise<{ day_id: string; abs_pop_diff_sum: number }[]> =>
   fetchBarometerTimeseriesInner().then(res => res.json());
+
+export const fetchTopChangesForDay = (_key: string, dayID: string) =>
+  apiBaseCaller((dayID: string) => `barometer/top_changes/${dayID}`)(dayID).then(
+    res =>
+      (res.json() as unknown) as Promise<
+        {
+          start_popularity: number | null;
+          end_popularity: number | null;
+          start_price: number | null;
+          end_price: number | null;
+          symbol: string | null;
+          name: string | null;
+        }[]
+      >
+  );

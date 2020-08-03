@@ -15,6 +15,22 @@ import { withMobileProp } from 'src/components/ResponsiveHelpers';
 import { getBaseConfigDefaults, getViewportHeight } from 'src/components/PopularityChart';
 import MobileZoomHandle from 'src/components/MobileZoomHandle';
 import { emphasis, emphasis2 } from 'src/style';
+import { INTENT_DANGER } from '@blueprintjs/core/lib/esm/common/classes';
+
+const fmtr = new Intl.DateTimeFormat('en-GB', {
+  year: 'numeric',
+  day: 'numeric',
+  month: 'numeric',
+  timeZone: 'EST',
+});
+const formatDate = (input: string | null | Date) => {
+  if (!input) {
+    return null;
+  }
+
+  const [day, month, year] = fmtr.format(input instanceof Date ? input : new Date(input)).split(/\//g);
+  return `${year}-${month}-${day}`;
+};
 
 const buildOptions = (
   mobile: boolean,
@@ -22,46 +38,28 @@ const buildOptions = (
   spyQuoteHistory: { last_trade_price: number; timestamp: string }[]
 ): echarts.EChartOption => {
   const [categoryData, valueData, dayIDs] = data.reduce(
-    ([categoryData, valueData, dayIDs], { day_id, abs_pop_diff_sum }): [Date[], number[], string[]] => {
-      categoryData.push(new Date(day_id + ' 08:00:00 EST'));
+    ([categoryData, valueData, dayIDs], { day_id, abs_pop_diff_sum }): [string[], number[], string[]] => {
+      categoryData.push(day_id);
       valueData.push(abs_pop_diff_sum);
       dayIDs.push(day_id);
       return [categoryData, valueData, dayIDs];
     },
-    [[], [], []] as [Date[], number[], string[]]
+    [[], [], []] as [string[], number[], string[]]
   );
-
-  const fmtr = new Intl.DateTimeFormat('en-GB', {
-    year: 'numeric',
-    day: 'numeric',
-    month: 'numeric',
-    timeZone: 'EST',
-  });
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) {
-      return null;
-    }
-
-    const [day, month, year] = fmtr.format(new Date(dateString)).split(/\//g);
-    return `${year}-${month}-${day}`;
-  };
 
   const { acc: spyPriceData, minPrice, maxPrice } = dayIDs.reduce(
     ({ lastDayID, acc, rest, minPrice, maxPrice }, dayID) => {
       if (rest.length === 0) {
-        console.log('all consumed');
         return { lastDayID: dayID, acc, rest, minPrice, maxPrice };
       }
 
       if (rest[0][0] === lastDayID) {
         rest.shift();
-        console.log('skipping dup: ', lastDayID);
         return { lastDayID, acc, rest, minPrice, maxPrice };
       }
 
       // Our quote was for a day that we're ignoring
       while (rest.length > 0 && formatDate(rest[0][0])! < dayID) {
-        console.log('skipping: ', formatDate(rest[0][0]));
         rest.shift();
       }
 
@@ -77,7 +75,6 @@ const buildOptions = (
           maxPrice: Math.max(rest[0]![1], maxPrice),
         };
       } else {
-        console.log('no quote for ', dayID);
         acc.push(null);
       }
 
@@ -109,6 +106,10 @@ const buildOptions = (
         textStyle: { color: '#fff' },
         filterMode: 'none',
         realtime: false,
+        labelFormatter: (_index: number, dateString: string) => {
+          const date = new Date(dateString);
+          return `${date.getMonth() + 1}/${date.getDate()}\n${date.getFullYear()}`;
+        },
         ...(mobile ? { handleIcon: MobileZoomHandle, handleSize: '80%' } : {}),
       },
     ],
@@ -117,27 +118,52 @@ const buildOptions = (
       data: categoryData,
       silent: false,
       axisLabel: {
-        formatter: (value: Date, _index: number) => {
+        formatter: (dateString: string, _index: number) => {
           // Formatted to be month/day; display year only in the first label
-          const date = new Date(value);
-          return `${date.getMonth() + 1}/${date.getDate()}\n${date.getFullYear()}`;
+          const [y, m, d] = dateString.split('-');
+          return `${m}/${d}\n${y}`;
         },
         color: '#ddd',
       },
     },
+    grid: {
+      bottom: 75,
+      top: mobile ? 95 : 75,
+      left: mobile ? 34 : 75,
+      right: mobile ? 26 : 75,
+    },
     yAxis: [
       {
         type: 'value',
-        formatter: (value: number) => `$${value.toFixed(2)}`,
         name: 'Aggregate Unique Position\n Count Difference',
-        axisLabel: { color: '#ddd' },
-        nameTextStyle: { color: '#aaa' },
+        axisLabel: {
+          color: '#ddd',
+          fontSize: 10,
+          formatter: mobile
+            ? (value: number) => `${(value / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 })}k`
+            : undefined,
+          margin: mobile ? 2 : undefined,
+        },
+        nameTextStyle: { color: '#aaa', padding: [0, 0, 0, 80] },
       },
       {
         type: 'value',
         name: '$SPY Price',
-        axisLabel: { color: '#ddd', showMaxLabel: false, showMinLabel: false },
-        nameTextStyle: { color: '#aaa' },
+        axisLabel: {
+          color: '#ddd',
+          showMaxLabel: false,
+          showMinLabel: false,
+          formatter: mobile
+            ? (value: number) => `$${value.toFixed(0)}`
+            : (value: number) =>
+                value.toLocaleString(undefined, {
+                  style: 'currency',
+                  currency: 'USD',
+                }),
+          fontSize: 10,
+          margin: mobile ? 2 : undefined,
+        },
+        nameTextStyle: { color: '#aaa', padding: [0, 16, 6, 0] },
         splitLine: { show: false },
         min: minPrice - priceOffset,
         max: maxPrice + priceOffset,
@@ -167,7 +193,10 @@ const buildOptions = (
   };
 };
 
-const BarometerTimeseries: React.FC<{ mobile: boolean }> = ({ mobile }) => {
+const BarometerTimeseries: React.FC<{ mobile: boolean; onDaySelect: (dayID: string) => void }> = ({
+  mobile,
+  onDaySelect,
+}) => {
   const { data: options } = useQuery({
     queryKey: 'barometer_timeseries',
     queryFn: () =>
@@ -175,6 +204,7 @@ const BarometerTimeseries: React.FC<{ mobile: boolean }> = ({ mobile }) => {
         fetchBarometerTimeseries(),
         fetchQuoteHistory('SPY').then(res => res.json()),
       ] as const).then(([data, spyQuoteHistory]) => buildOptions(mobile, data, spyQuoteHistory)),
+    config: { refetchOnWindowFocus: false },
   });
 
   if (!options) {
@@ -189,10 +219,19 @@ const BarometerTimeseries: React.FC<{ mobile: boolean }> = ({ mobile }) => {
         notMerge={true}
         lazyUpdate={false}
         opts={{}}
+        onEvents={{
+          click: ({ componentType, name }: { componentType: string; name: string }) => {
+            if (componentType !== 'series') {
+              return;
+            }
+
+            onDaySelect(name);
+          },
+        }}
         style={{ height: (mobile ? 0.5 : 0.7) * getViewportHeight() }}
       />
     </div>
   );
 };
 
-export default withMobileProp({ maxDeviceWidth: 600 })(BarometerTimeseries);
+export default React.memo(withMobileProp({ maxDeviceWidth: 600 })(BarometerTimeseries));

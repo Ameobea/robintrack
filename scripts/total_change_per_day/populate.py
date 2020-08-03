@@ -6,21 +6,18 @@ import click
 from python_common.db import get_db
 
 
-def write_day(db, docs: list):
-    pass  # TODO
-
-
 def populate_day(day: str):
     print(day)
     day = datetime.datetime.strptime(day, "%Y-%m-%d")
-    day = day.replace(tzinfo=datetime.timezone.utc)
+    day = day.replace(tzinfo=datetime.timezone(datetime.timedelta(hours=-4)))
     next_day = day + datetime.timedelta(days=1)
     print(f"Getting changes for day {day}")
 
     db = get_db()
 
     diffs_by_instrument_id = {}
-    # Iterate through all popularity and quote updates for that day and get the diff for both for each unique instrument id
+    # Iterate through all popularity and quote updates for that day and get the diff for
+    # both for each unique instrument id
     cur_instrument_id = None
     cur_start_val = None
     last_val = None
@@ -116,6 +113,8 @@ def backfill():
     db = get_db()
     buckets_by_dayid = {}
 
+    disabled_day_ids = set([datum["day_id"] for datum in db["invalid_dayids"].find()])
+
     for doc in db["popularity"].find():
         if (
             doc.get("popularity") is None
@@ -126,6 +125,8 @@ def backfill():
             continue
 
         day_id = doc["timestamp"].strftime("%Y-%m-%d")
+        if day_id in disabled_day_ids:
+            continue
         bucket = buckets_by_dayid.get(day_id)
         if bucket is None:
             buckets_by_dayid[day_id] = {}
@@ -155,6 +156,8 @@ def backfill():
             continue
 
         day_id = doc["updated_at"].strftime("%Y-%m-%d")
+        if day_id in disabled_day_ids:
+            continue
         bucket = buckets_by_dayid.get(day_id)
         if bucket is None:
             buckets_by_dayid[day_id] = {}
@@ -190,4 +193,4 @@ def main(day):
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pylint:disable=no-value-for-parameter
