@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Link } from 'react-router-dom';
@@ -12,6 +12,7 @@ import { setSymbolSearchContent } from 'src/actions/symbolSearch';
 import { backgroundColor, fontColor, emphasis } from 'src/style';
 import { withMobileProp } from 'src/components/ResponsiveHelpers';
 import { ROBINTRACK_LOGO_ALT } from 'src/constants';
+import { isInViewport } from 'src/util';
 
 const mapStateToProps = ({
   router: {
@@ -144,7 +145,7 @@ const MobileNavMenu = ({ onItemSelect }) => (
   </Menu>
 );
 
-const MobileHeader = ({ showLogo }) => {
+const MobileHeader = ({ showLogo, setIframeRef }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -173,6 +174,7 @@ const MobileHeader = ({ showLogo }) => {
 
       {showLogo ? (
         <iframe
+          ref={setIframeRef}
           style={{
             paddingTop: 10,
             paddingBottom: 20,
@@ -190,9 +192,10 @@ const MobileHeader = ({ showLogo }) => {
   );
 };
 
-const DesktopHeader = ({ showLogo }) => (
+const DesktopHeader = ({ showLogo, setIframeRef }) => (
   <div style={{ display: 'flex', flexDirection: 'column' }}>
     <iframe
+      ref={setIframeRef}
       style={{
         maxWidth: '100vw',
         marginLeft: 'auto',
@@ -226,17 +229,39 @@ const DesktopHeader = ({ showLogo }) => (
   </div>
 );
 
-const HeaderInner = ({ showLogo }) => (
-  <>
-    <MediaQuery maxDeviceWidth={840}>
-      <MobileHeader showLogo={showLogo} />
-    </MediaQuery>
+const HeaderInner = ({ showLogo }) => {
+  const [iframeRef, setIframeRef] = useState(null);
 
-    <MediaQuery minDeviceWidth={841}>
-      <DesktopHeader showLogo={showLogo} />
-    </MediaQuery>
-  </>
-);
+  useEffect(() => {
+    if (!iframeRef) {
+      return;
+    }
+
+    const intervalHandle = setInterval(function () {
+      if (isInViewport(iframeRef)) {
+        iframeRef.contentWindow.postMessage(true);
+      } else {
+        iframeRef.contentWindow.postMessage(false);
+      }
+    }, 100);
+
+    return () => {
+      clearInterval(intervalHandle);
+    };
+  }, [iframeRef]);
+
+  return (
+    <>
+      <MediaQuery maxDeviceWidth={840}>
+        <MobileHeader showLogo={showLogo} setIframeRef={setIframeRef} />
+      </MediaQuery>
+
+      <MediaQuery minDeviceWidth={841}>
+        <DesktopHeader showLogo={showLogo} setIframeRef={setIframeRef} />
+      </MediaQuery>
+    </>
+  );
+};
 
 const Header = connect(({ router: { location: { pathname } } }) => ({
   showLogo: pathname !== '/',

@@ -32,6 +32,24 @@
         });
         var lib = comp.getLibrary();
         loader.loadManifest(lib.properties.manifest);
+
+        // Pause when not in view
+        let curVisible = true;
+        window.addEventListener(
+          'message',
+          function (evt) {
+            const visible = evt.data;
+
+            if (visible && !curVisible) {
+              createjs.Ticker.setFPS(60);
+            } else if (!visible && curVisible) {
+              createjs.Ticker.setFPS(1);
+            }
+
+            curVisible = visible;
+          },
+          false
+        );
       }
       function handleFileLoad(evt, comp) {
         var images = comp.getImages();

@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 import { backgroundColor } from 'src/style';
 import { withMobileProp } from 'src/components/ResponsiveHelpers';
 import { ROBINTRACK_LOGO_ALT } from 'src/constants';
+import { isInViewport } from 'src/util';
 
 const styles = {
   disclaimer: {
@@ -123,40 +124,63 @@ const Info = () => (
   </div>
 );
 
-const Home = ({ mobile }) => (
-  <div style={{ backgroundColor, display: 'flex', flexDirection: 'column', fontSize: 16.5 }}>
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-      }}
-    >
+const Home = ({ mobile }) => {
+  const [iframeRef, setIframeRef] = useState(null);
+
+  useEffect(() => {
+    if (!mobile || !iframeRef) {
+      return;
+    }
+
+    const intervalHandle = setInterval(function () {
+      if (isInViewport(iframeRef)) {
+        iframeRef.contentWindow.postMessage(true);
+      } else {
+        iframeRef.contentWindow.postMessage(false);
+      }
+    }, 100);
+
+    return () => {
+      clearInterval(intervalHandle);
+    };
+  }, [mobile, iframeRef]);
+
+  return (
+    <div style={{ backgroundColor, display: 'flex', flexDirection: 'column', fontSize: 16.5 }}>
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          borderBottom: '1px solid #333',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
         }}
       >
-        {mobile ? (
-          <iframe
-            style={{ marginRight: 'auto', marginLeft: 'auto', border: 'none' }}
-            src="/ibbj/300_250.html"
-            width={300}
-            height={250}
-          />
-        ) : null}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            borderBottom: '1px solid #333',
+          }}
+        >
+          {mobile ? (
+            <iframe
+              ref={setIframeRef}
+              style={{ marginRight: 'auto', marginLeft: 'auto', border: 'none' }}
+              src="/ibbj/300_250.html"
+              width={300}
+              height={250}
+            />
+          ) : null}
 
-        <img src="/images/robintrack_logo.svg" style={styles.logo} alt={ROBINTRACK_LOGO_ALT} />
+          <img src="/images/robintrack_logo.svg" style={styles.logo} alt={ROBINTRACK_LOGO_ALT} />
+        </div>
+
+        <About />
       </div>
-
-      <About />
+      <Info />
     </div>
-    <Info />
-  </div>
-);
+  );
+};
 
 export default withMobileProp({ maxDeviceWidth: 840 })(Home);
