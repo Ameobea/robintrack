@@ -112,8 +112,8 @@ const Info = () => (
 
     <h2>About the Ads</h2>
     <p>
-      Ads displayed on the site are sponsored by Defiance ETFs, providers of the $FIVG ETF. For more information about
-      $FIVG, check out their website: <a href="https://www.defianceetfs.com?utm_source=robintrack">defianceetfs.com</a>
+      Ads displayed on the site are sponsored by Defiance ETFs, providers of the $IBBJ ETF. For more information about
+      $IBBJ, check out their website: <a href="https://www.defianceetfs.com?utm_source=robintrack">defianceetfs.com</a>
     </p>
 
     <span style={styles.disclaimer}>
@@ -144,7 +144,7 @@ const Home = ({ mobile }) => (
         {mobile ? (
           <iframe
             style={{ marginRight: 'auto', marginLeft: 'auto', border: 'none' }}
-            src="/fivg/300_250.html"
+            src="/ibbj/300_250.html"
             width={300}
             height={250}
           />

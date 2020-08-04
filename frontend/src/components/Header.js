@@ -181,7 +181,7 @@ const MobileHeader = ({ showLogo }) => {
             display: 'flex',
             border: 'none',
           }}
-          src="/fivg/300_250.html"
+          src="/ibbj/300_250.html"
           width={300}
           height={280}
         />
@@ -199,7 +199,7 @@ const DesktopHeader = ({ showLogo }) => (
         marginRight: 'auto',
         border: 'none',
       }}
-      src="/fivg/970_250.html"
+      src="/ibbj/970_250.html"
       width={970}
       height={270}
     />
