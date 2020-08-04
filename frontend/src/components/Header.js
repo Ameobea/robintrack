@@ -238,6 +238,9 @@ const HeaderInner = ({ showLogo }) => {
     }
 
     const intervalHandle = setInterval(function () {
+      if (!iframeRef || !iframeRef.contentWindow) {
+        return;
+      }
       if (isInViewport(iframeRef)) {
         iframeRef.contentWindow.postMessage(true);
       } else {
