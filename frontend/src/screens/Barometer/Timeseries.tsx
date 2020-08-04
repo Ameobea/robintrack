@@ -15,7 +15,6 @@ import { withMobileProp } from 'src/components/ResponsiveHelpers';
 import { getBaseConfigDefaults, getViewportHeight } from 'src/components/PopularityChart';
 import MobileZoomHandle from 'src/components/MobileZoomHandle';
 import { emphasis, emphasis2 } from 'src/style';
-import { INTENT_DANGER } from '@blueprintjs/core/lib/esm/common/classes';
 
 const fmtr = new Intl.DateTimeFormat('en-GB', {
   year: 'numeric',
@@ -138,13 +137,13 @@ const buildOptions = (
         name: 'Aggregate Unique Position\n Count Difference',
         axisLabel: {
           color: '#ddd',
-          fontSize: 10,
+          fontSize: mobile ? 10 : 13,
           formatter: mobile
             ? (value: number) => `${(value / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 })}k`
             : undefined,
-          margin: mobile ? 2 : undefined,
+          margin: mobile ? 2 : 5,
         },
-        nameTextStyle: { color: '#aaa', padding: [0, 0, 0, 80] },
+        nameTextStyle: { color: '#aaa', padding: mobile ? [0, 0, 0, 80] : undefined },
       },
       {
         type: 'value',
@@ -160,10 +159,10 @@ const buildOptions = (
                   style: 'currency',
                   currency: 'USD',
                 }),
-          fontSize: 10,
-          margin: mobile ? 2 : undefined,
+          fontSize: mobile ? 10 : 13,
+          margin: mobile ? 2 : 5,
         },
-        nameTextStyle: { color: '#aaa', padding: [0, 16, 6, 0] },
+        nameTextStyle: { color: '#aaa', padding: mobile ? [0, 16, 6, 0] : undefined },
         splitLine: { show: false },
         min: minPrice - priceOffset,
         max: maxPrice + priceOffset,
@@ -172,7 +171,7 @@ const buildOptions = (
     series: [
       {
         type: 'bar',
-        name: 'Abs. Agg. Position Count Diff',
+        name: 'Pos. Diff',
         data: valueData,
         lineStyle: { color: emphasis },
         itemStyle: { color: emphasis },

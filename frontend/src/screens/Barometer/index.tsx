@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
+import { withMobileProp } from 'src/components/ResponsiveHelpers';
 import BarometerTimeseries from './Timeseries';
 import './index.scss';
 import DayDetails from './DayDetails';
-import { withMobileProp } from 'src/components/ResponsiveHelpers';
 
 const Barometer: React.FC<{ mobile: boolean }> = ({ mobile }) => {
   const [selectedDayID, setSelectedDayID] = useState<string | null>(null);
@@ -11,6 +11,12 @@ const Barometer: React.FC<{ mobile: boolean }> = ({ mobile }) => {
   return (
     <div className="barometer">
       {mobile ? <h1 style={{ textAlign: 'center' }}>Retail Trading Barometer</h1> : null}
+      <div style={{ color: '#f5c542', marginTop: 20, marginBottom: 20, fontSize: mobile ? 15 : 18 }}>
+        This feature is currently in beta; The data has been provided as accurately as possible, but it is provided
+        as-is with no guarentees of of its correctness. Please report any issues or incorrectness you see on this page
+        using the &quot;Issues + Feedback&quot; button on the top of the page. Additional functionality will be added
+        soon as well!
+      </div>
       <BarometerTimeseries onDaySelect={setSelectedDayID} />
 
       <div className="day-details">

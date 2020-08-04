@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useQuery } from 'react-query';
 import { Column } from 'react-virtualized';
+import { Icon, Tooltip } from '@blueprintjs/core';
 
 import { fetchTopChangesForDay } from 'src/api';
 import Loading from 'src/components/Loading';
@@ -45,7 +46,11 @@ const PopDiff: React.FC<{
     </div>
     <div style={{ paddingLeft: 4, paddingRight: 4 }}>{' / '}</div>
     <div style={{ color: getColor(popChangePercent) }}>
-      {popChangePercent === null ? '--' : (popChangePercent >= 0 ? '+' : '') + popChangePercent.toFixed(2) + '%'}
+      {popChangePercent === null
+        ? '--'
+        : (popChangePercent >= 0 ? '+' : '') +
+          popChangePercent.toLocaleString(undefined, { maximumFractionDigits: 0 }) +
+          '%'}
     </div>
   </div>
 );
@@ -63,7 +68,11 @@ const PriceDiff: React.FC<{
     </div>
     <div style={{ paddingLeft: 4, paddingRight: 4 }}>{' / '}</div>
     <div style={{ color: getColor(priceChangePercent) }}>
-      {priceChangePercent === null ? '--' : (priceChangePercent >= 0 ? '+' : '') + priceChangePercent.toFixed(2) + '%'}
+      {priceChangePercent === null
+        ? '--'
+        : (priceChangePercent >= 0 ? '+' : '') +
+          priceChangePercent.toLocaleString(undefined, { maximumFractionDigits: 0 }) +
+          '%'}
     </div>
   </div>
 );
@@ -111,7 +120,14 @@ const DayDetails: React.FC<{ dayID: string; mobile: boolean }> = ({ dayID, mobil
         {...defaultColumnProps}
         cellRenderer={({ cellData }) => cellData}
         key={4}
-        label="Price Change"
+        label={
+          <>
+            Price Change{' '}
+            <Tooltip content="Price change between market close the previous day and market close on this day">
+              <Icon icon="info-sign" />
+            </Tooltip>
+          </>
+        }
         dataKey="formattedPriceDiff"
       />,
     ],
