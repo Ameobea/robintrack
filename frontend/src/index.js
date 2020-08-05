@@ -13,8 +13,8 @@ import { backgroundColor } from 'src/style';
 import Footer from 'src/components/Footer';
 import PageTracker from 'src/components/PageTracker';
 import Loading from 'src/components/Loading';
+import Home from 'src/screens/Home';
 
-const Home = React.lazy(() => import('src/screens/Home'));
 const Leaderboard = React.lazy(() => import('src/screens/Leaderboard'));
 const SymbolDetails = React.lazy(() => import('src/screens/SymbolDetails'));
 const PopularityChanges = React.lazy(() => import('src/screens/PopularityChanges'));

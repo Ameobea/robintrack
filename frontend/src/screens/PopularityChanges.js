@@ -114,6 +114,7 @@ const Setting = withMobileProp({ maxDeviceWidth: 600 })(({ label, style = {}, fl
 const lookbackOptionLabels = {
   1: '~1-2 Hours',
   4: '4 Hours',
+  8: '8 Hours',
   24: '24 Hours',
   [24 * 3]: '3 Days',
   [24 * 7]: '1 Week',
@@ -201,7 +202,7 @@ export const fetchPopularityChangesData = ({ config, requestLargestPopularityCha
     startIndex: config.startIndex || 0,
   });
 
-const fetchAllData = ({ requestTotalSymbols, totalSymbols, selectedSymbol, ...props }, cb) => {
+const fetchAllData = ({ requestTotalSymbols, totalSymbols, selectedSymbol, ...props }) => {
   fetchPopularityChangesData(props);
 
   R.isNil(totalSymbols) && requestTotalSymbols();
