@@ -242,9 +242,9 @@ const HeaderInner = ({ showLogo }) => {
         return;
       }
       if (isInViewport(iframeRef)) {
-        iframeRef.contentWindow.postMessage(true);
+        iframeRef.contentWindow.postMessage(true, '*');
       } else {
-        iframeRef.contentWindow.postMessage(false);
+        iframeRef.contentWindow.postMessage(false, '*');
       }
     }, 100);
 

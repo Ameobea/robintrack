@@ -133,10 +133,14 @@ const Home = ({ mobile }) => {
     }
 
     const intervalHandle = setInterval(function () {
+      if (!iframeRef || !iframeRef.contentWindow) {
+        return;
+      }
+
       if (isInViewport(iframeRef)) {
-        iframeRef.contentWindow.postMessage(true);
+        iframeRef.contentWindow.postMessage(true, '*');
       } else {
-        iframeRef.contentWindow.postMessage(false);
+        iframeRef.contentWindow.postMessage(false, '*');
       }
     }, 100);
 

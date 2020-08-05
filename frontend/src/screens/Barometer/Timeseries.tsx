@@ -20,7 +20,7 @@ const fmtr = new Intl.DateTimeFormat('en-GB', {
   year: 'numeric',
   day: 'numeric',
   month: 'numeric',
-  timeZone: 'EST',
+  timeZone: 'US/Eastern',
 });
 const formatDate = (input: string | null | Date) => {
   if (!input) {
