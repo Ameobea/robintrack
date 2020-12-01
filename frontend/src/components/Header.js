@@ -183,7 +183,7 @@ const MobileHeader = ({ showLogo, setIframeRef }) => {
             display: 'flex',
             border: 'none',
           }}
-          src="/ibbj/300_250.html"
+          src="/spak/300_250.html"
           width={300}
           height={280}
         />
@@ -202,7 +202,7 @@ const DesktopHeader = ({ showLogo, setIframeRef }) => (
         marginRight: 'auto',
         border: 'none',
       }}
-      src="/ibbj/970_250.html"
+      src="/spak/970_250.html"
       width={970}
       height={270}
     />
