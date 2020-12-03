@@ -19,7 +19,11 @@ import Home from 'src/screens/Home';
 
 Sentry.init({
   dsn: 'https://9b8ff5a40ba9424abf55d1b45dfa1131@sentry.ameo.design/5',
-  integrations: [new Integrations.BrowserTracing()],
+  integrations: [
+    new Integrations.BrowserTracing({
+      routingInstrumentation: Sentry.reactRouterV5Instrumentation(history),
+    }),
+  ],
   tracesSampleRate: 0.04,
 });
 
