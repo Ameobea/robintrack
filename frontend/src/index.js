@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 import { connect, Provider } from 'react-redux';
 import { Route, Switch } from 'react-router';
 import { ConnectedRouter } from 'connected-react-router';
+import * as Sentry from '@sentry/react';
+import { Integrations } from '@sentry/tracing';
 import 'react-virtualized/styles.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
@@ -14,6 +16,12 @@ import Footer from 'src/components/Footer';
 import PageTracker from 'src/components/PageTracker';
 import Loading from 'src/components/Loading';
 import Home from 'src/screens/Home';
+
+Sentry.init({
+  dsn: 'https://9b8ff5a40ba9424abf55d1b45dfa1131@sentry.ameo.design/5',
+  integrations: [new Integrations.BrowserTracing()],
+  tracesSampleRate: 0.04,
+});
 
 const Leaderboard = React.lazy(() => import('src/screens/Leaderboard'));
 const SymbolDetails = React.lazy(() => import('src/screens/SymbolDetails'));

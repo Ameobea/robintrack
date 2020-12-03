@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Link } from 'react-router-dom';
 import { compose } from 'recompose';
-import { Button, Menu, Popover, Position } from '@blueprintjs/core';
+import { Button, Callout, Menu, Popover, Position } from '@blueprintjs/core';
 import MediaQuery from 'react-responsive';
 import * as R from 'ramda';
 
@@ -229,6 +229,25 @@ const DesktopHeader = ({ showLogo, setIframeRef }) => (
   </div>
 );
 
+const ApiShutdownWarning = withMobileProp({ maxDeviceWidth: 600 })(({ mobile }) => (
+  <Callout intent="warning" style={{ fontSize: mobile ? 12 : 17, marginBottom: mobile ? 10 : undefined }}>
+    As of August 2020, Robinhood has{' '}
+    <a
+      style={{ color: 'white', textDecoration: 'underline' }}
+      href="https://www.bloomberg.com/news/articles/2020-08-08/robintrack-chronicler-of-day-trader-stock-demand-to-shut-down"
+    >
+      shut down the API
+    </a>{' '}
+    that Robintrack used to collect popularity data. As a result, the leaderboard page and popularity changes pages will
+    no longer show data, and no updated data will be shown for any assets.
+    <br />
+    <br />
+    Robinhood has indicated their interest in bringing back the data in some form at some point in the future, but no
+    details have been shared. Until that time, the site will remain as-is with all previously collected data. The full
+    database is still available for download via the Data Download page.
+  </Callout>
+));
+
 const HeaderInner = ({ showLogo }) => {
   const [iframeRef, setIframeRef] = useState(null);
 
@@ -262,6 +281,7 @@ const HeaderInner = ({ showLogo }) => {
       <MediaQuery minDeviceWidth={841}>
         <DesktopHeader showLogo={showLogo} setIframeRef={setIframeRef} />
       </MediaQuery>
+      <ApiShutdownWarning />
     </>
   );
 };
