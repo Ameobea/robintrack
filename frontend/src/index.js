@@ -24,7 +24,7 @@ Sentry.init({
       routingInstrumentation: Sentry.reactRouterV5Instrumentation(history),
     }),
   ],
-  tracesSampleRate: 0.04,
+  tracesSampleRate: 0.8,
 });
 
 const Leaderboard = React.lazy(() => import('src/screens/Leaderboard'));

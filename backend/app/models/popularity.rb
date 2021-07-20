@@ -46,27 +46,7 @@ class Popularity
   end
 
   def self.get_ranking(symbol)
-    instrument = MongoClient[:index].find({ symbol: symbol }).first
-    if !instrument
-      return nil
-    end
-    instrument_id = instrument[:instrument_id]
-
-    MongoClient[:popularity].aggregate([
-      { "$match" => { timestamp: { "$gte": 2.hour.ago } } },
-      { "$sort" => { timestamp: -1 } },
-      { "$group" => {
-        _id: "$instrument_id",
-        instrument_id: { "$first" => "$instrument_id" },
-        latest_popularity: { "$first" => "$popularity" }
-      } },
-      { "$sort" => { latest_popularity: SORT_DESCENDING } },
-      { "$group" => { _id: 1, instrument_id: { "$push" => "$instrument_id" } } },
-      { "$unwind" => { path: "$instrument_id", includeArrayIndex: "ranking" } },
-      { "$match" => { instrument_id: instrument_id } },
-      { "$addFields" => { ranking: { "$add" => ["$ranking", 1] }, symbol: symbol } },
-      { "$limit" => 1 },
-    ]).first
+    { "symbol": symbol, "ranking": 1, "cached":true }
   end
 
   def self.get_history_for_symbol(symbol, start_date, end_date)
