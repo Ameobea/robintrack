@@ -171,42 +171,12 @@ const MobileHeader = ({ showLogo, setIframeRef }) => {
 
         <SymbolSearch />
       </nav>
-
-      {showLogo ? (
-        <iframe
-          ref={setIframeRef}
-          style={{
-            paddingTop: 10,
-            paddingBottom: 20,
-            marginRight: 'auto',
-            marginLeft: 'auto',
-            display: 'flex',
-            border: 'none',
-          }}
-          src="/spak/300_250.html"
-          width={300}
-          height={280}
-        />
-      ) : null}
     </div>
   );
 };
 
 const DesktopHeader = ({ showLogo, setIframeRef }) => (
   <div style={{ display: 'flex', flexDirection: 'column' }}>
-    <iframe
-      ref={setIframeRef}
-      style={{
-        maxWidth: '100vw',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        border: 'none',
-      }}
-      src="/spak/970_250.html"
-      width={970}
-      height={270}
-    />
-
     <nav style={styles.desktopHeader}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         {showLogo ? (

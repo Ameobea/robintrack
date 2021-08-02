@@ -111,12 +111,6 @@ const Info = () => (
       they both change with respect to each other and over time.
     </p>
 
-    <h2>About the Ads</h2>
-    <p>
-      Ads displayed on the site are sponsored by Defiance ETFs, providers of the $SPAK ETF. For more information about
-      $SPAK, check out their website: <a href="https://www.defianceetfs.com?utm_source=robintrack">defianceetfs.com</a>
-    </p>
-
     <span style={styles.disclaimer}>
       This site is for informational purposes only. It is not intended to serve as investment advice. Robintrack is not
       affiliated with Robinhood in any way, but all popularity data is sourced from Robinhood directly via a public API.
@@ -167,16 +161,6 @@ const Home = ({ mobile }) => {
             borderBottom: '1px solid #333',
           }}
         >
-          {mobile ? (
-            <iframe
-              ref={setIframeRef}
-              style={{ marginRight: 'auto', marginLeft: 'auto', border: 'none' }}
-              src="/spak/300_250.html"
-              width={300}
-              height={250}
-            />
-          ) : null}
-
           <img src="/images/robintrack_logo.svg" style={styles.logo} alt={ROBINTRACK_LOGO_ALT} />
         </div>
 
