@@ -64,14 +64,16 @@ const buildOptions = (
 
       // Take the first matching quote for each day
       if (formatDate(rest[0]?.[0]) === dayID) {
+        const newMinPrice = Math.min(rest[0]![1], minPrice);
+        const newMaxPrice = Math.max(rest[0]![1], maxPrice);
         acc.push(rest.shift()![1]);
 
         return {
           lastDayID: dayID,
           acc,
           rest,
-          minPrice: Math.min(rest[0]![1], minPrice),
-          maxPrice: Math.max(rest[0]![1], maxPrice),
+          minPrice: newMinPrice,
+          maxPrice: newMaxPrice,
         };
       } else {
         acc.push(null);

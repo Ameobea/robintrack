@@ -70,7 +70,7 @@ const Info = () => (
   <div style={{ marginTop: 10, paddingBottom: 10 }}>
     <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', marginBottom: 20 }}>
       <ExampleImage
-        src="/images/buying_the_dip.jpg"
+        src="https://robintrack.b-cdn.net/images/buying_the_dip.jpg"
         alt="A chart showing the price vs popularity of Starbucks stock ($SBUX) while traders buy the dip during a drop in price."
         url="/symbol/SBUX"
         caption={
@@ -81,7 +81,7 @@ const Info = () => (
         }
       />
       <ExampleImage
-        src="/images/taking_profits.jpg"
+        src="https://robintrack.b-cdn.net/images/taking_profits.jpg"
         alt="A chart showing the price vs popularity of AMD stock ($AMD) while traders take profits during a rise in price."
         url="/symbol/AMD"
         caption={
@@ -92,7 +92,7 @@ const Info = () => (
         }
       />
       <ExampleImage
-        src="/images/fomo.jpg"
+        src="https://robintrack.b-cdn.net/images/fomo.jpg"
         alt="A chart showing the price vs popularity of iQIYI inc. stock ($IQ) while traders greed out and keep buying more and more as the price continues to rise."
         url="/symbol/IQ"
         caption={
@@ -161,7 +161,11 @@ const Home = ({ mobile }) => {
             borderBottom: '1px solid #333',
           }}
         >
-          <img src="/images/robintrack_logo.svg" style={styles.logo} alt={ROBINTRACK_LOGO_ALT} />
+          <img
+            src="https://robintrack.b-cdn.net/images/robintrack_logo.svg"
+            style={styles.logo}
+            alt={ROBINTRACK_LOGO_ALT}
+          />
         </div>
 
         <About />
